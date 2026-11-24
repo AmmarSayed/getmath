@@ -84,6 +84,10 @@ KNOWN = {
 }
 
 
+class Unusable(Exception):
+    pass
+
+
 def check(ok, message):
     if not ok:
         errors.append(message)
@@ -107,7 +111,8 @@ def table():
 
 def read_csv(name):
     raw = (ROOT / "data" / name).read_bytes()
-    check(hashlib.sha256(raw).hexdigest() == DATA[name], f"data/{name}: the SHA-256 differs from the pinned one")
+    if hashlib.sha256(raw).hexdigest() != DATA[name]:
+        raise Unusable(f"data/{name}: the SHA-256 differs from the pinned one, so nothing was reproduced")
     return list(csv.DictReader(io.StringIO(raw.decode("utf-8"), newline="")))
 
 
@@ -369,7 +374,11 @@ def run():
 sys.stdout.reconfigure(encoding="utf-8")
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    done = run()
+    try:
+        done = run()
+    except Unusable as problem:
+        errors.append(str(problem))
+        done = (0, 0)
 errors.extend(f"warning: {w.category.__name__}: {w.message}" for w in caught)
 if "--values" in sys.argv:
     for name, value in values:
