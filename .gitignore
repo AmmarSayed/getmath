@@ -3,3 +3,10 @@ references/local/
 
 # Local delegate lanes; depend on this machine's subscriptions
 .delegate/
+
+# Built site, generated types, installed packages, test output
+node_modules/
+dist/
+.astro/
+test-results/
+playwright-report/
