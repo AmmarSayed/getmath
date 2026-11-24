@@ -5,7 +5,7 @@ import type { Browser, Page } from "@playwright/test";
 export const thresholds = JSON.parse(readFileSync(new URL("./thresholds.json", import.meta.url), "utf8")) as Thresholds;
 
 type Stat = { runs: number; min: number; median: number; max: number };
-type Spec = { label: string; unit: string; deterministic: boolean; ceiling: number; why: string; measured: Stat & { where: string } };
+type Spec = { label: string; unit: string; deterministic: boolean; ceiling: number; why: string; measured: Record<"developer" | "runner", Stat & { where: string }> };
 export type Thresholds = {
   status: string;
   environment: {

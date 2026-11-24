@@ -19,28 +19,46 @@
       "label": "Largest contentful paint",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 2500,
-      "why": "Public 'good' guidance is 2500 ms. Measured about 4 times lower, so a slow runner has room, and a real slowdown (a render-blocking heavy script costs seconds on this network) is far over it.",
+      "ceiling": 1000,
+      "why": "About 2 times the runner's median of 436 ms and below the public 'good' guidance of 2500 ms. The developer machine's slowest run was 740 ms.",
       "measured": {
-        "runs": 25,
-        "min": 512,
-        "median": 548,
-        "max": 740,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 512,
+          "median": 548,
+          "max": 740,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 428,
+          "median": 436,
+          "max": 448,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "cls": {
       "label": "Cumulative layout shift",
       "unit": "",
       "deterministic": false,
-      "ceiling": 0.1,
-      "why": "Public 'good' guidance is 0.1. The page does not shift at all.",
+      "ceiling": 0.02,
+      "why": "The page does not shift at all (0 in every run, in both places). 0.02 is well below the public 'good' guidance of 0.1 and still lets a real shift of the page fail.",
       "measured": {
-        "runs": 25,
-        "min": 0,
-        "median": 0,
-        "max": 0,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 0,
+          "median": 0,
+          "max": 0,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 0,
+          "median": 0,
+          "max": 0,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "bytes": {
@@ -48,13 +66,22 @@
       "unit": "bytes",
       "deterministic": true,
       "ceiling": 215000,
-      "why": "Deterministic. About 10% above the measured weight: a new font, picture or library of 20 kB or more fails.",
+      "why": "Deterministic, from the weight measured in both places. About 10% above it, so 20 kB of new font, picture or library fails. Not a time, so there is no public guidance.",
       "measured": {
-        "runs": 25,
-        "min": 195280,
-        "median": 195280,
-        "max": 195280,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 195280,
+          "median": 195280,
+          "max": 195280,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 195275,
+          "median": 195275,
+          "max": 195275,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "scriptBytes": {
@@ -62,13 +89,22 @@
       "unit": "bytes",
       "deterministic": true,
       "ceiling": 118000,
-      "why": "Deterministic. About 10% above the measured weight: 11 kB of new script fails.",
+      "why": "Deterministic, from the weight measured in both places. About 10% above it, so 11 kB of new script fails.",
       "measured": {
-        "runs": 25,
-        "min": 107320,
-        "median": 107320,
-        "max": 107320,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 107320,
+          "median": 107320,
+          "max": 107320,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 107320,
+          "median": 107320,
+          "max": 107320,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "requests": {
@@ -76,69 +112,114 @@
       "unit": "requests",
       "deterministic": true,
       "ceiling": 14,
-      "why": "Deterministic. Two more than measured, so one new file passes and a third fails.",
+      "why": "Deterministic, from the 12 requests in both places. Two more, so one new file passes and a third fails.",
       "measured": {
-        "runs": 25,
-        "min": 12,
-        "median": 12,
-        "max": 12,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 12,
+          "median": 12,
+          "max": 12,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 12,
+          "median": 12,
+          "max": 12,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "keyWorst": {
       "label": "Keyboard step, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 200,
-      "why": "Public INP 'good' guidance is 200 ms. The median of the runs in the test is compared, so one slow step in one run does not fail a pull request; one run in 25 reached 160 ms.",
+      "ceiling": 100,
+      "why": "About 4 times the runner's median of 24 ms and below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request; the developer machine's worst of 25 runs was 160 ms.",
       "measured": {
-        "runs": 25,
-        "min": 40,
-        "median": 48,
-        "max": 160,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 40,
+          "median": 48,
+          "max": 160,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 24,
+          "median": 24,
+          "max": 32,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "keyMedian": {
       "label": "Keyboard step, median",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "100 ms, the limit for an answer to feel immediate. Measured about 3 times lower.",
+      "ceiling": 60,
+      "why": "About 4 times the runner's median of 15.55 ms and below the 100 ms in which an answer feels immediate.",
       "measured": {
-        "runs": 25,
-        "min": 24.9,
-        "median": 27.45,
-        "max": 49.35,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 24.9,
+          "median": 27.45,
+          "max": 49.35,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 14.1,
+          "median": 15.55,
+          "max": 17.55,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "dragWorst": {
       "label": "Drag move, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 200,
-      "why": "Public INP 'good' guidance is 200 ms, as for the keyboard.",
+      "ceiling": 100,
+      "why": "About 4 times the runner's median of 23.85 ms and below the public INP 'good' guidance of 200 ms.",
       "measured": {
-        "runs": 25,
-        "min": 38.8,
-        "median": 55.7,
-        "max": 124.7,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 38.8,
+          "median": 55.7,
+          "max": 124.7,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 20.1,
+          "median": 23.85,
+          "max": 30.6,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     },
     "dragMedian": {
       "label": "Drag move, median",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "100 ms, as for the keyboard.",
+      "ceiling": 60,
+      "why": "About 5 times the runner's median of 12.175 ms and below the 100 ms in which an answer feels immediate.",
       "measured": {
-        "runs": 25,
-        "min": 23.75,
-        "median": 26.3,
-        "max": 44.2,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        "developer": {
+          "runs": 25,
+          "min": 23.75,
+          "median": 26.3,
+          "max": 44.2,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 11.15,
+          "median": 12.175,
+          "max": 14.45,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
       }
     }
   }

@@ -14,7 +14,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "measure": "astro build && node scripts/measure.ts",
-    "test": "vitest run --dir src && astro build && playwright test && SPEED=1 playwright test"
+    "test": "vitest run --dir src && astro build && playwright test && playwright test --config playwright.speed.config.ts"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "0.4.10",

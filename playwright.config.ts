@@ -24,13 +24,10 @@ export default defineConfig({
         command: "pnpm preview --ignore-lock",
         url,
       },
-  // The speed tests run alone, because tests beside them would slow the page they time: SPEED=1 chooses them.
-  projects: process.env.SPEED
-    ? [{ name: "speed", testMatch: "speed/speed.spec.ts", use: devices["Desktop Chrome"] }]
-    : [
-      { name: "build", testMatch: ["build.spec.ts", "notices.spec.ts", "verify.spec.ts"] },
-      { name: "chromium", testMatch: siteTests, use: devices["Desktop Chrome"] },
-      { name: "firefox", testMatch: siteTests, use: devices["Desktop Firefox"] },
-      { name: "webkit", testMatch: siteTests, use: devices["Desktop Safari"] },
-    ],
+  projects: [
+    { name: "build", testMatch: ["build.spec.ts", "notices.spec.ts", "verify.spec.ts"] },
+    { name: "chromium", testMatch: siteTests, use: devices["Desktop Chrome"] },
+    { name: "firefox", testMatch: siteTests, use: devices["Desktop Firefox"] },
+    { name: "webkit", testMatch: siteTests, use: devices["Desktop Safari"] },
+  ],
 });
