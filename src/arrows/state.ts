@@ -25,7 +25,10 @@ export function add(a: Vector, b: Vector): Vector {
   return { x: a.x + b.x, y: a.y + b.y };
 }
 
-const same = (a: Vector, b: Vector) => a.x === b.x && a.y === b.y;
+export const same = (a: Vector, b: Vector) => a.x === b.x && a.y === b.y;
+
+/** The number nearest to the value from −limit to limit. */
+export const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
 
 const isWholeUpTo = (limit: number, value: number) => Number.isInteger(value) && Math.abs(value) <= limit;
 
@@ -44,7 +47,7 @@ export function withComponent(state: State, arrow: ArrowName, axis: Axis, value:
 /** The state with the tip of one arrow at the place nearest to this point, on the grid and within the bounds. */
 export function withTip(state: State, arrow: ArrowName, point: Vector): State {
   // Adding 0 turns −0 into 0.
-  const nearest = (value: number) => Math.max(-arrowLimit, Math.min(arrowLimit, Math.round(value))) + 0;
+  const nearest = (value: number) => clamp(Math.round(value), arrowLimit) + 0;
   const tip = { x: nearest(point.x), y: nearest(point.y) };
   return same(tip, state[arrow]) ? state : { ...state, [arrow]: tip };
 }

@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { add, type Arrows, type Vector } from "./state";
+  import { add, clamp, type Arrows, type Vector } from "./state";
   import { numeral } from "./words";
 
   interface Props {
@@ -23,7 +23,6 @@
   const { a, b } = $derived(arrows);
 
   const origin: Vector = { x: 0, y: 0 };
-  const edge = drawingEdge;
   const steps = Array.from({ length: 2 * sumLimit + 1 }, (_, i) => i - sumLimit);
   const grid = steps.map((i) => `M${i} ${-sumLimit}V${sumLimit}M${-sumLimit} ${i}H${sumLimit}`).join("");
   const ticks = steps.filter((i) => i && i % 4 === 0);
@@ -40,7 +39,6 @@
   const turnsLeft = $derived(a.x * b.y - a.y * b.x > 0);
   const label = $derived({ a: beside(a, !turnsLeft), b: beside(b, turnsLeft) });
 
-  const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
   const sumLabel = $derived(sum && { x: clamp(sum.x, sumLimit), y: sum.y + (sum.y < 0 ? -0.9 : 0.9) });
 </script>
 
@@ -63,7 +61,7 @@
 {/snippet}
 
 <div class="drawing">
-  <svg viewBox="{-edge} {-edge} {2 * edge} {2 * edge}" role="img" aria-label="Arrows on a grid" aria-describedby={describedby}>
+  <svg viewBox="{-drawingEdge} {-drawingEdge} {2 * drawingEdge} {2 * drawingEdge}" role="img" aria-label="Arrows on a grid" aria-describedby={describedby}>
     <path class="grid" d={grid} />
     <path class="axes" d="M{-sumLimit} 0H{sumLimit}M0 {-sumLimit}V{sumLimit}" />
     {#each ticks as tick (tick)}

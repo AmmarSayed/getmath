@@ -67,7 +67,7 @@
     if (problem?.axis ? problem.axis === axis : prediction) problems = { ...problems, [place]: undefined };
   }
 
-  /** Whether the component has changed. */
+  /** Sets the component, or shows and announces why not. Returns whether it has changed. */
   function setComponent(arrow: ArrowName, axis: Axis, value: number): boolean {
     const before = current[arrow][axis];
     const next = withComponent(current, arrow, axis, value);
@@ -81,10 +81,14 @@
     return true;
   }
 
-  const sumInWords = () => (sum ? `The sum is ${pair(sum)}.` : "");
+  const sumSentence = () => (sum ? `The sum is ${pair(sum)}.` : "");
+
+  function announceArrow(arrow: ArrowName) {
+    announce(`Arrow ${arrow} is ${pair(current[arrow])}. ${sumSentence()}`.trim());
+  }
 
   function changeComponent(arrow: ArrowName, axis: Axis, value: number) {
-    if (setComponent(arrow, axis, value)) announce(`Arrow ${arrow} is ${pair(current[arrow])}. ${sumInWords()}`.trim());
+    if (setComponent(arrow, axis, value)) announceArrow(arrow);
   }
 
   function dragTip(arrow: ArrowName, point: Vector) {
@@ -94,13 +98,14 @@
     problems = { ...problems, [arrow]: undefined };
   }
 
-  /** A tip that is moved has the focus, so its new value is read. The rest is announced here. */
-  function announceSum() {
-    announce(sumInWords());
+  function announceMove(arrow: ArrowName, hasFocus: boolean) {
+    // A screen reader reads the new value of a tip that has the focus. Only the rest is left to announce.
+    if (hasFocus) announce(sumSentence());
+    else announceArrow(arrow);
   }
 
   function stepTip(arrow: ArrowName, axis: Axis, step: number) {
-    if (setComponent(arrow, axis, current[arrow][axis] + step)) announceSum();
+    if (setComponent(arrow, axis, current[arrow][axis] + step)) announceMove(arrow, true);
   }
 
   function readComponent(arrow: ArrowName, axis: Axis, field: HTMLInputElement) {
@@ -184,7 +189,7 @@
   <div class="views">
     <Drawing arrows={current} {sum} {prediction} describedby="{id}-words">
       {#if live}
-        <Tips arrows={current} describedby="{id}-tip-hint" ondrag={dragTip} ondrop={announceSum} onstep={stepTip} />
+        <Tips arrows={current} describedby="{id}-tip-hint" ondrag={dragTip} ondrop={announceMove} onstep={stepTip} />
       {/if}
     </Drawing>
     {@render key()}
@@ -242,9 +247,9 @@
     {/if}
 
     <h3>{answer ? "Change the arrows, and watch what else changes" : "2. Change the arrows"}</h3>
-    <p id="{id}-tip-hint">
-      Drag the ring at the tip of an arrow in the drawing. Or move the focus to the ring with Tab, and press the arrow keys of
-      your keyboard.
+    <p>
+      Drag the ring at the tip of an arrow in the drawing. Or press Tab or Shift+Tab until a ring is outlined.
+      <span id="{id}-tip-hint">The arrow keys of your keyboard move it one step at a time.</span>
     </p>
     <p id="{id}-arrow-hint">You can also use the fields and buttons here. Each component is {arrowRange}.</p>
     {#each names as name (name)}

@@ -1,6 +1,7 @@
+<!-- The tips that can be moved. A child of Drawing, whose measures and colours it uses. -->
 <script lang="ts">
   import { drawingEdge } from "./Drawing.svelte";
-  import { arrowLimit, type ArrowName, type Arrows, type Axis, type Vector } from "./state";
+  import { arrowLimit, same, type ArrowName, type Arrows, type Axis, type Vector } from "./state";
   import { numeral } from "./words";
 
   interface Props {
@@ -8,15 +9,15 @@
     describedby: string;
     /** The learner drags the tip of an arrow to a point of the drawing. */
     ondrag: (arrow: ArrowName, point: Vector) => void;
-    /** The learner lets go of a tip that is at another place than before. */
-    ondrop: () => void;
+    /** The learner lets go of a tip that is at another place than before. It can have lost the focus. */
+    ondrop: (arrow: ArrowName, hasFocus: boolean) => void;
     /** The learner moves a tip by one step with the keyboard. */
     onstep: (arrow: ArrowName, axis: Axis, step: number) => void;
   }
 
   const { arrows, describedby, ondrag, ondrop, onstep }: Props = $props();
 
-  const steps: { readonly [key: string]: readonly [Axis, number] } = {
+  const keys: { readonly [key: string]: readonly [Axis, number] } = {
     ArrowLeft: ["x", -1],
     ArrowRight: ["x", 1],
     ArrowDown: ["y", -1],
@@ -38,7 +39,7 @@
 
   const percent = (distance: number) => `${(100 * distance) / (2 * drawingEdge)}%`;
   /** The value changes only when a drag ends, so that it is read once. */
-  const value = (name: ArrowName) => (drag?.arrow === name ? drag.from : arrows[name]);
+  const valueToRead = (name: ArrowName) => (drag?.arrow === name ? drag.from : arrows[name]);
 
   function pointAt({ clientX, clientY }: PointerEvent): Vector {
     const { left, top, width } = layer!.getBoundingClientRect();
@@ -47,14 +48,14 @@
   }
 
   function startDrag(event: PointerEvent & { currentTarget: HTMLElement }, pressed: ArrowName) {
-    if (drag || !event.isPrimary || event.button !== 0) return;
+    if (drag || !event.isPrimary || event.button !== 0 || event.ctrlKey) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = pointAt(event);
     const distance = (name: ArrowName) => Math.hypot(point.x - arrows[name].x, point.y - arrows[name].y);
     // Targets of tips that are close to each other overlap.
     const other = pressed === "a" ? "b" : "a";
     const arrow = distance(other) < distance(pressed) ? other : pressed;
-    // Before the rest, because leaving a field can still change an arrow.
+    // Before its place is read, because leaving a field can still change it.
     tips[arrow]!.focus({ preventScroll: true });
     const from = arrows[arrow];
     drag = { pointer: event.pointerId, arrow, from, held: { x: point.x - from.x, y: point.y - from.y } };
@@ -62,22 +63,30 @@
 
   function moveDrag(event: PointerEvent) {
     if (drag?.pointer !== event.pointerId) return;
+    if (event.type === "pointermove" && !event.buttons) {
+      // The release was missed, such as while a menu was open.
+      endDrag();
+      return;
+    }
     const point = pointAt(event);
     ondrag(drag.arrow, { x: point.x - drag.held.x, y: point.y - drag.held.y });
   }
 
-  function endDrag(event: PointerEvent) {
-    if (drag?.pointer !== event.pointerId) return;
+  function endDrag() {
+    if (!drag) return;
     const { arrow, from } = drag;
     drag = undefined;
-    if (arrows[arrow].x !== from.x || arrows[arrow].y !== from.y) ondrop();
+    if (!same(arrows[arrow], from)) ondrop(arrow, document.activeElement === tips[arrow]);
   }
 
-  function step(event: KeyboardEvent, name: ArrowName) {
-    const change = steps[event.key];
+  function pressKey(event: KeyboardEvent, name: ArrowName) {
+    const change = keys[event.key];
     if (!change || event.altKey || event.ctrlKey || event.metaKey) return;
     event.preventDefault();
-    if (!drag) onstep(name, ...change);
+    const [axis, step] = change;
+    // Held down, the key stops at the bound without a message for every repeat.
+    if (drag || (event.repeat && Math.abs(arrows[name][axis] + step) > arrowLimit)) return;
+    onstep(name, axis, step);
   }
 </script>
 
@@ -95,14 +104,17 @@
       aria-label="Tip of arrow {name}"
       aria-valuemin={-arrowLimit}
       aria-valuemax={arrowLimit}
-      aria-valuenow={value(name).x}
-      aria-valuetext="x = {numeral(value(name).x)}, y = {numeral(value(name).y)}"
+      aria-valuenow={valueToRead(name).x}
+      aria-valuetext="x = {numeral(valueToRead(name).x)}, y = {numeral(valueToRead(name).y)}"
       aria-describedby={describedby}
-      onkeydown={(event) => step(event, name)}
+      onkeydown={(event) => pressKey(event, name)}
       onpointerdown={(event) => startDrag(event, name)}
       onpointermove={moveDrag}
       onpointerup={moveDrag}
-      onlostpointercapture={endDrag}
+      onlostpointercapture={(event) => {
+        if (drag?.pointer === event.pointerId) endDrag();
+      }}
+      onblur={endDrag}
       onmousedown={(event) => {
         // The focus is already on the tip that is dragged, which can be the other one.
         if (event.button === 0) event.preventDefault();

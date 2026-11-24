@@ -146,12 +146,12 @@ async function drag(page: Page, from: Pair, ...through: Pair[]) {
 async function touch(page: Page) {
   await page.locator(".interaction svg").scrollIntoViewIfNeeded();
   const session = await page.context().newCDPSession(page);
-  // Where the drawing is now, which a scroll by the finger must not change for the rest of its way.
+  // Measured once: a finger goes on in a straight line on the screen while the page scrolls under it.
   const [left, top] = await onScreen(page, [0, 0]);
   const unit = (await onScreen(page, [1, 0]))[0] - left;
   const at = (points: Pair[]) => points.map(([x, y], id) => ({ x: left + x * unit, y: top - y * unit, id }));
   let last: Pair[] = [];
-  const send = async (type: "touchStart" | "touchMove" | "touchEnd", points: Pair[]) => {
+  const send = async (type: "touchStart" | "touchMove" | "touchEnd" | "touchCancel", points: Pair[]) => {
     await session.send("Input.dispatchTouchEvent", { type, touchPoints: at(points) });
     last = points;
   };
@@ -160,6 +160,7 @@ async function touch(page: Page) {
     alsoDown: (point: Pair) => send("touchStart", [...last, point]),
     move: (...points: Pair[]) => send("touchMove", points),
     up: () => send("touchEnd", []),
+    cancel: () => send("touchCancel", []),
   };
 }
 
@@ -324,6 +325,45 @@ test.describe("dragging", () => {
     await expectViews(page, [2, -1], [-1, 2], [1, 1]);
     expect(await spoken()).toHaveLength(3);
   });
+  test("ends when the focus leaves the tip, and Reset is not undone", async ({ page, browserName }) => {
+    const tab = browserName === "webkit" ? "Alt+Tab" : "Tab";
+    const spoken = await listen(page);
+    await drag(page, [3, 2], [1, 1]);
+    await page.keyboard.press(tab);
+    await expect(handle(page, "b")).toBeFocused();
+    // The tip has lost the focus, so its value is not read.
+    await expect.poll(spoken).toEqual(["Arrow a is (1, 1)."]);
+    await page.mouse.move(...(await onScreen(page, [0, -4])));
+    await page.mouse.up();
+    await expectViews(page, [1, 1], [-1, 2]);
+
+    await drag(page, [1, 1], [2, 2]);
+    await page.getByRole("button", { name: "Reset" }).focus();
+    await page.keyboard.press("Enter");
+    await expectViews(page, [3, 2], [-1, 2]);
+    await page.mouse.move(...(await onScreen(page, [0, -4])));
+    await page.mouse.up();
+    await expectViews(page, [3, 2], [-1, 2]);
+  });
+
+  test("does not start with Ctrl, and ends when the release was missed", async ({ page }) => {
+    await page.keyboard.down("Control");
+    await drag(page, [3, 2], [1, 1]);
+    await page.mouse.up();
+    await page.keyboard.up("Control");
+    await expectViews(page, [3, 2], [-1, 2]);
+
+    await handle(page, "a").evaluate((tip) =>
+      tip.addEventListener("pointerdown", (event) => Object.assign(window, { pointer: (event as PointerEvent).pointerId })),
+    );
+    await drag(page, [3, 2], [1, 1]);
+    await handle(page, "a").evaluate((tip) => {
+      const { pointer } = window as unknown as { pointer: number };
+      tip.dispatchEvent(new PointerEvent("pointermove", { pointerId: pointer, buttons: 0, bubbles: true }));
+    });
+    await page.mouse.move(...(await onScreen(page, [0, -4])));
+    await expectViews(page, [1, 1], [-1, 2]);
+  });
 });
 
 test.describe("touch", () => {
@@ -351,6 +391,16 @@ test.describe("touch", () => {
     });
   }
 
+  test("that the browser takes away leaves the tip where it is, and is announced", async ({ page }) => {
+    const finger = await touch(page);
+    const spoken = await listen(page);
+    await finger.down([3, 2]);
+    await finger.move([1, 1]);
+    await finger.cancel();
+    await expectViews(page, [1, 1], [-1, 2]);
+    await expect.poll(spoken).toEqual(["x = 1, y = 1"]);
+  });
+
   test("a second finger does not disturb a drag", async ({ page }) => {
     const finger = await touch(page);
     await finger.down([3, 2]);
@@ -371,7 +421,7 @@ test.describe("a tip for the keyboard and assistive technology", () => {
       const tip = page.getByRole("slider", { name: `Tip of arrow ${name}`, exact: true });
       await expect(tip).toHaveAttribute("aria-valuetext", value);
       await expect(tip).toHaveAttribute("aria-valuenow", now);
-      await expect(tip).toHaveAccessibleDescription(/press the arrow keys of your keyboard/);
+      await expect(tip).toHaveAccessibleDescription("The arrow keys of your keyboard move it one step at a time.");
       const { width, height } = (await tip.boundingBox())!;
       expect(Math.min(width, height)).toBeGreaterThanOrEqual(44);
     }
@@ -412,6 +462,11 @@ test.describe("a tip for the keyboard and assistive technology", () => {
     await expect(arrow(page, "a").getByText(message)).toBeVisible();
     await expectViews(page, [4, 2], [-1, 2]);
     expect(await spoken()).toEqual([message]);
+    // Held down, the key does not repeat the message.
+    await page.keyboard.down("ArrowRight");
+    for (let i = 0; i < 3; i++) await page.keyboard.down("ArrowRight");
+    await page.keyboard.up("ArrowRight");
+    expect(await spoken()).toEqual([message, message]);
     await page.keyboard.press("ArrowLeft");
     await expect(arrow(page, "a").getByText(message)).toHaveCount(0);
   });
@@ -733,15 +788,16 @@ for (const forcedColors of ["none", "active"] as const) {
         const paper = luminance(getComputedStyle(document.documentElement).backgroundColor);
         const parts = { a: ".a line", b: ".b line", sum: ".sum line", copy: ".copy line", prediction: ".prediction", axes: ".axes" };
         const labels = { "label a": "text.a", "label b": "text.b", "label sum": "text.sum" };
-        const contrast = (selector: string, property: "stroke" | "fill") => {
-          const part = luminance(getComputedStyle(svg.querySelector(selector)!)[property]);
+        const contrastOf = (colour: string) => {
+          const part = luminance(colour);
           return (Math.max(part, paper) + 0.05) / (Math.min(part, paper) + 0.05);
         };
+        const contrast = (selector: string, property: "stroke" | "fill") =>
+          contrastOf(getComputedStyle(svg.querySelector(selector)!)[property]);
         const rings = [...document.querySelectorAll("[role=slider] .ring")].map((ring) => {
           const { borderTopColor, borderTopStyle, borderTopWidth, width } = getComputedStyle(ring);
-          const part = luminance(borderTopColor);
           return {
-            contrast: (Math.max(part, paper) + 0.05) / (Math.min(part, paper) + 0.05),
+            contrast: contrastOf(borderTopColor),
             thickness: parseFloat(borderTopWidth),
             style: borderTopStyle,
             width,
