@@ -232,6 +232,16 @@ test("a notebook that differs from its program fails", async ({}, testInfo) => {
   expect(result.passed).toBe(false);
 });
 
+test("a notebook that is not JSON is listed, and the other checks still run", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await writeFile(copy.path("notebooks/add-vectors.ipynb"), "{");
+  await copy.change("dist/index.html", (text) => text.replace("/blob/main/", "/blob/dev/"));
+  const result = await copy.verify(["--no-build"]);
+  expect(result.output).toContain("add-vectors: the notebook cannot be read");
+  expect(result.output).toContain("a link to Colab that is not exactly");
+  expect(result.passed).toBe(false);
+});
+
 test("a notebook that is not stored fails", async ({}, testInfo) => {
   const copy = await setUp(testInfo.outputPath("copy"));
   await rm(copy.path("notebooks/add-vectors.ipynb"));
@@ -261,6 +271,7 @@ test("a program that runs as a file but not in a notebook fails", async ({}, tes
   // Only a program run as a file has a name for it.
   await writeFile(copy.path("src/snippets/file.py"), "print(__file__ != '')\n");
   await writeFile(copy.path("src/snippets/file.txt"), "True\n");
+  await execute("uv", ["run", "--quiet", "--locked", "scripts/make_notebook.py"], { cwd: copy.path("") });
   const result = await copy.verify(["--no-build"]);
   expect(result.output).toContain("file: the notebook did not run");
   expect(result.output).toContain("NameError");

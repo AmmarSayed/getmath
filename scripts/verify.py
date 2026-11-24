@@ -90,7 +90,11 @@ def run_programs():
 
 def execute(name, text):
     """Runs a notebook in the locked environment, and compares what it prints with the output file."""
-    notebook = nbformat.reads(text, as_version=4)
+    try:
+        notebook = nbformat.reads(text, as_version=4)
+    except Exception as problem:
+        errors.append(f"{name}: the notebook cannot be read\n{type(problem).__name__}: {problem}")
+        return
     with tempfile.TemporaryDirectory() as folder:
         # Our own kernel, found only here, and run like the programs: by this Python, isolated, in UTF-8.
         # No setting of the machine or of the user reaches it.
