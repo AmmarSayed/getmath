@@ -54,7 +54,7 @@ def check_toc():
 
 
 def check_datasets():
-    """Reproduces the table of data. Its known differences are shown on every run."""
+    """Reproduces the table of data."""
     command = [sys.executable, "-I", "-X", "utf8", str(ROOT / "scripts" / "check_datasets.py")]
     try:
         done = subprocess.run(command, capture_output=True, encoding="utf-8", timeout=600)
@@ -63,7 +63,6 @@ def check_datasets():
         return
     lines = (done.stdout + done.stderr).strip().splitlines()
     if done.returncode == 0 and lines and not done.stderr:
-        print("\n".join(lines[:-1]))
         return lines[-1].removeprefix("OK: ")
     errors.extend(f"datasets: {line}" for line in lines)
     if not lines:

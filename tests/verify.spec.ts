@@ -40,7 +40,6 @@ async function setUp(folder: string, dist = "dist") {
 test("the site as built passes", async ({}, testInfo) => {
   const result = await (await setUp(testInfo.outputPath("copy"))).verify("--no-build");
   expect(result.output).toMatch(/^OK: /m);
-  expect(result.output).toMatch(/^known difference: /m);
   expect(result.passed).toBe(true);
 });
 
@@ -52,7 +51,7 @@ test("an output file that differs from what Python prints fails, and both are sh
     text.replace("<samp>[4, 3]", "<samp>[4, 4]").replace("[0,&quot;[4, 3]", "[0,&quot;[4, 4]"),
   );
   const result = await copy.verify("--no-build");
-  expect(result.output.trim().split(/\r?\n/).filter((line) => !line.startsWith("known difference: "))).toEqual([
+  expect(result.output.trim().split(/\r?\n/)).toEqual([
     "add-vectors: the output differs from add-vectors.txt",
     String.raw`  expected: '[4, 4]\n'`,
     String.raw`  actual:   '[4, 3]\n'`,
