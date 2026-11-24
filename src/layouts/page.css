@@ -32,3 +32,17 @@ body {
 .formula > .katex-display {
   margin: 0;
 }
+
+/* A still figure replaces its interaction without JavaScript (see Page.astro), or when a link leads to it. */
+.still {
+  display: none;
+}
+
+.still:target {
+  display: block;
+}
+
+:focus-visible {
+  outline: 3px solid;
+  outline-offset: 2px;
+}
