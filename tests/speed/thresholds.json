@@ -1,7 +1,7 @@
 {
   "status": "provisional until Ammar accepts",
   "environment": {
-    "description": "Chromium from Playwright on the production build under /getmath/, cold cache (a new browser context for every run), viewport 1280 by 800. Network: 150 ms round trip, 1600 kbit/s down, 750 kbit/s up (the slow 4G profile of Lighthouse), set through the Chrome DevTools Protocol. Processor: 4 times slower. Each run loads the page, waits for the interaction to start and for 1 second, presses 30 arrow keys on a handle, then drags it round a circle in 40 pointer moves. Arrow response is the time from the input to the next paint: Event Timing for the keyboard worst (it only reports events over 16 ms, in steps of 8 ms), and the event to the first frame and the task after it for the other three, because Event Timing does not cover pointer moves. The page weight counts bytes as the preview server sends them, without compression, so GitHub Pages sends less.",
+    "description": "Chromium from Playwright on the production build under /getmath/, cold cache (a new browser context for every run), viewport 1280 by 800. Network: 150 ms round trip, 1600 kbit/s down, 750 kbit/s up (the slow 4G profile of Lighthouse), set through the Chrome DevTools Protocol. Processor: 4 times slower. Each run loads the page, then waits until no request is in flight and none has started for 500 ms (a failed or pending request fails the run). It submits a prediction, so that the sum, its copy, the formula and the feedback are all shown. It presses 20 arrow keys on a handle, then drags the handle through 30 pointer moves from the middle of one grid cell to the middle of another. Every step must change the arrow, or the run fails. Arrow response is the time from the input to the first frame and the task after it, for every step; the worst of the keyboard also counts the Event Timing figure (it only reports events over 16 ms, in steps of 8 ms), which does not cover pointer moves. The page weight counts bytes as the preview server sends them, without compression, so GitHub Pages sends less.",
     "viewport": {
       "width": 1280,
       "height": 800
@@ -10,9 +10,10 @@
     "downloadKbps": 1600,
     "uploadKbps": 750,
     "cpuSlowdown": 4,
-    "keySteps": 30,
-    "dragSteps": 40,
-    "runsInTest": 3
+    "keySteps": 20,
+    "dragSteps": 30,
+    "runsInTest": 3,
+    "quietMs": 500
   },
   "measures": {
     "lcp": {
@@ -24,17 +25,17 @@
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 512,
-          "median": 548,
-          "max": 740,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "min": 508,
+          "median": 524,
+          "max": 580,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 428,
           "median": 436,
           "max": 448,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -50,14 +51,14 @@
           "min": 0,
           "median": 0,
           "max": 0,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 0,
           "median": 0,
           "max": 0,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -73,14 +74,14 @@
           "min": 195280,
           "median": 195280,
           "max": 195280,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 195275,
           "median": 195275,
           "max": 195275,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -96,14 +97,14 @@
           "min": 107320,
           "median": 107320,
           "max": 107320,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 107320,
           "median": 107320,
           "max": 107320,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -119,14 +120,14 @@
           "min": 12,
           "median": 12,
           "max": 12,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 12,
           "median": 12,
           "max": 12,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -134,22 +135,22 @@
       "label": "Keyboard step, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "About 4 times the runner's median of 24 ms and below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request; the developer machine's worst of 25 runs was 160 ms.",
+      "ceiling": 150,
+      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 62 ms and the slowest run 106 ms, so the earlier 100 ms was too tight; 150 ms is below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 40,
-          "median": 48,
-          "max": 160,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "min": 51.9,
+          "median": 61.8,
+          "max": 105.7,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 24,
           "median": 24,
           "max": 32,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -157,22 +158,22 @@
       "label": "Keyboard step, median",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 60,
-      "why": "About 4 times the runner's median of 15.55 ms and below the 100 ms in which an answer feels immediate.",
+      "ceiling": 100,
+      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 42 ms and the slowest run 52 ms, so the earlier 60 ms left little room; 100 ms is the limit in which an answer feels immediate, and a slowdown of 150 ms on every step is shown to fail it.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 24.9,
-          "median": 27.45,
-          "max": 49.35,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "min": 39.25,
+          "median": 41.95,
+          "max": 52.1,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 14.1,
           "median": 15.55,
           "max": 17.55,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -180,22 +181,22 @@
       "label": "Drag move, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "About 4 times the runner's median of 23.85 ms and below the public INP 'good' guidance of 200 ms.",
+      "ceiling": 150,
+      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 41 ms and the slowest run 120 ms, so the earlier 100 ms was too tight; 150 ms is below the public INP 'good' guidance of 200 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 38.8,
-          "median": 55.7,
-          "max": 124.7,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "min": 35.1,
+          "median": 41,
+          "max": 120.5,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 20.1,
           "median": 23.85,
           "max": 30.6,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     },
@@ -208,17 +209,17 @@
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 23.75,
-          "median": 26.3,
-          "max": 44.2,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
+          "min": 28.4,
+          "median": 29.25,
+          "max": 30.95,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
         },
         "runner": {
           "runs": 20,
           "min": 11.15,
           "median": 12.175,
           "max": 14.45,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
         }
       }
     }

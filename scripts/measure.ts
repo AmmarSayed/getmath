@@ -1,17 +1,26 @@
 // Repeats the speed measurement on the production build and prints how each measure varies.
 // Usage: pnpm measure [runs]   (builds first; stop other servers on port 4321)
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { chromium } from "@playwright/test";
 import { measures, measureOnce, middle, thresholds, type Result } from "../tests/speed/measure.ts";
 
 const runs = Number(process.argv[2] ?? 20);
+if (!Number.isInteger(runs) || runs < 1) throw new Error("The number of runs must be a positive whole number");
 const url = process.env.SITE_URL ?? "http://127.0.0.1:4321/getmath/";
 
 const answers = () => fetch(url).then((r) => r.ok, () => false);
 if (!process.env.SITE_URL && (await answers())) throw new Error(`${url} already answers, so it may be another build. Stop that server first.`);
-const server = process.env.SITE_URL ? undefined : spawn("node_modules/.bin/astro", ["preview", "--ignore-lock"], { stdio: "ignore" });
+const server = process.env.SITE_URL ? undefined : spawn(process.execPath, ["node_modules/astro/bin/astro.mjs", "preview", "--ignore-lock"], { stdio: "ignore" });
 let exited = false;
 server?.on("exit", () => (exited = true));
+const stop = async () => {
+  if (!server || exited) return;
+  server.kill();
+  await once(server, "exit");
+};
+for (const signal of ["SIGINT", "SIGTERM"] as const)
+  process.on(signal, () => stop().finally(() => process.exit(130)));
 try {
   for (let i = 0; !(await answers()); i++) {
     if (exited) throw new Error("The preview server exited before it answered. Is the site built, and is port 4321 free?");
@@ -37,5 +46,5 @@ try {
   }
   if (process.env.MEASURE_JSON) console.log(JSON.stringify(all));
 } finally {
-  server?.kill();
+  await stop();
 }
