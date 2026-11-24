@@ -16,7 +16,18 @@ const output = outputs[`./${name}.txt`];
 if (program === undefined || output === undefined) {
   throw new Error(`The example "${name}" needs src/snippets/${name}.py and ${name}.txt`);
 }
+// `scripts/make_notebook.py` makes the notebook from the same two files, and `scripts/verify.py` checks it.
+const notebooks = import.meta.glob<string>("../../notebooks/*.ipynb", { eager: true, query: "?raw", import: "default" });
+if (notebooks[`../../notebooks/${name}.ipynb`] === undefined) {
+  throw new Error(`The example "${name}" needs notebooks/${name}.ipynb. Run: uv run --locked scripts/make_notebook.py`);
+}
+const notebook = `https://colab.research.google.com/github/AmmarSayed/getmath/blob/main/notebooks/${name}.ipynb`;
 ---
 
 <pre data-program={name} class="code" tabindex="0" role="group" aria-label="Python program"><code>{program}</code></pre>
 <RunExample client:idle {name} {output} />
+<p class="notebook">
+  Optional: <a href={notebook}>open the same program in a Colab notebook</a>, where it can run for real. Colab is an
+  outside service, it works only online, and it may ask for a Google account. This page works fully without it, and
+  nothing is requested from Colab until you follow the link.
+</p>
