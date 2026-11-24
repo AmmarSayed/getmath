@@ -62,6 +62,7 @@ SEPARATION_TOLERANCE = 1e-6  # the sum of slacks above which a direction separat
 
 ROOT = Path(__file__).resolve().parent.parent
 errors = []
+WORDS = {word: str(n) for n, word in enumerate(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"])}
 values = []  # every reproduced value, unrounded, for --values
 
 
@@ -197,7 +198,7 @@ def runs():
 
 def listed(items):
     """The items as the table writes a list: "a, b and c"."""
-    *most, last = items
+    *most, last = list(items) or ["none"]
     return f"{', '.join(most)} and {last}" if most else last
 
 
@@ -208,10 +209,10 @@ def mixture():
     best, *lower = sorted(groups, reverse=True)
     values.extend((f"mixture: groups of log-likelihoods, {key}", [(round(t, 4), round(a, 4)) for t, a in groups[key]]) for key in sorted(groups, reverse=True))
     for key, members in groups.items():
-        check(len({f"{ari:.2f}" for _, ari in members}) == 1, f"mixture: the starts at {key} do not agree on the ARI at two decimals")
+        check(len({shown(ari, "0.00") for _, ari in members}) == 1, f"mixture: the starts at {key} do not agree on the ARI at two decimals")
     return [
         groups[best][0][1], STARTS, len(groups[best]), best, sum(len(groups[key]) for key in lower), len(lower),
-        listed(f"{key:.1f}" for key in lower), listed(f"{groups[key][0][1]:.2f}" for key in lower),
+        listed(shown(key, "0.0") for key in lower), listed(shown(groups[key][0][1], "0.00") for key in lower),
     ]
 
 
@@ -308,7 +309,7 @@ def edge(value, token):
 
 def compare(row, labels, tokens, results):
     for label, token, value in zip(labels, tokens, results, strict=True):
-        token = {"four": "4", "six": "6"}.get(token, token.replace("−", "-"))
+        token = WORDS.get(token, token.replace("−", "-"))
         got = shown(value, token)
         values.append((f"{row}: {label}", value if isinstance(value, str) else float(value)))
         if re.fullmatch(r"-?\d+(\.\d+)?", token) and edge(value, token) < 0.05:
