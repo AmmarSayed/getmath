@@ -2,6 +2,7 @@ import { globSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { openPage } from "./open-page";
 
 /** Turns files such as `a/index.html` and `a.mdx` into page paths such as `a/`. */
 function pagePaths(files: string[]) {
@@ -98,17 +99,22 @@ for (const path of pages) {
 test.describe("formulas without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
+  // The formulas written in the page, without those of its interactions.
+  const written = "main > :is(p, .formula)";
+
   test("are reachable as mathematics, and drawn once", async ({ page }) => {
     await page.goto("./");
     // The accessible form is MathML. The drawn form is hidden from assistive technology.
-    const formulas = page.locator("main").getByRole("math");
-    await expect(formulas).toHaveCount(4);
+    const formulas = page.locator(written).getByRole("math");
+    const count = await page.locator(written).locator(".katex").count();
+    expect(count).toBeGreaterThanOrEqual(4);
+    await expect(formulas).toHaveCount(count);
     await expect(formulas.nth(0).locator("mn")).toHaveText(["3", "4", "7"]);
     await expect(formulas.nth(1).locator("msqrt mfrac mn")).toHaveText(["9", "16"]);
     await expect(formulas.nth(2).locator("mtable")).toHaveCount(4);
     // The three on their own line are built as such.
-    await expect(page.locator('.formula math[display="block"]')).toHaveCount(3);
-    await expect(page.locator(".katex-html")).toHaveCount(4);
+    await expect(page.locator('main > .formula math[display="block"]')).toHaveCount(3);
+    await expect(page.locator(written).locator(".katex-html")).toHaveCount(count);
     await expect(page.locator(".katex-html:not([aria-hidden=true])")).toHaveCount(0);
   });
 
@@ -122,12 +128,6 @@ test.describe("formulas without JavaScript", () => {
     await expect.poll(() => fonts.join()).toContain(`${baseURL}_astro/KaTeX_Main-Regular`);
   });
 });
-
-/** Opens a page and waits for its fonts. */
-async function openPage(page: Page, path = "") {
-  await page.goto(`./${path}`);
-  await page.evaluate(() => document.fonts.ready);
-}
 
 /**
  * Relative luminance, from 0 to 1, of the darkest and the lightest pixel shown
@@ -272,7 +272,7 @@ for (const width of [320, 390, 1280]) {
 test("a wide formula can be scrolled with the keyboard", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("./");
-  const formula = page.locator(".formula").last();
+  const formula = page.locator("main > .formula").last();
   for (let i = 0; i < 10 && !(await formula.evaluate((element) => element === document.activeElement)); i++) {
     await page.keyboard.press("Tab");
   }

@@ -1,5 +1,7 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { globSync, readdirSync, readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { AstroIntegration } from "astro";
 
 const licencesFile = "third-party-licences.txt";
@@ -27,7 +29,8 @@ function readTerms(folder: string) {
 /**
  * Notes which packages the built site distributes, and publishes their terms
  * next to the pages. Counted are styles, with the fonts and images that they
- * use, components, and the scripts that reach the browser.
+ * use, components, and the scripts that reach the browser. Astro's own script
+ * is written into each page that has an interaction, where no module shows it.
  */
 export function thirdParty(): AstroIntegration {
   const folders = new Set<string>();
@@ -71,6 +74,10 @@ export function thirdParty(): AstroIntegration {
         srcDir = config.srcDir;
       },
       "astro:build:done": async ({ dir }) => {
+        const pages = globSync("**/*.html", { cwd: dir }).map((page) => readFileSync(new URL(page, dir), "utf8"));
+        if (pages.some((page) => page.includes("<astro-island"))) {
+          folders.add(dirname(fileURLToPath(import.meta.resolve("astro/package.json"))));
+        }
         const terms = [...folders].map(readTerms).sort((a, b) => a.title.localeCompare(b.title));
         const sections = terms.flatMap(({ title, name, text }) => {
           const further = furtherTerms[name];

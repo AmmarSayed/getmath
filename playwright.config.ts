@@ -8,6 +8,8 @@ const siteUrl = process.env.SITE_URL;
 if (siteUrl && !siteUrl.endsWith("/")) throw new Error("SITE_URL must end with a slash");
 const url = siteUrl || "http://127.0.0.1:4321/getmath/";
 
+const siteTests = ["site.spec.ts", "arrows.spec.ts"];
+
 export default defineConfig({
   testDir: "tests",
   fullyParallel: true,
@@ -24,8 +26,8 @@ export default defineConfig({
       },
   projects: [
     { name: "build", testMatch: ["build.spec.ts", "notices.spec.ts"] },
-    { name: "chromium", testMatch: "site.spec.ts", use: devices["Desktop Chrome"] },
-    { name: "firefox", testMatch: "site.spec.ts", use: devices["Desktop Firefox"] },
-    { name: "webkit", testMatch: "site.spec.ts", use: devices["Desktop Safari"] },
+    { name: "chromium", testMatch: siteTests, use: devices["Desktop Chrome"] },
+    { name: "firefox", testMatch: siteTests, use: devices["Desktop Firefox"] },
+    { name: "webkit", testMatch: siteTests, use: devices["Desktop Safari"] },
   ],
 });

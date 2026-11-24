@@ -1,12 +1,15 @@
 /* Follows the system setting, also for what the browser draws itself. */
 :root {
   color-scheme: light dark;
-  color: light-dark(#1b1b1b, #e4e6ea);
-  background: light-dark(#fff, #16181d);
+  --ink: light-dark(#1b1b1b, #e4e6ea);
+  --paper: light-dark(#fff, #16181d);
+  --link: light-dark(#0b4fb3, #9cc3ff);
+  color: var(--ink);
+  background: var(--paper);
 }
 
 a {
-  color: light-dark(#0b4fb3, #9cc3ff);
+  color: var(--link);
 }
 
 body {
@@ -31,4 +34,18 @@ body {
 
 .formula > .katex-display {
   margin: 0;
+}
+
+/* A still figure replaces its interaction without JavaScript (see Page.astro), or when a link leads to it. */
+.still {
+  display: none;
+}
+
+.still:target {
+  display: block;
+}
+
+:focus-visible {
+  outline: 3px solid;
+  outline-offset: 2px;
 }

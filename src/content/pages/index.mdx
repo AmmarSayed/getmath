@@ -4,8 +4,9 @@ description: A technical test of the website that will hold the GetMath book.
 status: technical-test
 ---
 
-This page tests the website that will hold the GetMath book. It teaches nothing
-yet, and it will be deleted when the testing is finished.
+import AddArrows from "../../arrows/AddArrows.svelte";
+
+This page tests the website that will hold the GetMath book. It is not a lesson, and it will be deleted when the testing is finished.
 
 ## What is being tested
 
@@ -13,7 +14,8 @@ yet, and it will be deleted when the testing is finished.
 - Its label comes from its validation status, and a page without a status cannot be built.
 - It loads nothing from other companies' servers.
 - It is tested automatically in the Chromium, Firefox and WebKit browser engines. Safari is not tested by hand.
-- Its formulas are built with the page, so they need no JavaScript.
+- The formulas in its text are built with the page, so they need no JavaScript.
+- Its one interaction works without a mouse. Without JavaScript, a still figure and its explanation replace it.
 
 ## Formulas
 
@@ -35,3 +37,17 @@ A formula too wide for the screen scrolls by itself, and the rest of the page st
 $$
 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16 + 17 + 18 + 19 + 20 = 210
 $$
+
+## Adding two arrows
+
+Two arrows start at the same point. Each is written as two numbers, its **components**:
+$x$ says how far it goes to the right, and $y$ how far up. A negative $x$ goes left, and
+a negative $y$ goes down. The arrow $\mathbf{a} = (3, 2)$ goes 3 right and 2 up.
+In a formula the same arrow can be written as a column, with $x$ above $y$. The pointed end of
+an arrow is its tip.
+
+To add arrow $\mathbf{b}$ to arrow $\mathbf{a}$, walk along $\mathbf{a}$, and from its tip walk
+along a copy of $\mathbf{b}$. The sum, written $\mathbf{a} + \mathbf{b}$, is the arrow from the start
+straight to where you end. Where is that?
+
+<AddArrows client:idle />
