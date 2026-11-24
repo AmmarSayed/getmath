@@ -19,103 +19,103 @@ MML is a good topic baseline but not a beginner's book, and it does not cover al
 
 ## 2. Coverage of MML
 
-"Adapt" means teach the part named and drop the rest.
+"Adapt" means teach the part named and drop the rest. "Chapter" was added on 2026-11-24 from the draft `docs/table-of-contents.md`; "later" means optional and written after the Full Book chapters, if Ammar still wants it.
 
-| MML | Topic | Prerequisites MML assumes | Decision | Milestone |
-| --- | --- | --- | --- | --- |
-| 2.1–2.3 | Linear systems, matrices, elimination | Algebra, index and sum notation | Include | M1 |
-| 2.4 | Vector spaces and groups | Sets, quantifiers, proof | Adapt: ℝⁿ and subspaces; groups out | M1 |
-| 2.5–2.6 | Independence, basis, rank | Sets, systems | Include | M1 |
-| 2.7 | Linear mappings | Functions | Adapt: matrices as maps, column and null space, rank–nullity, change of basis | M1 |
-| 2.8 | Affine spaces | Subspaces | Adapt: lines, planes, hyperplanes | M1 |
-| 3.1–3.6 | Norms, inner products, angles, orthogonality | Cosine, geometry | Include the dot product; general inner products out | M1 |
-| 3.7 | Inner products of functions | Integrals | Exclude | – |
-| 3.8 | Projections, Gram–Schmidt | Inverse, orthogonality | Include | M1 |
-| 3.9 | Rotations | Trigonometry | Adapt: 2D only, as a picture for SVD | M1 |
-| 4.1–4.2 | Determinant, trace, eigenvectors | Polynomials, (briefly) complex numbers | Include; trace and determinant as needed | M1 |
-| 4.3 | Cholesky | Positive definiteness | Exclude | – |
-| 4.4–4.6 | Eigendecomposition, SVD, low rank | Spectral theorem | Include; add the proofs, Frobenius norm and general pseudoinverse | M1 |
-| 4.7 | Matrix phylogeny | – | Exclude | – |
-| 5.1 | Univariate differentiation | Limits, earlier calculus | Include from zero | M1 |
-| 5.2–5.3 | Gradients, Jacobians, chain rule | 5.1, matrices | Include | M1 |
-| 5.4–5.5 | Matrix gradients | 5.3, tensors | Adapt: the few identities used, derived; no tensors | M1/M2 |
-| 5.6 | Backpropagation | Chain rule | Include as neural-network training | M1 |
-| 5.7–5.8 | Hessian, Taylor | Derivatives | Adapt: first and second order only | M1 |
-| 6.1–6.4 | Probability, Bayes, summary statistics | Sets, counting, integrals | Include; probability space simplified | M1 |
-| 6.5 | Gaussian | Matrices, integrals | M1: one variable, and 2D as a picture. M2: several variables, marginals and conditionals | M1/M2 |
-| 6.6 | Conjugacy, exponential family | Bayes | Conjugacy for the Gaussian; exponential family out | M2 |
-| 6.7 | Change of variables | Substitution, Jacobian | Adapt: linear only. One variable M1; several M2 | M1/M2 |
-| 7.1 | Gradient descent, SGD, momentum | Gradients | Include; momentum optional | M1 |
-| 7.2 | Lagrange multipliers, duality | Gradients, inequalities | Include, plus KKT conditions | M2 |
-| 7.3 | Convexity, LP/QP, Legendre–Fenchel | Hessian | Convex functions M1; quadratic programs M2; Legendre–Fenchel and LP out | M1/M2 |
-| 8.1–8.2 | Data, risk, overfitting, cross-validation | Expectation | Include | M1 |
-| 8.3 | MLE, MAP | Likelihood, logs | MLE M1; MAP with Bayesian regression | M1/M2 |
-| 8.4 | Probabilistic modelling | Bayes | Adapt: latent variables and posteriors | M2 |
-| 8.5 | Directed graphical models | Independence | Optional enrichment | – |
-| 8.6 | Model selection | Risk, Bayes | Cross-validation M1; Bayes factors out | M1 |
-| 9.1–9.2, 9.4 | Linear regression | Gradients, Gaussian, projection | Include | M1 |
-| 9.3 | Bayesian regression | Completing the square | Include, introductory | M2 |
-| 10.1–10.4, 10.6 | PCA | Eigenvectors, Lagrange multipliers | Include, by the route in section 6 | M1 |
-| 10.5, 10.7 | High-dimensional and probabilistic PCA | PCA, Gaussians | Optional enrichment | – |
-| 11.1–11.4 | Gaussian mixtures, EM | Gaussian, matrix gradients, Lagrange multipliers | Include | M2 |
-| 12.1–12.2 | Primal SVM | Projections, convexity | Include | M2 |
-| 12.3 | Dual SVM | Duality | Include; convex-hull view optional | M2 |
-| 12.4 | Kernels | Hilbert spaces (mentioned) | Adapt: finite feature maps and Gram matrices | M2 |
-| 12.5 | Numerical solvers | Quadratic programs | Optional enrichment | – |
+| MML | Topic | Prerequisites MML assumes | Decision | Milestone | Chapter |
+| --- | --- | --- | --- | --- | --- |
+| 2.1–2.3 | Linear systems, matrices, elimination | Algebra, index and sum notation | Include | M1 | `systems`, `matrices` |
+| 2.4 | Vector spaces and groups | Sets, quantifiers, proof | Adapt: ℝⁿ and subspaces; groups out | M1 | `subspaces` |
+| 2.5–2.6 | Independence, basis, rank | Sets, systems | Include | M1 | `subspaces`, `linear-maps` |
+| 2.7 | Linear mappings | Functions | Adapt: matrices as maps, column and null space, rank–nullity, change of basis | M1 | `linear-maps` |
+| 2.8 | Affine spaces | Subspaces | Adapt: lines, planes, hyperplanes | M1 | `projection` |
+| 3.1–3.6 | Norms, inner products, angles, orthogonality | Cosine, geometry | Include the dot product; general inner products out | M1 | `dot-product`, `projection` |
+| 3.7 | Inner products of functions | Integrals | Exclude | – | – |
+| 3.8 | Projections, Gram–Schmidt | Inverse, orthogonality | Include | M1 | `projection` |
+| 3.9 | Rotations | Trigonometry | Adapt: 2D only, as a picture for SVD | M1 | `eigenvectors` |
+| 4.1–4.2 | Determinant, trace, eigenvectors | Polynomials, (briefly) complex numbers | Include; trace and determinant as needed | M1 | `determinants`, `eigenvectors` |
+| 4.3 | Cholesky | Positive definiteness | Exclude | – | – |
+| 4.4–4.6 | Eigendecomposition, SVD, low rank | Spectral theorem | Include; add the proofs, Frobenius norm and general pseudoinverse | M1 | `spectral-theorem`, `svd` |
+| 4.7 | Matrix phylogeny | – | Exclude | – | – |
+| 5.1 | Univariate differentiation | Limits, earlier calculus | Include from zero | M1 | `limits`, `derivatives` |
+| 5.2–5.3 | Gradients, Jacobians, chain rule | 5.1, matrices | Include | M1 | `gradients` |
+| 5.4–5.5 | Matrix gradients | 5.3, tensors | Adapt: the few identities used, derived; no tensors | M1/M2 | `gradients`, `mixtures` |
+| 5.6 | Backpropagation | Chain rule | Include as neural-network training | M1 | `backpropagation` |
+| 5.7–5.8 | Hessian, Taylor | Derivatives | Adapt: first and second order only | M1 | `mean-value`, `curvature` |
+| 6.1–6.4 | Probability, Bayes, summary statistics | Sets, counting, integrals | Include; probability space simplified | M1 | `probability`, `random-variables`, `variance`, `densities` |
+| 6.5 | Gaussian | Matrices, integrals | M1: one variable, and 2D as a picture. M2: several variables, marginals and conditionals | M1/M2 | `gaussian`, `multivariate-gaussian`, `gaussian-conditionals` |
+| 6.6 | Conjugacy, exponential family | Bayes | Conjugacy for the Gaussian; exponential family out | M2 | `gaussian-conditionals` |
+| 6.7 | Change of variables | Substitution, Jacobian | Adapt: linear only. One variable M1; several M2 | M1/M2 | `densities`, `multivariate-gaussian` |
+| 7.1 | Gradient descent, SGD, momentum | Gradients | Include; momentum optional | M1 | `gradient-descent`, `backpropagation` |
+| 7.2 | Lagrange multipliers, duality | Gradients, inequalities | Include, plus KKT conditions | M2 | `lagrange`, `kkt` |
+| 7.3 | Convexity, LP/QP, Legendre–Fenchel | Hessian | Convex functions M1; quadratic programs M2; Legendre–Fenchel and LP out | M1/M2 | `convexity`, `kkt`, `svm-primal` |
+| 8.1–8.2 | Data, risk, overfitting, cross-validation | Expectation | Include | M1 | `linear-regression`, `evaluation`, `regularisation` |
+| 8.3 | MLE, MAP | Likelihood, logs | MLE M1; MAP with Bayesian regression | M1/M2 | `likelihood`, `bayesian-regression` |
+| 8.4 | Probabilistic modelling | Bayes | Adapt: latent variables and posteriors | M2 | `bayesian-regression`, `mixtures` |
+| 8.5 | Directed graphical models | Independence | Optional enrichment | – | later |
+| 8.6 | Model selection | Risk, Bayes | Cross-validation M1; Bayes factors out | M1 | `evaluation` |
+| 9.1–9.2, 9.4 | Linear regression | Gradients, Gaussian, projection | Include | M1 | `line-by-projection`, `line-by-descent`, `line-by-likelihood`, `linear-regression`, `regularisation` |
+| 9.3 | Bayesian regression | Completing the square | Include, introductory | M2 | `bayesian-regression` |
+| 10.1–10.4, 10.6 | PCA | Eigenvectors, Lagrange multipliers | Include, by the route in section 6 | M1 | `pca` |
+| 10.5, 10.7 | High-dimensional and probabilistic PCA | PCA, Gaussians | Optional enrichment | – | later |
+| 11.1–11.4 | Gaussian mixtures, EM | Gaussian, matrix gradients, Lagrange multipliers | Include | M2 | `mixtures`, `em-guarantees` |
+| 12.1–12.2 | Primal SVM | Projections, convexity | Include | M2 | `svm-primal` |
+| 12.3 | Dual SVM | Duality | Include; convex-hull view optional | M2 | `svm-dual` |
+| 12.4 | Kernels | Hilbert spaces (mentioned) | Adapt: finite feature maps and Gram matrices | M2 | `kernels` |
+| 12.5 | Numerical solvers | Quadratic programs | Optional enrichment | – | later |
 
 ## 3. Gaps
 
 Every gap below is a **required foundation (F)**, **required application (A)** or **optional enrichment (O)**. "Evidence of learning" is the assessment that would show the outcome.
 
-| ID | Gap and evidence in MML | Needed for | Class | Milestone | Evidence of learning | Found by |
-| --- | --- | --- | --- | --- | --- | --- |
-| G1 | Exponentials, logarithms, sums, products, double sums, sets, quantifiers and proof reading: in the symbol table (pp. 6–7) or used, not taught. Mappings are developed (pp. 48–60), but general function skills (graphs, composition, inverses) get a formal definition only (p. 139). Our proofs also need induction, a word MML does not use in that sense. Inequalities and absolute values are assumed | Everything | F | M1 | Read and rewrite a likelihood in logs; solve and graph an inequality | B, G, H |
-| G2 | Right-triangle trigonometry and cosine: assumed (p. 84) | Angles, projections | F | M1 | Derive the dot-product angle formula | C |
-| G3 | Counting and binomial coefficients: used in the proof on p. 142, not taught. The product rule and induction give the same result. Listing equally likely outcomes is needed and sits in G33 | Binomial distribution, if used | O | – | Count outcomes | C, H |
-| G4 | Limits and single-variable calculus: "briefly revisit" (p. 141); rules listed (p. 145) | Every optimisation | F | M1 | Derive the product, chain and inverse-function rules | B, R |
-| G5 | Integrals: first used in an exercise (p. 67) and on p. 80; in sections we keep, from p. 181. Fundamental theorem only named (pp. 217–218); antiderivative, integration by parts 0 hits. Also needed: improper integrals, and iterated two-variable integrals (light in M1) | Densities, expectations | F | M1 | Compute a probability, mean and variance from a density | B, R |
-| G6 | Second-order reasoning: a one-variable check (p. 226); convexity tests cited, not proved (p. 237). Mean value theorem 0 hits | Logistic regression, linear regression | F | M1 | Prove a loss convex | B |
-| G7 | Spectral theorem stated without proof (p. 111). The SVD starts by assuming it exists (p. 123); pp. 124–126 then build the factors, resting on the spectral theorem | PCA, SVD | F | M1 | Maximise xᵀAx on the unit sphere at u; for v ⊥ u, use (u + tv)ᵀA(u + tv) ≤ (1 + t²)uᵀAu for small t (the 1 + t² is ‖u + tv‖² for unit v) to force vᵀAu = 0 (algebra only: no derivatives, no Lagrange multipliers); use induction; build the SVD | C, H |
-| G8 | Frobenius norm: 0 hits. Eckart–Young is given for the spectral norm only (p. 131), but PCA's squared error is Frobenius | PCA as low-rank approximation | F | M1 | Show squared reconstruction error is the sum of dropped eigenvalues | C |
-| G9 | Information theory is not taught: cross-entropy 0 hits; entropy only as a convexity example (pp. 237–238) and an exercise (p. 248); KL divergence deferred (p. 197) | Logistic and neural-network losses | F | M1 | Derive cross-entropy from a Bernoulli likelihood | B, H |
-| G10 | Logistic regression: outlined with the sigmoid and Bernoulli likelihood (pp. 213, 315), never fitted | Section 2 outcome | A | M1 | Derive its gradient, run steps by hand; show no finite minimum for separable and quasi-separable data | B, H |
-| G11 | Softmax and multi-class outputs: softmax 0 hits | Classification with neural networks | A | M1 | Derive the softmax gradient | C |
-| G12 | Neural networks: layers, squared loss and gradient structure (pp. 159–161), but no worked numerical pass, initialisation or classification loss; saturation and vanishing gradients 0 hits; breaking symmetry at initialisation not mentioned | Section 2 outcome | A | M1 | One full forward, backward and update pass by hand; show equal starting weights staying equal | B, H |
-| G13 | Gradient descent: convergence claimed "for suitable step-size" (p. 228); a quadratic is iterated (pp. 228–229), but no model is fitted by hand | Logistic regression, neural networks | A | M1 | Prove convergence on a quadratic; show divergence | B, H |
-| G14 | Classification evaluation: confusion matrix 0 hits. Leakage gets a margin note on test-set use (p. 262), with no worked example | Assumptions and failures | A | M1 | Choose a metric for unbalanced data and defend it | B |
-| G15 | Bias–variance decomposition (p. 193) and trade-off (p. 265): named only. The bias of the 1/N variance is stated (p. 192), not derived | Regularisation, failures of regression | A | M1 | Derive the decomposition for squared error; derive the N − 1 correction | B, R |
-| G16 | Law of large numbers 0 hits; central limit theorem a margin note (p. 197); sampling distribution 0 hits; standard error a margin note (p. 284), and the variance of a mean never derived; Markov's and Chebyshev's inequalities 0 hits. Population, sample and empirical distribution are not separated (pp. 178, 192) | MLE, held-out error | F | M1 | Derive V[X̄] = σ²/N; prove Chebyshev and the weak law for independent observations with finite variance; give a test error with an approximate interval (central limit theorem simulated, "not proved here") | C, R, N, H |
-| G17 | Intervals for regression coefficients, the bootstrap, and tests: confidence interval 0 hits, bootstrap only a pointer (p. 265), p-value 0 hits, hypothesis testing mentioned in passing (three times) | Linear regression; comparing models | A | M2 | Build and interpret an interval; run a permutation test and a t-test, and say what their p-values mean; plan an A/B test's size | B, R |
-| G18 | Numerical behaviour: underflow (p. 293), condition number (p. 230); log-sum-exp 0 hits; cancellation only a margin note (p. 193) | Logistic, mixtures, gradient descent | F | M1 | Explain and repair an underflow; compute a stable log-sum-exp by hand | C, H |
-| G19 | Multivariate Gaussian: normalisation not derived (p. 198); conditionals cited to Bishop (p. 199); block elimination assumed (p. 199); degenerate covariances not treated | Bayesian regression, mixtures | F | M2 | Derive a 2D conditional | B, H |
-| G20 | Matrix-gradient identities listed unproved (p. 158), then used for the covariance update (Chapter 11) | EM | F | M2 | With S the weighted scatter, apply log x ≤ x − 1 to the eigenvalues of Σ^(−1/2) S Σ^(−1/2); needs positive total responsibility, positive definite S, the spectral square root, det(AB) = det A det B and tr(AB) = tr(BA) | C, H |
-| G21 | EM's increase in likelihood cited, not proved (p. 361); the inequality behind Jensen's is the definition of convexity (p. 236) and is named in a remark (p. 239) | EM derivation | F | M2 | Prove each EM step cannot lower the likelihood | B, H |
-| G22 | EM failures: local optima noted (p. 367); unbounded likelihood only under Further Reading (p. 368); empty components and singular scatter not treated; identifiability 0 hits | Mixture failures | A | M2 | Show a component collapsing on a point | C, H |
-| G23 | KKT conditions only in a margin note (p. 385) | SVM support vectors | F | M2 | Find support vectors and b by hand; when no multiplier is strictly between 0 and C, find the interval of valid b from the KKT inequalities | C, H |
-| G24 | Strong duality asserted for convex problems with no qualification, and equality constraints described as "convex sets" rather than affine functions (pp. 236, 239); Slater 0 hits | SVM dual | F | M2 | Prove weak duality and KKT sufficiency; state Slater's theorem with its conditions, and check that the soft margin meets them | B, H |
-| G25 | Kernels: feature maps, Gram matrices and positive semidefiniteness in three pages (pp. 388–390), with little derived | SVM kernels | A | M2 | Expand a polynomial kernel; test a Gram matrix, knowing that one sample can refute a kernel but not prove it | B, H |
-| G26 | Reading Python: none | Charter Part 0 | F | M1 | Predict the output of a short loop | D |
-| G27 | Categorical distribution: the idea appears (pp. 180, 364, as "multinoulli") and mixture weights are fitted from expected counts (pp. 359–360), but its likelihood and fit to observed labels do not | Softmax, mixture labels | F | M1 | Write its likelihood from counts; use indicator variables and probabilities that sum to 1 | R, H |
-| G28 | Pseudoinverse formula only for full column rank (pp. 35, 86); general existence appears only in a diagram (p. 134). Existence and uniqueness are not separated | Linear regression with dependent features | F | M1 | Find the smallest-norm fit for collinear data | R, H |
-| G29 | Outliers: the median's robustness gets one sentence (p. 188); their effect on a fit is not developed. Histograms only under Further Reading (p. 369) | Failures of regression | A | M1 | Show one outlier moving a fitted line | R |
-| G30 | Determinant: 2×2 and 3×3 formulas, signed volume and the Laplace expansion (pp. 100–102), but no general definition, and the properties are listed without proof | Eigenvalues, Gaussian density | F | M1: 2×2 and 3×3, and the eigenvalue route to SVD and PCA does not need more. M2: n×n properties | M1: derive the 2×2 case from area. M2: define it by elimination; prove det(AB) = det A det B; show that for a symmetric matrix it is the product of eigenvalues | P, N, H |
-| G31 | In Chapter 3, "closest point" and "orthogonal error" are linked by geometric argument only (pp. 83, 86); calculus links them later (pp. 313–314, 327–328). The left null space is not named | Least squares | F | M1 | Prove the closest point with Pythagoras; get the normal equations from it | P, N, H |
-| G32 | Cauchy–Schwarz stated (p. 75); directional derivative and steepest ascent never derived (pp. 141, 228) | Gradient descent, correlation bounds | F | M1 | Prove that the gradient is the steepest direction | P |
-| G33 | Additivity of probability and the conditional probability of general events are not set out (pp. 175–178); conditional probability is given by counts (pp. 179–180) | Bayes' theorem | F | M1 | List outcomes; work a two-event Bayes problem from the axioms | P, H |
-| G34 | PCA's best subspace is found one direction at a time (pp. 321–324), and the joint case is referred back to that (p. 332) | PCA | F | M1 | Extend the directions to a full orthonormal basis, so each weight wᵢ is at most 1 and they sum to M; show that moving weight to larger eigenvalues cannot lower the total; explain ties and sign choices | P, N, H |
-| G35 | The equality-constraint condition is motivated by a penalty and by differentiating the Lagrangian (pp. 233–236), never derived | Mixture weights, SVM | F | M2 | Derive it along a curve in two variables | P |
-| G36 | Completing the square: used for the Gaussian posterior (pp. 306–308), assumed in one variable | Bayesian regression | F | M1 (one variable), M2 (vectors) | Complete a square; find a posterior mean by hand | G |
-| G37 | Unproved: all bases have the same size (pp. 43, 45), row rank equals column rank (p. 47), rank–nullity (p. 60) | Dimension, rank, SVD, PCA | F | M1 | Prove each from elimination | N |
-| G38 | Continuity, limit laws, and closed and bounded sets: used, not defined | Derivatives, section 5 item 1 | F | M1 | Apply limit laws; recognise a discontinuity; show the unit circle is closed and bounded | N, H |
-| G39 | Multivariable stationary points: saddle points appear only in an exercise (p. 247), undefined | Neural-network and mixture failures | A | M1 | Classify a stationary point from a 2×2 Hessian, including a zero eigenvalue, where the test decides nothing | N, H |
-| G40 | Scaling and encoding: standardisation (pp. 253, 336) and one-hot vectors (p. 364) appear, but not why scale changes PCA, regularised regression or SVMs, nor zero-variance features; coding degrees as 1, 2, 3 (pp. 252–253) also fixes the spacing | Section 2 failures | A | M1 | Rescale one feature and show the first principal direction change | N, H |
-| G41 | Linearity of expectation is used on p. 190 and stated for two variables on p. 193, not proved; the expectation of g(X) is defined without justification (p. 187) | Variance of sums, bias–variance, EM | F | M1 | Prove both for discrete variables without assuming independence, before covariance; say what carries over to densities | N, H |
-| G42 | Subgradients: the hinge loss's is given (p. 391); the general definition and why it works are not | SVM loss view only; the KKT route does not need them | O | – | Sketch the subgradients of max(0, 1 − t) | N, H |
-| G43 | Data orientation changes: rows are examples on p. 253, columns on p. 335; no habit of checking shapes | All matrix models | F | M1 | Check shapes through a whole derivation; convert between conventions | H |
-| G44 | Intercepts: MML shows a prior pulling the intercept towards zero (p. 268), but does not say that the intercept is usually left unpenalised, or why | Regression, regularisation | A | M1 | Show a penalised intercept changing when y is shifted | H |
-| G45 | Common distributions beyond Bernoulli, binomial and Gaussian: uniform, geometric, Poisson, exponential | Standard preparation: Stat 110, CS229 review, 18.05 and D2L (Poisson) | O | M1 | Match a situation to a distribution and find its mean | R |
-| G46 | Newton's method: 18.01, CS229, *Deep Learning* and D2L teach it | Second-order view of optimisation | O | M1 | Take one Newton step on a one-variable loss | R |
-| G47 | KL divergence: *Deep Learning*, D2L and CS109 teach it | Links cross-entropy and EM | O | M1 | Compute it for two coins | R |
+| ID | Gap and evidence in MML | Needed for | Class | Milestone | Evidence of learning | Found by | Chapter |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| G1 | Exponentials, logarithms, sums, products, double sums, sets, quantifiers and proof reading: in the symbol table (pp. 6–7) or used, not taught. Mappings are developed (pp. 48–60), but general function skills (graphs, composition, inverses) get a formal definition only (p. 139). Our proofs also need induction, a word MML does not use in that sense. Inequalities and absolute values are assumed | Everything | F | M1 | Read and rewrite a likelihood in logs; solve and graph an inequality | B, G, H | `opening`, `vectors`, `matrices`, `subspaces`, `dot-product`, `spectral-theorem`, `functions` |
+| G2 | Right-triangle trigonometry and cosine: assumed (p. 84) | Angles, projections | F | M1 | Derive the dot-product angle formula | C | `angles`, `dot-product` |
+| G3 | Counting and binomial coefficients: used in the proof on p. 142, not taught. The product rule and induction give the same result. Listing equally likely outcomes is needed and sits in G33 | Binomial distribution, if used | O | – | Count outcomes | C, H | `random-variables` |
+| G4 | Limits and single-variable calculus: "briefly revisit" (p. 141); rules listed (p. 145) | Every optimisation | F | M1 | Derive the product, chain and inverse-function rules | B, R | `limits`, `derivatives` |
+| G5 | Integrals: first used in an exercise (p. 67) and on p. 80; in sections we keep, from p. 181. Fundamental theorem only named (pp. 217–218); antiderivative, integration by parts 0 hits. Also needed: improper integrals, and iterated two-variable integrals (light in M1) | Densities, expectations | F | M1 | Compute a probability, mean and variance from a density | B, R | `integrals`, `densities` |
+| G6 | Second-order reasoning: a one-variable check (p. 226); convexity tests cited, not proved (p. 237). Mean value theorem 0 hits | Logistic regression, linear regression | F | M1 | Prove a loss convex | B | `mean-value`, `convexity` |
+| G7 | Spectral theorem stated without proof (p. 111). The SVD starts by assuming it exists (p. 123); pp. 124–126 then build the factors, resting on the spectral theorem | PCA, SVD | F | M1 | Maximise xᵀAx on the unit sphere at u; for v ⊥ u, use (u + tv)ᵀA(u + tv) ≤ (1 + t²)uᵀAu for small t (the 1 + t² is ‖u + tv‖² for unit v) to force vᵀAu = 0 (algebra only: no derivatives, no Lagrange multipliers); use induction; build the SVD | C, H | `spectral-theorem`, `svd` |
+| G8 | Frobenius norm: 0 hits. Eckart–Young is given for the spectral norm only (p. 131), but PCA's squared error is Frobenius | PCA as low-rank approximation | F | M1 | Show squared reconstruction error is the sum of dropped eigenvalues | C | `svd`, `pca` |
+| G9 | Information theory is not taught: cross-entropy 0 hits; entropy only as a convexity example (pp. 237–238) and an exercise (p. 248); KL divergence deferred (p. 197) | Logistic and neural-network losses | F | M1 | Derive cross-entropy from a Bernoulli likelihood | B, H | `cross-entropy` |
+| G10 | Logistic regression: outlined with the sigmoid and Bernoulli likelihood (pp. 213, 315), never fitted | Section 2 outcome | A | M1 | Derive its gradient, run steps by hand; show no finite minimum for separable and quasi-separable data | B, H | `logistic-regression` |
+| G11 | Softmax and multi-class outputs: softmax 0 hits | Classification with neural networks | A | M1 | Derive the softmax gradient | C | `softmax` |
+| G12 | Neural networks: layers, squared loss and gradient structure (pp. 159–161), but no worked numerical pass, initialisation or classification loss; saturation and vanishing gradients 0 hits; breaking symmetry at initialisation not mentioned | Section 2 outcome | A | M1 | One full forward, backward and update pass by hand; show equal starting weights staying equal | B, H | `neural-networks`, `backpropagation` |
+| G13 | Gradient descent: convergence claimed "for suitable step-size" (p. 228); a quadratic is iterated (pp. 228–229), but no model is fitted by hand | Logistic regression, neural networks | A | M1 | Prove convergence on a quadratic; show divergence | B, H | `gradient-descent`, `line-by-descent` |
+| G14 | Classification evaluation: confusion matrix 0 hits. Leakage gets a margin note on test-set use (p. 262), with no worked example | Assumptions and failures | A | M1 | Choose a metric for unbalanced data and defend it | B | `evaluation`, `classification-metrics` |
+| G15 | Bias–variance decomposition (p. 193) and trade-off (p. 265): named only. The bias of the 1/N variance is stated (p. 192), not derived | Regularisation, failures of regression | A | M1 | Derive the decomposition for squared error; derive the N − 1 correction | B, R | `variance`, `bias-variance` |
+| G16 | Law of large numbers 0 hits; central limit theorem a margin note (p. 197); sampling distribution 0 hits; standard error a margin note (p. 284), and the variance of a mean never derived; Markov's and Chebyshev's inequalities 0 hits. Population, sample and empirical distribution are not separated (pp. 178, 192) | MLE, held-out error | F | M1 | Derive V[X̄] = σ²/N; prove Chebyshev and the weak law for independent observations with finite variance; give a test error with an approximate interval (central limit theorem simulated, "not proved here") | C, R, N, H | `variance`, `law-of-large-numbers`, `gaussian`, `evaluation` |
+| G17 | Intervals for regression coefficients, the bootstrap, and tests: confidence interval 0 hits, bootstrap only a pointer (p. 265), p-value 0 hits, hypothesis testing mentioned in passing (three times) | Linear regression; comparing models | A | M2 | Build and interpret an interval; run a permutation test and a t-test, and say what their p-values mean; plan an A/B test's size | B, R | `intervals`, `tests`, `bayesian-regression` |
+| G18 | Numerical behaviour: underflow (p. 293), condition number (p. 230); log-sum-exp 0 hits; cancellation only a margin note (p. 193) | Logistic, mixtures, gradient descent | F | M1 | Explain and repair an underflow; compute a stable log-sum-exp by hand | C, H | `gradient-descent`, `likelihood`, `softmax` |
+| G19 | Multivariate Gaussian: normalisation not derived (p. 198); conditionals cited to Bishop (p. 199); block elimination assumed (p. 199); degenerate covariances not treated | Bayesian regression, mixtures | F | M2 | Derive a 2D conditional | B, H | `multivariate-gaussian`, `gaussian-conditionals` |
+| G20 | Matrix-gradient identities listed unproved (p. 158), then used for the covariance update (Chapter 11) | EM | F | M2 | With S the weighted scatter, apply log x ≤ x − 1 to the eigenvalues of Σ^(−1/2) S Σ^(−1/2); needs positive total responsibility, positive definite S, the spectral square root, det(AB) = det A det B and tr(AB) = tr(BA) | C, H | `mixtures` |
+| G21 | EM's increase in likelihood cited, not proved (p. 361); the inequality behind Jensen's is the definition of convexity (p. 236) and is named in a remark (p. 239) | EM derivation | F | M2 | Prove each EM step cannot lower the likelihood | B, H | `em-guarantees` |
+| G22 | EM failures: local optima noted (p. 367); unbounded likelihood only under Further Reading (p. 368); empty components and singular scatter not treated; identifiability 0 hits | Mixture failures | A | M2 | Show a component collapsing on a point | C, H | `em-guarantees` |
+| G23 | KKT conditions only in a margin note (p. 385) | SVM support vectors | F | M2 | Find support vectors and b by hand; when no multiplier is strictly between 0 and C, find the interval of valid b from the KKT inequalities | C, H | `svm-dual` |
+| G24 | Strong duality asserted for convex problems with no qualification, and equality constraints described as "convex sets" rather than affine functions (pp. 236, 239); Slater 0 hits | SVM dual | F | M2 | Prove weak duality and KKT sufficiency; state Slater's theorem with its conditions, and check that the soft margin meets them | B, H | `kkt`, `svm-primal` |
+| G25 | Kernels: feature maps, Gram matrices and positive semidefiniteness in three pages (pp. 388–390), with little derived | SVM kernels | A | M2 | Expand a polynomial kernel; test a Gram matrix, knowing that one sample can refute a kernel but not prove it | B, H | `kernels` |
+| G26 | Reading Python: none | Charter Part 0 | F | M1 | Predict the output of a short loop | D | `opening` |
+| G27 | Categorical distribution: the idea appears (pp. 180, 364, as "multinoulli") and mixture weights are fitted from expected counts (pp. 359–360), but its likelihood and fit to observed labels do not | Softmax, mixture labels | F | M1 | Write its likelihood from counts; use indicator variables and probabilities that sum to 1 | R, H | `random-variables`, `likelihood` |
+| G28 | Pseudoinverse formula only for full column rank (pp. 35, 86); general existence appears only in a diagram (p. 134). Existence and uniqueness are not separated | Linear regression with dependent features | F | M1 | Find the smallest-norm fit for collinear data | R, H | `svd`, `linear-regression` |
+| G29 | Outliers: the median's robustness gets one sentence (p. 188); their effect on a fit is not developed. Histograms only under Further Reading (p. 369) | Failures of regression | A | M1 | Show one outlier moving a fitted line | R | `variance`, `linear-regression` |
+| G30 | Determinant: 2×2 and 3×3 formulas, signed volume and the Laplace expansion (pp. 100–102), but no general definition, and the properties are listed without proof | Eigenvalues, Gaussian density | F | M1: 2×2 and 3×3, and the eigenvalue route to SVD and PCA does not need more. M2: n×n properties | M1: derive the 2×2 case from area. M2: define it by elimination; prove det(AB) = det A det B; show that for a symmetric matrix it is the product of eigenvalues | P, N, H | `determinants`, `determinants-n` |
+| G31 | In Chapter 3, "closest point" and "orthogonal error" are linked by geometric argument only (pp. 83, 86); calculus links them later (pp. 313–314, 327–328). The left null space is not named | Least squares | F | M1 | Prove the closest point with Pythagoras; get the normal equations from it | P, N, H | `projection` |
+| G32 | Cauchy–Schwarz stated (p. 75); directional derivative and steepest ascent never derived (pp. 141, 228) | Gradient descent, correlation bounds | F | M1 | Prove that the gradient is the steepest direction | P | `dot-product`, `gradients`, `variance` |
+| G33 | Additivity of probability and the conditional probability of general events are not set out (pp. 175–178); conditional probability is given by counts (pp. 179–180) | Bayes' theorem | F | M1 | List outcomes; work a two-event Bayes problem from the axioms | P, H | `probability` |
+| G34 | PCA's best subspace is found one direction at a time (pp. 321–324), and the joint case is referred back to that (p. 332) | PCA | F | M1 | Extend the directions to a full orthonormal basis, so each weight wᵢ is at most 1 and they sum to M; show that moving weight to larger eigenvalues cannot lower the total; explain ties and sign choices | P, N, H | `svd`, `pca` |
+| G35 | The equality-constraint condition is motivated by a penalty and by differentiating the Lagrangian (pp. 233–236), never derived | Mixture weights, SVM | F | M2 | Derive it along a curve in two variables | P | `lagrange` |
+| G36 | Completing the square: used for the Gaussian posterior (pp. 306–308), assumed in one variable | Bayesian regression | F | M1 (one variable), M2 (vectors) | Complete a square; find a posterior mean by hand | G | `eigenvectors`, `gaussian-conditionals` |
+| G37 | Unproved: all bases have the same size (pp. 43, 45), row rank equals column rank (p. 47), rank–nullity (p. 60) | Dimension, rank, SVD, PCA | F | M1 | Prove each from elimination | N | `subspaces`, `linear-maps` |
+| G38 | Continuity, limit laws, and closed and bounded sets: used, not defined | Derivatives, section 5 item 1 | F | M1 | Apply limit laws; recognise a discontinuity; show the unit circle is closed and bounded | N, H | `spectral-theorem`, `limits` |
+| G39 | Multivariable stationary points: saddle points appear only in an exercise (p. 247), undefined | Neural-network and mixture failures | A | M1 | Classify a stationary point from a 2×2 Hessian, including a zero eigenvalue, where the test decides nothing | N, H | `curvature`, `backpropagation` |
+| G40 | Scaling and encoding: standardisation (pp. 253, 336) and one-hot vectors (p. 364) appear, but not why scale changes PCA, regularised regression or SVMs, nor zero-variance features; coding degrees as 1, 2, 3 (pp. 252–253) also fixes the spacing | Section 2 failures | A | M1 | Rescale one feature and show the first principal direction change | N, H | `regularisation`, `pca` |
+| G41 | Linearity of expectation is used on p. 190 and stated for two variables on p. 193, not proved; the expectation of g(X) is defined without justification (p. 187) | Variance of sums, bias–variance, EM | F | M1 | Prove both for discrete variables without assuming independence, before covariance; say what carries over to densities | N, H | `random-variables`, `densities` |
+| G42 | Subgradients: the hinge loss's is given (p. 391); the general definition and why it works are not | SVM loss view only; the KKT route does not need them | O | – | Sketch the subgradients of max(0, 1 − t) | N, H | `svm-primal` |
+| G43 | Data orientation changes: rows are examples on p. 253, columns on p. 335; no habit of checking shapes | All matrix models | F | M1 | Check shapes through a whole derivation; convert between conventions | H | `vectors`, `matrices`, `linear-regression` |
+| G44 | Intercepts: MML shows a prior pulling the intercept towards zero (p. 268), but does not say that the intercept is usually left unpenalised, or why | Regression, regularisation | A | M1 | Show a penalised intercept changing when y is shifted | H | `regularisation` |
+| G45 | Common distributions beyond Bernoulli, binomial and Gaussian: uniform, geometric, Poisson, exponential | Standard preparation: Stat 110, CS229 review, 18.05 and D2L (Poisson) | O | M1 | Match a situation to a distribution and find its mean | R | `densities` |
+| G46 | Newton's method: 18.01, CS229, *Deep Learning* and D2L teach it | Second-order view of optimisation | O | M1 | Take one Newton step on a one-variable loss | R | `curvature` |
+| G47 | KL divergence: *Deep Learning*, D2L and CS109 teach it | Links cross-entropy and EM | O | M1 | Compute it for two coins | R | `cross-entropy` |
 
 ## 4. Not in 1.0
 

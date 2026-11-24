@@ -2,7 +2,7 @@
 
 **An Open, Interactive Book on the Mathematics Behind Machine Learning**
 
-**Status:** approved by Ammar on 2026-11-24.
+**Status:** approved by Ammar on 2026-11-24, including the changes of the same day to sections 3, 8, 9 and 10. Ammar left one further change, completing the square in Part I instead of Part II, to Claude's judgement.
 
 This is the project's only governing document. A change to it needs Ammar's approval and is made here; Git history records what changed and why.
 
@@ -41,22 +41,27 @@ Models in Ready to Start ML (section 3) reach all three levels there. The Bayesi
 
 ## 3. Scope
 
-The book has five parts:
+The book has six parts:
 
 | Part | Subject |
 | --- | --- |
-| 0 | Mathematical foundations: algebra, inequalities, completing the square, functions and graphs, exponentials and logarithms, trigonometry, sums, sets, notation, proof reading, numerical reasoning, reading simple Python |
+| 0 | Opening: algebra, basic functions and graphs, notation, reading simple Python |
 | I | Data as geometry: vectors, matrices, projections, eigenvalues, singular value decomposition (SVD) |
 | II | Change and optimisation: calculus, gradients, optimisation, numerical behaviour |
 | III | Uncertainty and statistics: probability, distributions, likelihood, estimation, inference, information theory |
-| IV | Machine learning: modelling, evaluation, regularisation and the models in section 2 |
+| IV | Machine learning: modelling, evaluation, regularisation and the Ready to Start ML models |
+| V | Full Book: the mathematics and models of the second milestone, in dependency order |
+
+**Foundations.** Part 0 is one short opening chapter. The other foundations are taught in full just before they are first needed: sums, sets, proof reading, trigonometry, inequalities, completing the square and induction in Part I; functions in depth, exponentials and logarithms in Part II; numerical reasoning where it arises. Readiness checks let learners skip practice they do not need.
+
+**Capstones.** Parts I, II and III each end by fitting a line: by projection, by gradient descent and by likelihood. Part IV unites the three views.
 
 It is delivered in two milestones:
 
 | Milestone | Contents |
 | --- | --- |
-| **Ready to Start ML** | Part 0; vectors to SVD; derivatives, gradients, the chain rule and gradient descent; second derivatives and convexity; integrals as needed; core probability, the Gaussian (one variable, and two as a picture), maximum likelihood, entropy and cross-entropy; basic statistics; evaluation, overfitting and regularisation; linear and logistic regression, PCA and small neural networks |
-| **Full Book** | Constrained optimisation and SVMs; the multivariate Gaussian, its conditionals and conjugacy; Gaussian mixtures and EM; Bayesian regression; deeper statistical inference |
+| **Ready to Start ML** | Parts 0 to IV: the opening and the foundations; vectors to SVD; derivatives, gradients, the chain rule and gradient descent; second derivatives and convexity; integrals as needed; core probability, the Gaussian (one variable, and two as a picture), maximum likelihood, entropy and cross-entropy; basic statistics; evaluation, overfitting and regularisation; linear and logistic regression, PCA and small neural networks |
+| **Full Book** | Part V: constrained optimisation and SVMs; the multivariate Gaussian, its conditionals and conjugacy; Gaussian mixtures and EM; Bayesian regression; deeper statistical inference |
 
 **Statistics.** Basic statistics means the mean, variance with its N − 1 correction, covariance, correlation, the standard error, Chebyshev's inequality, the weak law of large numbers, and an approximate interval for a test error. Deeper statistical inference means the sampling distribution of regression coefficients (derived with known variance), large-sample intervals, the bootstrap, Bayesian credible intervals, hypothesis tests and p-values (large-sample, permutation and Student's t), power and A/B tests. Student's t is stated and simulated, and labelled "not proved here". Approximations are stated.
 
@@ -139,9 +144,11 @@ Content is kept in portable, version-controlled source with machine-readable cur
 1. Claude drafts the specification: goals, outline, prerequisites, misconceptions and acceptance criteria.
 2. Ammar approves it.
 3. The reviewer writes the hidden test problems in a separate file that Ammar does not open before the test. Claude checks their solutions only after the chapter is built.
-4. Claude builds the chapter and its automated tests.
-5. The reviewer checks it, and Claude fixes the findings.
-6. Ammar takes the chapter and its test, then accepts it or returns it.
+4. Claude writes the chapter in Markdown, describing each interaction in place.
+5. The reviewer checks its mathematics and teaching, and Claude fixes the findings.
+6. Claude adds the interactions and automated tests. The Markdown file becomes the MDX source; there is never a second copy.
+7. The reviewer checks the finished page, and Claude fixes the findings.
+8. Ammar takes the chapter and its test on the finished page, then accepts it or returns it.
 
 The pilot is approved at each major stage. Later chapters may be approved in batches.
 
@@ -150,10 +157,12 @@ The pilot is approved at each major stage. Later chapters may be approved in bat
 | Gate | A chapter passes when |
 | --- | --- |
 | Mathematics | Numerical examples and answers are verified by script where practicable; derivations and claims are independently reviewed; assumptions and approximations are explicit |
-| Learning | Ammar finishes it using only the book, solves the unseen transfer problems, passes a later retrieval check at their own pace, and wants to continue; points of boredom or difficulty are recorded and addressed |
+| Learning | Ammar finishes it using only the book, solves the unseen transfer problems, passes a later retrieval check, and wants to continue; points of boredom or difficulty are recorded and addressed |
 | Interaction | Every interaction has a purpose, useful feedback, correct mathematics and an accessible alternative; pictures, numbers and symbols agree; Python outputs are accurate and labelled |
 | Engineering | Tests, build, deployment, offline use, accessibility and browser checks pass against thresholds set in the proof of concept |
 | Publication | Rights, attribution and editorial review are complete; release-blocking defects are fixed; known limitations are stated |
+
+The retrieval check comes at least two weeks after the test, at Ammar's own pace. It does not delay acceptance or later chapters, but a failed check reopens the chapter, and 1.0 needs every check passed.
 
 Each published chapter says **"AI-reviewed, not expert-reviewed; tested by the owner"** until that changes. The project does not claim the book works for beginners in general. Unfinished content is labelled with its validation status.
 
@@ -165,5 +174,5 @@ Releases use semantic versions and state their completion status, supported envi
 2. Gap assessment, and in parallel a technical proof of concept: a GitHub Pages build, one accessible interaction, one Run/Reset Python example, one Colab notebook, an offline bundle, and performance, accessibility and output-verification tests.
 3. Ammar approves the gap assessment, then the table of contents and a short design specification covering components, notation, verification and accessibility.
 4. Pilot chapter: vectors, unless the dependency map shows a better choice.
-5. Ammar tests the pilot; it is revised and approved as the standard for later chapters.
-6. Remaining chapters: Ready to Start ML, then Full Book.
+5. Ammar tests the pilot. Its method, meaning layout, tools and process, is revised and approved as the standard for later chapters. The pilot itself is then deleted.
+6. All chapters, written in reading order from Part 0, including vectors again: Ready to Start ML, then Full Book.
