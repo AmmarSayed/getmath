@@ -3,14 +3,16 @@
 With --no-build, check the pages that are already in dist."""
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlparse
 
 import nbformat
+from jupyter_client import KernelManager
+from jupyter_client.kernelspec import KernelSpecManager
 from nbclient import NotebookClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -90,11 +92,21 @@ def execute(name, text):
     """Runs a notebook in the locked environment, and compares what it prints with the output file."""
     notebook = nbformat.reads(text, as_version=4)
     with tempfile.TemporaryDirectory() as folder:
-        # The kernel keeps its files in the folder too, and the machine's settings do not reach it.
-        env = {"JUPYTER_RUNTIME_DIR": folder, "JUPYTER_CONFIG_DIR": folder, "IPYTHONDIR": folder}
-        os.environ.update(env)
+        # Our own kernel, found only here, and run like the programs: by this Python, isolated, in UTF-8.
+        # No setting of the machine or of the user reaches it.
+        kernels = Path(folder) / "kernels" / "python3"
+        kernels.mkdir(parents=True)
+        spec = {
+            "argv": [sys.executable, "-I", "-X", "utf8", "-m", "ipykernel_launcher", "-f", "{connection_file}"],
+            "display_name": "Python 3",
+            "language": "python",
+            "env": {"IPYTHONDIR": folder, "JUPYTER_NO_CONFIG": "1", "JUPYTER_CONFIG_DIR": folder, "JUPYTER_CONFIG_PATH": folder},
+        }
+        (kernels / "kernel.json").write_text(json.dumps(spec), encoding="utf-8")
+        specs = KernelSpecManager(kernel_dirs=[str(kernels.parent)], ensure_native_kernel=False)
+        manager = KernelManager(kernel_name="python3", kernel_spec_manager=specs, connection_file=str(Path(folder) / "kernel.json"))
+        client = NotebookClient(notebook, km=manager, timeout=60, resources={"metadata": {"path": folder}})
         try:
-            client = NotebookClient(notebook, timeout=60, kernel_name="python3", resources={"metadata": {"path": folder}})
             # The kernel's own warnings are not the notebook's output.
             client.execute(stderr=subprocess.DEVNULL)
         except Exception as problem:
@@ -119,9 +131,13 @@ def check_notebooks(known):
             continue
         if name not in files:
             errors.append(f"{name}: has no notebooks/{name}.ipynb. Run: uv run --locked scripts/make_notebook.py")
-        elif read(NOTEBOOKS / f"{name}.ipynb") != made:
-            errors.append(f"notebooks/{name}.ipynb differs from its program and output. Run: uv run --locked scripts/make_notebook.py")
-        execute(name, made)
+        else:
+            stored = read(NOTEBOOKS / f"{name}.ipynb")
+            if stored != made:
+                errors.append(f"notebooks/{name}.ipynb differs from its program and output. Run: uv run --locked scripts/make_notebook.py")
+            # The file that Colab opens is the one that runs.
+            if stored is not None:
+                execute(name, stored)
     return len(known)
 
 
@@ -142,10 +158,11 @@ class Page(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
-        if tag == "a" and (attrs.get("href") or "").startswith(make_notebook.COLAB):
-            name = attrs["href"].removeprefix(make_notebook.COLAB).removesuffix(".ipynb")
-            if name not in self.known or not (NOTEBOOKS / f"{name}.ipynb").exists():
-                errors.append(f"{self.page}: a link to the notebook {name!r}, which does not exist")
+        href = attrs.get("href") or ""
+        if tag == "a" and urlparse(href).hostname == "colab.research.google.com":
+            name = href.removeprefix(make_notebook.COLAB).removesuffix(".ipynb")
+            if not (href.startswith(make_notebook.COLAB) and href.endswith(".ipynb")) or name not in self.known or not (NOTEBOOKS / f"{name}.ipynb").exists():
+                errors.append(f"{self.page}: a link to Colab that is not exactly {make_notebook.COLAB}NAME.ipynb for a notebook that exists: {href}")
         if tag == "astro-island" and "props" in attrs:
             props = json.loads(attrs["props"])
             if "output" in props:
