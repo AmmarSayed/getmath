@@ -2,7 +2,7 @@
 
 **An Open, Interactive Book on the Mathematics Behind Machine Learning**
 
-**Status:** approved by Ammar on 2026-11-24, including the changes of the same day to sections 3, 8, 9 and 10. Ammar left one further change, completing the square in Part I instead of Part II, to Claude's judgement.
+**Status:** approved by Ammar on 2026-11-24, including the changes of the same day to sections 3, 8 (with the proof register), 9 and 10. Ammar left one further change, completing the square in Part I instead of Part II, to Claude's judgement.
 
 This is the project's only governing document. A change to it needs Ammar's approval and is made here; Git history records what changed and why.
 
@@ -141,7 +141,7 @@ Content is kept in portable, version-controlled source with machine-readable cur
 
 **Each chapter:**
 
-1. Claude drafts the specification: goals, outline, prerequisites, misconceptions and acceptance criteria.
+1. Claude drafts the specification: goals, outline, prerequisites, misconceptions, acceptance criteria, and a proof register: each result, its assumptions, the earlier results it needs and where they were taught.
 2. Ammar approves it.
 3. The reviewer writes the hidden test problems in a separate file that Ammar does not open before the test. Claude checks their solutions only after the chapter is built.
 4. Claude writes the chapter in Markdown, describing each interaction in place.

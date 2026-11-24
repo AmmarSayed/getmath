@@ -27,7 +27,7 @@ The last chapter of Parts I, II and III. It fits a line with that part's mathema
 _Avoid_: Part review, final project
 
 **Optional lesson**:
-A lesson that no required lesson uses and no hidden test covers.
+A lesson that no required lesson uses and no hidden test covers. It teaches topics the gap assessment classes as optional enrichment.
 _Avoid_: Enrichment, extra, bonus
 
 **Milestone**:
