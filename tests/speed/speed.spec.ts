@@ -1,5 +1,5 @@
 import { chromium, expect, test } from "@playwright/test";
-import { describe, measureOnce, medians, over, thresholds, type Measure, type Tamper } from "./measure";
+import { describe, measureOnce, measures, medians, over, thresholds, type Measure, type Tamper } from "./measure";
 
 // One browser, and one test at a time: another test running beside these would slow them.
 test.describe.configure({ mode: "serial" });
@@ -13,6 +13,8 @@ test("the page loads fast, stays still and answers the arrows within the ceiling
     const runs = [];
     for (let i = 0; i < thresholds.environment.runsInTest; i++) runs.push(await measureOnce(browser, page(baseURL)));
     const result = medians(runs);
+    console.log(`speed, ${runs.length} runs:`);
+    for (const m of measures) console.log(`  ${thresholds.measures[m].label}: ${runs.map((r) => +r[m].toFixed(3)).join(", ")}; median ${+result[m].toFixed(3)}; ceiling ${thresholds.measures[m].ceiling}`);
     expect(describe(result, over(result)), `median of ${runs.length} runs, ${thresholds.status}`).toEqual([]);
   } finally {
     await browser.close();
@@ -48,18 +50,16 @@ const slowdowns: Record<string, { tamper: Tamper; fails: Measure[]; fine?: Measu
     fails: ["bytes"],
     fine: ["scriptBytes"],
   },
-  "busy time in input handling": {
+  "busy time in every input event": {
     tamper: (p) =>
       p.addInitScript(() => {
-        let count = 0;
         const busy = () => {
-          if (++count % 5) return;
-          for (const end = performance.now() + 400; performance.now() < end; );
+          for (const end = performance.now() + 150; performance.now() < end; );
         };
         addEventListener("keydown", busy, true);
         addEventListener("pointermove", busy, true);
       }),
-    fails: ["keyWorst", "dragWorst"],
+    fails: ["keyMedian", "dragMedian"],
   },
   "a layout shift": {
     tamper: (p) =>

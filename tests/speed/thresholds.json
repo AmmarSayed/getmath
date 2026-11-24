@@ -24,9 +24,9 @@
       "measured": {
         "runs": 25,
         "min": 512,
-        "median": 552,
-        "max": 760,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "median": 548,
+        "max": 740,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "cls": {
@@ -40,7 +40,7 @@
         "min": 0,
         "median": 0,
         "max": 0,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "bytes": {
@@ -54,7 +54,7 @@
         "min": 195280,
         "median": 195280,
         "max": 195280,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "scriptBytes": {
@@ -68,7 +68,7 @@
         "min": 107320,
         "median": 107320,
         "max": 107320,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "requests": {
@@ -82,7 +82,7 @@
         "min": 12,
         "median": 12,
         "max": 12,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "keyWorst": {
@@ -90,13 +90,13 @@
       "unit": "ms",
       "deterministic": false,
       "ceiling": 200,
-      "why": "Public INP 'good' guidance is 200 ms. The median of the runs in the test is compared, so one slow step in one run does not fail a pull request; one run in 25 reached 152 ms.",
+      "why": "Public INP 'good' guidance is 200 ms. The median of the runs in the test is compared, so one slow step in one run does not fail a pull request; one run in 25 reached 160 ms.",
       "measured": {
         "runs": 25,
         "min": 40,
-        "median": 56,
-        "max": 152,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "median": 48,
+        "max": 160,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "keyMedian": {
@@ -107,10 +107,10 @@
       "why": "100 ms, the limit for an answer to feel immediate. Measured about 3 times lower.",
       "measured": {
         "runs": 25,
-        "min": 25.8,
-        "median": 29.2,
-        "max": 45.3,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "min": 24.9,
+        "median": 27.45,
+        "max": 49.35,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "dragWorst": {
@@ -121,10 +121,10 @@
       "why": "Public INP 'good' guidance is 200 ms, as for the keyboard.",
       "measured": {
         "runs": 25,
-        "min": 37.1,
-        "median": 49.4,
-        "max": 97.7,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "min": 38.8,
+        "median": 55.7,
+        "max": 124.7,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     },
     "dragMedian": {
@@ -135,10 +135,10 @@
       "why": "100 ms, as for the keyboard.",
       "measured": {
         "runs": 25,
-        "min": 22.65,
-        "median": 26.45,
-        "max": 45.25,
-        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+        "min": 23.75,
+        "median": 26.3,
+        "max": 44.2,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, machine quiet, port 4321 free"
       }
     }
   }

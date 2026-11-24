@@ -108,10 +108,13 @@ export async function measureOnce(browser: Browser, url: string, tamper?: Tamper
   await page.waitForTimeout(1000);
 
   const handle = page.getByRole("slider", { name: "Tip of arrow a" });
+  const value = () => handle.getAttribute("aria-valuetext");
   await handle.scrollIntoViewIfNeeded();
   await handle.focus();
+  const start = await value();
   for (let i = 0; i < env.keySteps; i++) {
     await page.keyboard.press(i % 2 ? "ArrowLeft" : "ArrowRight");
+    if (i === 0) if ((await value()) === start) throw new Error("The keyboard steps did not move the arrow, so nothing was measured");
     await page.waitForTimeout(40);
   }
 
@@ -121,11 +124,15 @@ export async function measureOnce(browser: Browser, url: string, tamper?: Tamper
   const box = (await handle.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
+  const before = await value();
+  let moved = false;
   for (let i = 0; i <= env.dragSteps; i++) {
     const angle = (i / env.dragSteps) * 2 * Math.PI;
     await page.mouse.move(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle));
     await page.waitForTimeout(20);
+    moved ||= (await value()) !== before;
   }
+  if (!moved) throw new Error("The drag did not move the arrow, so nothing was measured");
   await page.mouse.up();
   await page.waitForTimeout(300);
 
@@ -141,6 +148,10 @@ export async function measureOnce(browser: Browser, url: string, tamper?: Tamper
   }
   // Moves from the press onwards are the drag, and the keys never hold the pointer down.
   const drags = seen.drags.slice(-env.dragSteps);
+  if (seen.keys.length !== env.keySteps) throw new Error(`${seen.keys.length} keyboard samples, not ${env.keySteps}`);
+  if (drags.length !== env.dragSteps) throw new Error(`${drags.length} drag samples, not ${env.dragSteps}`);
+  if (!(seen.lcp > 0)) throw new Error("No largest contentful paint was seen");
+  if (!(scriptBytes > 0)) throw new Error("No script bytes were seen");
   return {
     lcp: seen.lcp,
     cls: cumulativeShift(seen.shifts),

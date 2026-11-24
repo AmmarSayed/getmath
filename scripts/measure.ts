@@ -7,12 +7,18 @@ import { measures, measureOnce, middle, thresholds, type Result } from "../tests
 const runs = Number(process.argv[2] ?? 20);
 const url = process.env.SITE_URL ?? "http://127.0.0.1:4321/getmath/";
 
+const answers = () => fetch(url).then((r) => r.ok, () => false);
+if (!process.env.SITE_URL && (await answers())) throw new Error(`${url} already answers, so it may be another build. Stop that server first.`);
 const server = process.env.SITE_URL ? undefined : spawn("node_modules/.bin/astro", ["preview", "--ignore-lock"], { stdio: "ignore" });
+let exited = false;
+server?.on("exit", () => (exited = true));
 try {
-  for (let i = 0; i < 100; i++) {
-    if (await fetch(url).then((r) => r.ok, () => false)) break;
+  for (let i = 0; !(await answers()); i++) {
+    if (exited) throw new Error("The preview server exited before it answered. Is the site built, and is port 4321 free?");
+    if (i >= 100) throw new Error(`${url} did not answer in 10 seconds`);
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
+  if (exited) throw new Error("The preview server exited, so the answer came from another server");
   const browser = await chromium.launch();
   const all: Result[] = [];
   for (let i = 0; i < runs; i++) {
