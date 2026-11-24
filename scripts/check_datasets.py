@@ -68,7 +68,7 @@ values = []  # every reproduced value, unrounded, for --values
 # Differences from the table that are known and reported to Ammar. Each is (row, label) ->
 # (table value, reproduced value, reason). The script fails if a reproduced value changes,
 # or if an entry is no longer needed. The table is corrected in a separate pull request.
-LOWER = "The 20 starts fixed in advance give different local optima than the run behind the table, whose seeds are not recorded."
+LOWER = "Neither the seeds nor the way the starts were drawn are recorded for the run behind the table, so it cannot be reproduced. The 20 starts fixed in advance reach these optima."
 KNOWN = {
     ("Mixture of three Gaussians, standardised, full covariances", label): (table, got, LOWER)
     for label, table, got in [
@@ -80,6 +80,9 @@ KNOWN = {
         ("ARI lower 1", "0.91", "0.52"),
         ("ARI lower 2", "0.52", "0.53"),
         ("ARI lower 3", "0.60", "0.58"),
+        ("lower groups", "3", "4"),
+        ("lower 4", "none", "-1298.9"),
+        ("ARI lower 4", "none", "0.65"),
     ]
 }
 
@@ -220,11 +223,14 @@ def mixture():
         groups.setdefault(round(total, 1), []).append((total, ari))
     best, *lower = sorted(groups, reverse=True)
     values.extend((f"mixture: groups of log-likelihoods, {key}", [(round(t, 4), round(a, 4)) for t, a in groups[key]]) for key in sorted(groups, reverse=True))
+    fourth = lower[3:4]
     lower = (lower + [None] * 3)[:3]
     return [
         groups[best][0][1], STARTS, len(groups[best]), best, sum(len(groups[key]) for key in groups if key != best),
         *(key if key is not None else "none" for key in lower),
         *(groups[key][0][1] if key is not None else "none" for key in lower),
+        len(groups) - 1,
+        *(f"{fourth[0]}" if fourth else "none", f"{groups[fourth[0]][0][1]:.2f}" if fourth else "none"),
     ]
 
 
@@ -275,7 +281,7 @@ ROWS = [
     ("Adelie and Gentoo", r"(completely) separable", ["separation"], lambda: [{"complete": "completely"}.get(pair_separation("Adelie", "Gentoo"), "not completely")]),
     ("Adelie and Chinstrap", r"(neither) completely nor quasi-completely separable", ["separation"], lambda: [{"none": "neither"}.get(pair_separation("Adelie", "Chinstrap"), "separable")]),
     ("Three-class softmax", rf"{NUMBER}% accuracy, 5-fold cross-validation", ["accuracy %"], softmax),
-    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (three) stop lower: {NUMBER}, {NUMBER} and {NUMBER} \(ARI {NUMBER}, {NUMBER} and {NUMBER}\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower 1", "lower 2", "lower 3", "ARI lower 1", "ARI lower 2", "ARI lower 3"], mixture),
+    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (three) stop lower: {NUMBER}, {NUMBER} and {NUMBER} \(ARI {NUMBER}, {NUMBER} and {NUMBER}\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower 1", "lower 2", "lower 3", "ARI lower 1", "ARI lower 2", "ARI lower 3", "lower groups", "lower 4", "ARI lower 4"], mixture),
     ("Adelie (151) and Chinstrap (68)", rf"Adelie \({NUMBER}\) and Chinstrap \({NUMBER}\) body mass.*\|\| difference {NUMBER} g, 95% interval {NUMBER} to {NUMBER} g, p = {NUMBER}", ["Adelie rows", "Chinstrap rows", "difference", "interval low", "interval high", "p"], welch),
     ("Price per unit area", rf"{NUMBER} rows \|\| in-sample R² {NUMBER}; {NUMBER} on log distance", ["rows", "R²", "R² on log distance"], price_curves),
     ("Coordinates", rf"{NUMBER} rows repeat an earlier row's exact coordinates", ["repeated rows"], coordinates),
@@ -330,7 +336,10 @@ def compare(row, labels, tokens, results):
             continue
         known = KNOWN.get((row, label))
         if known and known[:2] == (token, got):
-            notes.append(f"known difference: {row}: {label}: table {token}, reproduced {got}. {known[2]}")
+            if (row, known[2]) not in reasons:
+                reasons.add((row, known[2]))
+                notes.append(f"known difference: {row}: {known[2]}")
+            notes.append(f"known difference: {row}: {label}: table {token}, reproduced {got}")
             used.add((row, label))
         elif known:
             errors.append(f"{row}: {label}: known difference changed: table {token}, now reproduced {got}, was {known[1]}")
@@ -340,6 +349,7 @@ def compare(row, labels, tokens, results):
 
 
 used = set()
+reasons = set()
 
 
 def run():
@@ -357,7 +367,11 @@ def run():
         if not found:
             errors.append(f"{cells[0]}: the table's wording no longer matches the check")
             continue
-        compare(cells[0], labels, found.groups(), function())
+        tokens = found.groups()
+        if key == "Mixture of three Gaussians":
+            # The table lists three lower groups and no fourth.
+            tokens += (tokens[4], "none", "none")
+        compare(cells[0], labels, tokens, function())
     for key, *_ in ROWS:
         check(key in keys, f"check without a table row: {key}")
     for name, pattern, labels, function in LIMITS:
