@@ -26,7 +26,8 @@ test("the notices name exactly the packages that the site distributes, with thei
   const packages = distributedPackages();
   expect([...new Set(distributed.map(([, name]) => name))]).toEqual(packages.map(({ name }) => name));
   for (const { name, licence } of packages) {
-    expect(distributed.find(([item]) => item === name)?.[3], name).toBe(licence);
+    const licences = distributed.filter(([, owner]) => owner === name).map((row) => row[3]);
+    expect(licences, name).toContain(licence);
   }
 });
 

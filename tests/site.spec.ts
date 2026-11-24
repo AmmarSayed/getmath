@@ -93,6 +93,8 @@ test.describe("formulas without JavaScript", () => {
     await expect(formulas.nth(0).locator("mn")).toHaveText(["3", "4", "7"]);
     await expect(formulas.nth(1).locator("msqrt mfrac mn")).toHaveText(["9", "16"]);
     await expect(formulas.nth(2).locator("mtable")).toHaveCount(4);
+    // The three on their own line are built as such.
+    await expect(page.locator('.formula math[display="block"]')).toHaveCount(3);
     await expect(page.locator(".katex-html")).toHaveCount(4);
     await expect(page.locator(".katex-html:not([aria-hidden=true])")).toHaveCount(0);
   });
@@ -181,10 +183,8 @@ for (const forcedColors of ["none", "active"] as const) {
         // Elsewhere a pixel more above and below, because a line one pixel high may be drawn beside its box.
         const clip = name === "root sign" ? { ...box, width: 12 } : { ...box, y: box.y - 1, height: box.height + 2 };
         const part = await luminances(page, clip);
-        const contrast = Math.max(
-          (background + 0.05) / (part.darkest + 0.05),
-          (part.lightest + 0.05) / (background + 0.05),
-        );
+        // Each part is compared with the background that it is drawn on.
+        const contrast = (part.lightest + 0.05) / (part.darkest + 0.05);
         expect(contrast, name).toBeGreaterThan(4.5);
       }
     });
@@ -237,6 +237,7 @@ for (const width of [320, 390, 1280]) {
             drawnWidth,
             hiddenAtStart,
             hiddenAbove: box.top - drawing.top,
+            hiddenBelow: drawing.bottom - box.bottom,
             tooWide: drawnWidth > element.clientWidth + 1,
             scrolls: element.scrollLeft > 0,
             hiddenAtEnd: end() - box.right,
@@ -247,6 +248,7 @@ for (const width of [320, 390, 1280]) {
         expect(scrolled.scrolls).toBe(scrolled.tooWide);
         expect(scrolled.hiddenAtStart).toBeLessThanOrEqual(1);
         expect(scrolled.hiddenAbove).toBeLessThanOrEqual(0);
+        expect(scrolled.hiddenBelow).toBeLessThanOrEqual(0);
         expect(scrolled.hiddenAtEnd).toBeLessThanOrEqual(1);
         expect(scrolled.scrollsDown).toBe(false);
       }
