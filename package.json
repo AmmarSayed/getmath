@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check && svelte-check --fail-on-warnings",
-    "verify": "astro build && uv run --locked scripts/verify.py",
+    "verify": "uv run --locked scripts/verify.py",
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run --dir src && astro build && playwright test"

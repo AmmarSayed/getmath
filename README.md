@@ -17,7 +17,7 @@ You need Git, [uv](https://docs.astral.sh/uv/) and [Node.js](https://nodejs.org)
 | `pnpm build` | Builds the site into `dist/` |
 | `pnpm preview` | Serves that build under the real base path |
 | `pnpm test` | Tests the state of interactions, builds the site, then tests that build in Chromium, Firefox and WebKit. Stop `pnpm dev` and `pnpm preview` first |
-| `pnpm verify` | Builds the site, then checks the table of contents against the gap assessment, runs every Python program in `src/snippets/` with the locked Python and compares its output, and checks that every program and output in the built pages comes from those files |
+| `pnpm verify` | Builds the site, then checks the table of contents against the gap assessment, runs every Python program in `src/snippets/` with the locked Python and compares its output, and checks that the code blocks and outputs in the built pages come from those files |
 
 The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`.
 
@@ -39,7 +39,7 @@ A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or bet
 
 An interaction is a Svelte component, such as `src/arrows/AddArrows.svelte`. One plain module holds the mathematical state and its arithmetic, and the drawing, numbers, words and formula are calculated from that. In the component, the element with the class `interaction` is replaced, without JavaScript, by the still figure with the class `still`.
 
-A Python example is two files in `src/snippets/`, `name.py` with the program and `name.txt` with exactly what it prints, and `<Example name="name" />` in the page, after `import Example from "../../snippets/Example.astro";`. The page shows both files as they are, and `pnpm verify` runs the program and fails if its output differs from the `.txt`. To change an example, change the files and run `pnpm verify`. Nothing runs on the site: Run only reveals the expected output. A code block written by hand in a page has no source, so `pnpm verify` fails on it.
+A Python example is two files in `src/snippets/`, `name.py` with the program and `name.txt` with exactly what it prints, and `<Example name="name" />` in the page, after `import Example from "../../snippets/Example.astro";`. The page shows both files as they are, and `pnpm verify` runs the program and fails if its output differs from the `.txt`. To change an example, change the files and run `pnpm verify`. Nothing runs on the site: Run only reveals the expected output. A code block (`<pre>`) or output (`<samp>`) written by hand in a page has no source, so `pnpm verify` fails on it. It cannot recognise an output that is written in a sentence or drawn in another way, so outputs are shown only with `<Example>`.
 
 ## Publishing
 

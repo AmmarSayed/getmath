@@ -1,4 +1,6 @@
-"""Check what the site shows: the table of contents, and every displayed Python program and output."""
+"""Build the site, then check the table of contents and every displayed Python program and output.
+
+With --no-build, check the pages that are already in dist."""
 
 import json
 import subprocess
@@ -14,25 +16,41 @@ errors = []
 
 
 def read(path):
-    return path.read_text(encoding="utf-8")
+    """The text of a file. One that is not UTF-8 is a problem, and reads as None."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        problem = f"{path.relative_to(ROOT).as_posix()}: not UTF-8"
+        if problem not in errors:
+            errors.append(problem)
 
 
 def start_of(text):
-    return repr(text[:60])
+    return repr(str(text)[:60])
 
 
-def differ(what, expected, actual):
-    return f"{what}\n  expected: {expected!r}\n  actual:   {actual!r}"
+def compare(problem, source, actual):
+    expected = read(source)
+    if expected is not None and actual != expected:
+        errors.append(f"{problem} {source.name}\n  expected: {expected!r}\n  actual:   {actual!r}")
+
+
+def build():
+    command = ["node", str(ROOT / "node_modules" / "astro" / "bin" / "astro.mjs"), "build"]
+    done = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8")
+    if done.returncode:
+        errors.append(f"the site does not build, so its pages were not checked\n{done.stdout.rstrip()}")
+    return not done.returncode
 
 
 def check_toc():
     done = subprocess.run([sys.executable, "-I", "-X", "utf8", str(ROOT / "scripts" / "check_toc.py")], capture_output=True, encoding="utf-8")
     lines = done.stdout.strip().splitlines()
-    if done.returncode == 0 and not done.stderr:
+    if done.returncode == 0 and lines and not done.stderr:
         return lines[-1].removeprefix("OK: ")
-    errors.extend(f"table of contents: {line}" for line in lines)
-    if done.stderr:
-        errors.append(f"table of contents: check_toc.py wrote to stderr:\n{done.stderr.rstrip()}")
+    errors.extend(f"table of contents: {line}" for line in lines + done.stderr.strip().splitlines())
+    if not lines:
+        errors.append(f"table of contents: check_toc.py printed nothing, with exit code {done.returncode}")
 
 
 def run_programs():
@@ -47,7 +65,7 @@ def run_programs():
         with tempfile.TemporaryDirectory() as folder:
             command = [sys.executable, "-I", "-X", "utf8", str(SNIPPETS / f"{name}.py")]
             try:
-                done = subprocess.run(command, cwd=folder, capture_output=True, encoding="utf-8", errors="backslashreplace", timeout=60)
+                done = subprocess.run(command, cwd=folder, stdin=subprocess.DEVNULL, capture_output=True, encoding="utf-8", errors="backslashreplace", timeout=60)
             except subprocess.TimeoutExpired:
                 errors.append(f"{name}: the program did not finish in 60 seconds")
                 continue
@@ -55,8 +73,8 @@ def run_programs():
             errors.append(f"{name}: the program failed with exit code {done.returncode}\n{done.stderr.rstrip()}")
         elif done.stderr:
             errors.append(f"{name}: the program wrote to stderr\n{done.stderr.rstrip()}")
-        elif done.stdout != read(SNIPPETS / f"{name}.txt"):
-            errors.append(differ(f"{name}: the output differs from {name}.txt", read(SNIPPETS / f"{name}.txt"), done.stdout))
+        else:
+            compare(f"{name}: the output differs from", SNIPPETS / f"{name}.txt", done.stdout)
     return programs & outputs
 
 
@@ -83,12 +101,12 @@ class Page(HTMLParser):
                 name, output = props.get("name", [0, ""])[1], props["output"][1]
                 if name not in self.known:
                     self.problem(f"island output for unknown example {name!r}", output)
-                elif output != read(SNIPPETS / f"{name}.txt"):
-                    errors.append(differ(f"{self.page}: the data of the island for {name} differs from {name}.txt", read(SNIPPETS / f"{name}.txt"), output))
+                else:
+                    compare(f"{self.page}: the data of the island for {name} differs from", SNIPPETS / f"{name}.txt", output)
         elif tag in ("pre", "samp") and not self.block:
-            kind = "program" if "data-program" in attrs else "output" if "data-output" in attrs else None
-            # A <samp> alone is a displayed output too.
-            kind = kind if tag == "pre" else None
+            # A <samp> alone is a displayed output too, and has no source.
+            kinds = ("program", "output") if tag == "pre" else ()
+            kind = next((kind for kind in kinds if f"data-{kind}" in attrs), None)
             self.block = {"end": tag, "kind": kind, "name": attrs.get(f"data-{kind}"), "text": ""}
 
     def handle_endtag(self, tag):
@@ -105,8 +123,7 @@ class Page(HTMLParser):
         path = self.source(block["kind"], block["name"]) if block["kind"] else None
         if not path:
             return self.problem("no data-program or data-output naming a snippet", block["text"])
-        if block["text"] != read(path):
-            errors.append(differ(f"{self.page}: the displayed {block['kind']} {block['name']} differs from {path.name}", read(path), block["text"]))
+        compare(f"{self.page}: the displayed {block['kind']} {block['name']} differs from", path, block["text"])
 
     def close(self):
         super().close()
@@ -117,11 +134,11 @@ class Page(HTMLParser):
 def check_pages(known):
     pages = sorted(DIST.glob("**/*.html"))
     if not pages:
-        errors.append("dist: no pages; run `astro build` first")
+        errors.append("dist: no pages")
     shown = 0
     for page in pages:
         parser = Page(str(page.relative_to(DIST)).replace("\\", "/"), known)
-        parser.feed(read(page))
+        parser.feed(read(page) or "")
         parser.close()
         shown += parser.shown
     return len(pages), shown
@@ -131,6 +148,6 @@ def check_pages(known):
 sys.stdout.reconfigure(encoding="utf-8")
 toc = check_toc()
 known = run_programs()
-pages, shown = check_pages(known)
+pages, shown = check_pages(known) if "--no-build" in sys.argv or build() else (0, 0)
 print("\n".join(errors) or f"OK: {toc}; {len(known)} programs, {pages} pages, {shown} displayed programs and outputs")
 sys.exit(bool(errors))

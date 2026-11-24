@@ -14,9 +14,14 @@
     live = true;
   });
 
-  function say(text: string, show: boolean) {
-    shown = show;
-    announcement = { text };
+  function run() {
+    shown = true;
+    announcement = { text: "The expected output is shown below. No code was run." };
+  }
+
+  function reset() {
+    shown = false;
+    announcement = { text: "The expected output is hidden." };
   }
 </script>
 
@@ -28,8 +33,8 @@
 
 <div class="interaction" data-example={name}>
   <div class="row">
-    <button type="button" disabled={!live} onclick={() => say("The expected output is shown below. No code was run.", true)}>Run</button>
-    <button type="button" disabled={!live} onclick={() => say("The expected output is hidden.", false)}>Reset</button>
+    <button type="button" disabled={!live} onclick={run}>Run</button>
+    <button type="button" disabled={!live} onclick={reset}>Reset</button>
   </div>
   {#if shown}
     {@render expected()}
