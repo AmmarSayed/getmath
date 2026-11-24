@@ -1,0 +1,3 @@
+# Also on Windows, because pages show these files exactly.
+src/snippets/*.py text eol=lf
+src/snippets/*.txt text eol=lf

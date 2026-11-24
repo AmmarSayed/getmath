@@ -207,7 +207,7 @@ for (const forcedColors of ["none", "active"] as const) {
 // 1280 px at 400% zoom leaves 320 px, which is also the width of a small phone.
 for (const width of [320, 390, 1280]) {
   for (const path of pages) {
-    test(`page /${path} loses nothing and scrolls only wide formulas at ${width} px`, async ({ page }) => {
+    test(`page /${path} loses nothing and scrolls only wide formulas and code at ${width} px`, async ({ page }) => {
       await openPage(page, path);
       const content = () => page.evaluate(() => document.body.innerText.replace(/\s+/g, ""));
       const wideContent = await content();
@@ -216,7 +216,7 @@ for (const width of [320, 390, 1280]) {
 
       // A phone keeps this width and size of text, instead of shrinking a wide page.
       await expect(page.locator('meta[name="viewport"]')).toHaveAttribute("content", /\bwidth=device-width\b/);
-      for (const text of await page.locator("main :is(p, li, .katex):visible").all()) {
+      for (const text of await page.locator("main :is(p, li, .katex, .code):visible").all()) {
         expect(await text.evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
       }
 
@@ -225,7 +225,7 @@ for (const width of [320, 390, 1280]) {
       expect(pageWidth).toBeLessThanOrEqual(width);
       const outside = await page.locator("body *:visible").evaluateAll((elements) =>
         elements
-          .filter((element) => !element.closest(".formula > *") && !element.closest(".katex-mathml"))
+          .filter((element) => !element.closest(".formula > *, .code > *") && !element.closest(".katex-mathml"))
           .filter((element) => {
             const { left, right } = element.getBoundingClientRect();
             return left < 0 || right > document.documentElement.clientWidth;

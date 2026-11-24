@@ -1,12 +1,18 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { listen } from "./listen";
 import { openPage } from "./open-page";
 
 type Pair = [number, number];
 
 const arrow = (page: Page, name: "a" | "b") => page.getByRole("group", { name: `Arrow ${name}` });
 const prediction = (page: Page) => page.getByRole("group", { name: "Predict where the sum ends" });
-const view = (page: Page, name: string) => page.locator(`.interaction [data-view="${name}"]`);
+// The page also holds a Python example, which has an interaction and a still figure of its own.
+const interaction = (page: Page) => page.locator(".interaction:has(svg)");
+const still = (page: Page) => page.locator(".still:has(svg)");
+const reset = (page: Page) => interaction(page).getByRole("button", { name: "Reset" });
+const status = (page: Page) => interaction(page).getByRole("status");
+const view = (page: Page, name: string) => interaction(page).locator(`[data-view="${name}"]`);
 
 async function predict(page: Page, x: string, y: string) {
   await prediction(page).getByLabel("x", { exact: true }).fill(x);
@@ -20,30 +26,11 @@ async function enter(field: Locator, text: string) {
   await field.press("Tab");
 }
 
-/** Notes what a screen reader speaks from now on: texts in live regions, and new values of the control with the focus. */
-async function listen(page: Page) {
-  await page.evaluate(() => {
-    const spoken: string[] = [];
-    Object.assign(window, { spoken });
-    for (const region of document.querySelectorAll("[role=status], [role=alert], [role=log], output, [aria-live]")) {
-      new MutationObserver(() => {
-        if (region.textContent) spoken.push(region.textContent);
-      }).observe(region, { childList: true, subtree: true, characterData: true });
-    }
-    for (const slider of document.querySelectorAll("[role=slider]")) {
-      new MutationObserver(() => {
-        if (slider === document.activeElement) spoken.push(slider.ariaValueText!);
-      }).observe(slider, { attributeFilter: ["aria-valuetext", "aria-valuenow"] });
-    }
-  });
-  return () => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken);
-}
-
 const minus = (value: number) => String(value).replace("-", "−");
 
 /** Where an arrow's tip is drawn, or undefined if the arrow is not drawn. */
 async function tip(page: Page, name: "a" | "b" | "sum"): Promise<Pair | undefined> {
-  const drawn = page.locator(`.interaction [data-arrow="${name}"]`);
+  const drawn = interaction(page).locator(`[data-arrow="${name}"]`);
   if (!(await drawn.count())) return undefined;
   const shape = drawn.locator("polygon");
   if (!(await shape.count())) return [0, 0];
@@ -85,18 +72,18 @@ test.beforeEach(({ page, javaScriptEnabled }) => openPage(page, "", javaScriptEn
 test("the sum is hidden everywhere until a prediction is submitted", async ({ page }) => {
   await expectViews(page, [3, 2], [-1, 2]);
   // The answer is nowhere in the page, not even where only a screen reader would find it.
-  const markup = () => page.locator(".interaction").evaluate((element) => element.outerHTML);
+  const markup = () => interaction(page).evaluate((element) => element.outerHTML);
   for (const answer of ["(2, 4)", "2 right and 4 up", "x = 2, y = 4"]) {
     expect(await markup()).not.toContain(answer);
     await expect(page.locator("body")).not.toContainText(answer);
   }
   await expect(page.locator('[data-arrow="copy"]')).toHaveCount(0);
-  await expect(page.locator(".still")).toHaveCount(0);
+  await expect(still(page)).toHaveCount(0);
 
   // Changing arrows first does not reveal it.
   await arrow(page, "a").getByRole("button", { name: "Decrease x" }).click();
   await expectViews(page, [2, 2], [-1, 2]);
-  await expect(page.getByRole("status")).toHaveText("Arrow a is (2, 2).");
+  await expect(status(page)).toHaveText("Arrow a is (2, 2).");
 
   await predict(page, "1", "4");
   await expectViews(page, [2, 2], [-1, 2], [1, 4]);
@@ -127,7 +114,7 @@ const handle = (page: Page, name: "a" | "b") => page.getByRole("slider", { name:
 
 /** Where a point of the grid is on the screen. The axes are drawn from −8 to 8. */
 async function onScreen(page: Page, [x, y]: Pair): Promise<Pair> {
-  const axes = await page.locator(".interaction .axes").evaluate((path) => {
+  const axes = await interaction(page).locator(".axes").evaluate((path) => {
     const { left, top, width, height } = path.getBoundingClientRect();
     return { left, top, width, height };
   });
@@ -136,7 +123,7 @@ async function onScreen(page: Page, [x, y]: Pair): Promise<Pair> {
 
 /** Presses the mouse at the first point, and takes it through the others. */
 async function drag(page: Page, from: Pair, ...through: Pair[]) {
-  await page.locator(".interaction svg").scrollIntoViewIfNeeded();
+  await interaction(page).locator("svg").scrollIntoViewIfNeeded();
   await page.mouse.move(...(await onScreen(page, from)));
   await page.mouse.down();
   for (const point of through) await page.mouse.move(...(await onScreen(page, point)), { steps: 5 });
@@ -144,7 +131,7 @@ async function drag(page: Page, from: Pair, ...through: Pair[]) {
 
 /** Touches the drawing with fingers, as a touch screen would. Only Chromium can. */
 async function touch(page: Page) {
-  await page.locator(".interaction svg").scrollIntoViewIfNeeded();
+  await interaction(page).locator("svg").scrollIntoViewIfNeeded();
   const session = await page.context().newCDPSession(page);
   // Measured once: a finger goes on in a straight line on the screen while the page scrolls under it.
   const [left, top] = await onScreen(page, [0, 0]);
@@ -289,7 +276,7 @@ test.describe("dragging", () => {
   });
 
   test("needs the main button, and is not disturbed by the keyboard", async ({ page }) => {
-    await page.locator(".interaction svg").scrollIntoViewIfNeeded();
+    await interaction(page).locator("svg").scrollIntoViewIfNeeded();
     await page.mouse.move(...(await onScreen(page, [3, 2])));
     await page.mouse.down({ button: "middle" });
     await page.mouse.move(...(await onScreen(page, [0, 0])));
@@ -309,7 +296,7 @@ test.describe("dragging", () => {
     expect(await spoken()).toEqual([]);
     await page.mouse.up();
     await expect.poll(spoken).toEqual(["Arrow a is (1, 1)."]);
-    await expect(page.getByRole("status")).toHaveText("Arrow a is (1, 1).");
+    await expect(status(page)).toHaveText("Arrow a is (1, 1).");
 
     await predict(page, "2", "4");
     await drag(page, [1, 1], [4, -4], [-4, -4], [2, -1]);
@@ -360,7 +347,7 @@ test.describe("dragging", () => {
     expect(await spoken()).toHaveLength(1);
 
     await drag(page, [1, 1], [2, 2]);
-    await page.getByRole("button", { name: "Reset" }).focus();
+    await reset(page).focus();
     await page.keyboard.press("Enter");
     await expectViews(page, [3, 2], [-1, 2]);
     await page.mouse.move(...(await onScreen(page, [0, -4])));
@@ -515,7 +502,7 @@ test("nothing in the interaction moves by itself with reduced motion", async ({ 
   await handle(page, "a").press("ArrowLeft");
   await drag(page, [-1, 2], [-4, 4]);
   await page.mouse.up();
-  const moving = await page.locator(".interaction").evaluate((element) =>
+  const moving = await interaction(page).evaluate((element) =>
     element.getAnimations({ subtree: true }).map((animation) => (animation.effect as KeyframeEffect).target?.outerHTML),
   );
   expect(moving).toEqual([]);
@@ -526,7 +513,7 @@ test("nothing in the interaction moves by itself with reduced motion", async ({ 
 
 /** The parts of the drawing that reach outside it. */
 function drawnOutside(page: Page) {
-  return page.locator(".interaction svg").evaluate((svg) => {
+  return interaction(page).locator("svg").evaluate((svg) => {
     const box = svg.getBoundingClientRect();
     return [...svg.querySelectorAll("text, line, polygon, path, circle")]
       .filter((part) => {
@@ -540,7 +527,7 @@ function drawnOutside(page: Page) {
 for (const [x, y] of [["-8", "8"], ["8", "-8"]]) {
   test(`a prediction of (${x}, ${y}) is marked inside the drawing`, async ({ page }) => {
     await predict(page, x, y);
-    await expect(page.locator(".interaction .prediction")).toBeVisible();
+    await expect(interaction(page).locator(".prediction")).toBeVisible();
     expect(await drawnOutside(page)).toEqual([]);
   });
 }
@@ -572,12 +559,12 @@ test.describe("feedback", () => {
       await expect(view(page, "feedback")).toContainText("each component of the sum is that component of a plus that component of b");
       // Moving the focus to the result is its announcement.
       await expect(view(page, "feedback").getByRole("heading")).toBeFocused();
-      await expect(page.getByRole("status")).toHaveText("");
+      await expect(status(page)).toHaveText("");
     });
   }
 
   test("stays about the arrows that were predicted, and the mark is left out when they change", async ({ page }) => {
-    const mark = page.locator(".interaction .prediction");
+    const mark = interaction(page).locator(".prediction");
     await predict(page, "4", "-3");
     await expect(mark).toHaveAttribute("data-x", "4");
     await expect(mark).toHaveAttribute("data-y", "-3");
@@ -598,7 +585,7 @@ test.describe("invalid input", () => {
       await enter(field, text);
       await expect(arrow(page, "a").getByText(message)).toBeVisible();
       await expect(field).toHaveAccessibleDescription(new RegExp(message));
-      await expect(page.getByRole("status")).toHaveText(message);
+      await expect(status(page)).toHaveText(message);
       await expectViews(page, [3, 2], [-1, 2]);
       await enter(field, "4");
       await expect(arrow(page, "a").getByText("must be")).toHaveCount(0);
@@ -612,7 +599,7 @@ test.describe("invalid input", () => {
     await expect(button).toHaveAttribute("aria-disabled", "true");
     await button.press("Enter");
     await expect(button).toBeFocused();
-    await expect(page.getByRole("status")).toHaveText(/must be a whole number from −4 to 4. It is still 4/);
+    await expect(status(page)).toHaveText(/must be a whole number from −4 to 4. It is still 4/);
     await expectViews(page, [4, 2], [-1, 2]);
   });
 
@@ -673,7 +660,7 @@ test.describe("invalid input", () => {
     const x = prediction(page).getByLabel("x", { exact: true });
     await enter(x, "9");
     await enter(x, "2");
-    await expect(page.getByRole("status")).toHaveText("");
+    await expect(status(page)).toHaveText("");
     await expect(prediction(page).getByText("must be")).toHaveCount(0);
   });
 });
@@ -690,7 +677,7 @@ for (const width of [320, 1280]) {
       await predict(page, "8", "8");
       await expect(view(page, "feedback")).toBeVisible();
       await arrow(page, "b").getByLabel("y", { exact: true }).fill(text);
-      await page.getByRole("button", { name: "Reset" }).click();
+      await reset(page).click();
       await expectViews(page, [3, 2], [-1, 2]);
     });
   }
@@ -700,7 +687,7 @@ for (const width of [320, 1280]) {
   test(`controls stay where they are while the arrows change, at ${width} px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
     const top = () =>
-      page.getByRole("button", { name: "Reset" }).evaluate((button) => button.getBoundingClientRect().top + window.scrollY);
+      reset(page).evaluate((button) => button.getBoundingClientRect().top + window.scrollY);
     for (const submitted of [false, true]) {
       if (submitted) await predict(page, "2", "4");
       const before = await top();
@@ -712,7 +699,7 @@ for (const width of [320, 1280]) {
           }
         }
       }
-      await page.getByRole("button", { name: "Reset" }).click();
+      await reset(page).click();
     }
   });
 }
@@ -721,13 +708,13 @@ test("Reset restores the start and keeps the focus", async ({ page }) => {
   await predict(page, "2", "4");
   await enter(arrow(page, "a").getByLabel("x", { exact: true }), "-2");
   await enter(arrow(page, "b").getByLabel("y", { exact: true }), "x");
-  await page.getByRole("button", { name: "Reset" }).click();
+  await reset(page).click();
   await expectViews(page, [3, 2], [-1, 2]);
   await expect(view(page, "feedback")).toHaveCount(0);
   await expect(prediction(page).getByLabel("x", { exact: true })).toHaveValue("");
   await expect(page.getByText("must be")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Reset" })).toBeFocused();
-  await expect(page.getByRole("status")).toHaveText("Back at the start. The sum is hidden until you submit a prediction.");
+  await expect(reset(page)).toBeFocused();
+  await expect(status(page)).toHaveText("Back at the start. The sum is hidden until you submit a prediction.");
 });
 
 test("a change is announced once and briefly", async ({ page }) => {
@@ -797,7 +784,7 @@ for (const forcedColors of ["none", "active"] as const) {
       test.skip(forcedColors === "active" && browserName === "webkit", "Playwright's WebKit has no forced colours");
       await page.emulateMedia({ colorScheme, forcedColors });
       await predict(page, "4", "0");
-      const drawn = await page.locator(".interaction svg").evaluate((svg) => {
+      const drawn = await interaction(page).locator("svg").evaluate((svg) => {
         const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
         const luminance = (colour: string) => {
           context.fillStyle = colour;
@@ -860,7 +847,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 }
 
 test("controls are large enough targets", async ({ page }) => {
-  for (const control of await page.locator(".interaction :is(button, input)").all()) {
+  for (const control of await interaction(page).locator(":is(button, input)").all()) {
     const { width, height } = (await control.boundingBox())!;
     expect(Math.min(width, height)).toBeGreaterThanOrEqual(24);
   }
@@ -873,7 +860,7 @@ for (const width of [320, 1024, 1280]) {
     await predict(page, "4", "4");
     await expect(view(page, "feedback")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    const outside = await page.locator(".interaction, .interaction :is(p, li, h3, fieldset, button, input, svg)").evaluateAll(
+    const outside = await page.locator(".interaction:has(svg), .interaction:has(svg) :is(p, li, h3, fieldset, button, input, svg)").evaluateAll(
       (elements) =>
         elements
           .filter((element) => {
@@ -885,8 +872,8 @@ for (const width of [320, 1024, 1280]) {
     expect(outside).toEqual([]);
     // On a computer, the drawing and the numbers that change it are seen together.
     if (width >= 1024) {
-      const drawing = (await page.locator(".interaction svg").boundingBox())!;
-      const controls = (await page.locator(".interaction .controls").boundingBox())!;
+      const drawing = (await interaction(page).locator("svg").boundingBox())!;
+      const controls = (await interaction(page).locator(".controls").boundingBox())!;
       expect(controls.x).toBeGreaterThanOrEqual(drawing.x + drawing.width);
     }
   });
@@ -903,12 +890,12 @@ for (const width of [320, 1280]) {
     await page.setViewportSize({ width, height: 800 });
     // The spacing that WCAG 1.4.12 names.
     const spacing = "line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important;";
-    await page.addStyleTag({ content: `.interaction * { ${spacing} } .interaction p { margin-bottom: 2em !important; }` });
+    await page.addStyleTag({ content: `.interaction:has(svg) * { ${spacing} } .interaction:has(svg) p { margin-bottom: 2em !important; }` });
     await enter(arrow(page, "a").getByLabel("x", { exact: true }), "9");
     await predict(page, "4", "4");
     await expect(view(page, "feedback")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    const cutOff = await page.locator(".interaction :is(p:not(.announcement), li, h3, legend, button, input):visible").evaluateAll((elements) =>
+    const cutOff = await interaction(page).locator(":is(p:not(.announcement), li, h3, legend, button, input):visible").evaluateAll((elements) =>
       elements.filter((element) => element.scrollWidth > element.clientWidth + 1 && element.clientWidth).map((element) => element.outerHTML),
     );
     expect(cutOff).toEqual([]);
@@ -917,12 +904,12 @@ for (const width of [320, 1280]) {
 
 /** The still figure and its explanation, which replace the interaction. */
 async function expectStillFigure(page: Page) {
-  const still = page.locator(".still");
-  await expect(still.getByRole("img", { name: "Arrows on a grid" })).toBeVisible();
-  await expect(still.locator('[data-arrow="sum"]')).toBeVisible();
-  await expect(still).toContainText("Arrow a goes 3 right and 2 up. Arrow b goes 1 left and 2 up. The sum, a + b, goes 2 right and 4 up.");
-  await expect(still).toContainText("each component of the sum is that component of a plus that component of b");
-  await expect(still.getByRole("math")).toHaveCount(1);
+  const figure = still(page);
+  await expect(figure.getByRole("img", { name: "Arrows on a grid" })).toBeVisible();
+  await expect(figure.locator('[data-arrow="sum"]')).toBeVisible();
+  await expect(figure).toContainText("Arrow a goes 3 right and 2 up. Arrow b goes 1 left and 2 up. The sum, a + b, goes 2 right and 4 up.");
+  await expect(figure).toContainText("each component of the sum is that component of a plus that component of b");
+  await expect(figure.getByRole("math")).toHaveCount(1);
 }
 
 test("the link to the still figure does not flash while the page loads", async ({ page }) => {
@@ -936,15 +923,15 @@ test.describe("without JavaScript", () => {
 
   test("a still figure and its explanation replace the interaction", async ({ page }) => {
     await expectStillFigure(page);
-    await expect(page.locator(".interaction")).toBeHidden();
+    await expect(interaction(page)).toBeHidden();
   });
 });
 
 test("if the scripts fail to load, a link leads to the still figure", async ({ page }) => {
   await page.route("**/*.js", (route) => route.abort());
   await page.goto("./");
-  await expect(page.locator(".still")).toBeHidden();
-  await expect(page.getByRole("button", { name: "Reset" })).toBeDisabled();
+  await expect(still(page)).toBeHidden();
+  await expect(reset(page)).toBeDisabled();
   await page.getByRole("link", { name: "See a still figure" }).click({ timeout: 10_000 });
   await expectStillFigure(page);
 });

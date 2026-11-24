@@ -312,10 +312,6 @@
 {/if}
 
 <style>
-  .interaction {
-    position: relative;
-  }
-
   /* Wider than the text, so that the drawing and the controls are seen together. */
   @media (min-width: 64rem) {
     .interaction {
@@ -370,26 +366,6 @@
     margin: 0.5rem 0;
   }
 
-  input,
-  button {
-    box-sizing: border-box;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    border: 1px solid;
-    color: inherit;
-    background: transparent;
-    font: inherit;
-  }
-
-  button {
-    padding: 0 0.75rem;
-    border-radius: 0.5rem;
-  }
-
-  :is(input, button):disabled {
-    opacity: 0.6;
-  }
-
   input {
     width: 4rem;
     text-align: center;
@@ -425,26 +401,5 @@
     form .message {
       min-height: 2lh;
     }
-  }
-
-  /* Seen only if the scripts have not started by then. */
-  .late {
-    animation: appear 5s step-end both;
-  }
-
-  @keyframes appear {
-    from {
-      visibility: hidden;
-    }
-  }
-
-  .announcement {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    margin: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
   }
 </style>

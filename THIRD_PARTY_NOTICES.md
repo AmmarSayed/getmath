@@ -1,6 +1,6 @@
 # Third-party notices
 
-Material from others that GetMath uses (`CHARTER.md` section 7). Nothing here has been changed, except as stated. Exact versions are in `package.json`, `pnpm-lock.yaml` and `.github/workflows/`.
+Material from others that GetMath uses (`CHARTER.md` section 7). Nothing here has been changed, except as stated. Exact versions are in `package.json`, `pnpm-lock.yaml`, `.python-version`, `pyproject.toml` and `.github/workflows/`.
 
 ## Distributed with the site
 
@@ -36,8 +36,11 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 | Chromium, Firefox and WebKit builds that Playwright downloads | The Chromium, Mozilla and WebKit projects | BSD-3-Clause, MPL-2.0, and LGPL-2.1 with BSD-2-Clause, with the notices in each download | <https://playwright.dev/docs/browsers> |
 | @types/node | DefinitelyTyped contributors | MIT | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | pnpm | pnpm contributors | MIT | <https://github.com/pnpm/pnpm> |
+| uv | Astral | MIT or Apache-2.0 | <https://github.com/astral-sh/uv> |
+| CPython builds that uv downloads (python-build-standalone) | The Python Software Foundation and Astral | PSF-2.0, with the notices in each download; the scripts that make the builds are under MPL-2.0 | <https://github.com/astral-sh/python-build-standalone> |
 | actions/checkout, actions/setup-node, actions/upload-artifact, actions/upload-pages-artifact, actions/deploy-pages | GitHub | MIT | <https://github.com/actions> |
 | pnpm/action-setup | pnpm contributors | MIT | <https://github.com/pnpm/action-setup> |
+| astral-sh/setup-uv | Astral | MIT | <https://github.com/astral-sh/setup-uv> |
 
 These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
 
