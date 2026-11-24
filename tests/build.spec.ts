@@ -6,8 +6,8 @@ import { expect, test } from "@playwright/test";
 
 const execute = promisify(execFile);
 
-/** Builds a copy of the site in `folder`, with one extra page made of `metadata`. */
-async function buildWithPage(folder: string, metadata: string) {
+/** Builds a copy of the site in `folder`, with one extra page made of `metadata` and `text`. */
+async function buildWithPage(folder: string, metadata: string, text = "Text.") {
   await mkdir(join(folder, "node_modules"), { recursive: true });
   for (const item of ["src", "public", "astro.config.mjs", "package.json", "tsconfig.json"]) {
     await cp(item, join(folder, item), { recursive: true });
@@ -19,7 +19,7 @@ async function buildWithPage(folder: string, metadata: string) {
       await symlink(join(process.cwd(), "node_modules", name), join(folder, "node_modules", name), "junction");
     }
   }
-  await writeFile(join(folder, "src/content/pages/extra.mdx"), `---\n${metadata}\n---\n\nText.\n`);
+  await writeFile(join(folder, "src/content/pages/extra.mdx"), `---\n${metadata}\n---\n\n${text}\n`);
   const astro = join(process.cwd(), "node_modules/astro/bin/astro.mjs");
   try {
     // Colour codes, which Astro adds in CI, would split the messages checked below.
@@ -51,3 +51,15 @@ test("a page with an unknown status fails the build", async ({}, testInfo) => {
   expect(result.output).toContain("status: Invalid input");
   expect(result.built).toBe(false);
 });
+
+for (const [formula, message] of [
+  ["\\frac{1}", "KaTeX parse error"],
+  ["\\href{https://example.com}{x}", "\\href is not allowed in a formula"],
+]) {
+  test(`the formula ${formula} fails the build`, async ({}, testInfo) => {
+    const metadata = `${withoutStatus}\nstatus: technical-test`;
+    const result = await buildWithPage(testInfo.outputPath("site"), metadata, `$${formula}$`);
+    expect(result.output).toContain(message);
+    expect(result.built).toBe(false);
+  });
+}

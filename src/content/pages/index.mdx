@@ -12,3 +12,25 @@ yet, and it will be deleted when the testing is finished.
 - The page is built as static files, so reading it needs no account and no server.
 - Its label comes from its validation status, and a page without a status cannot be built.
 - It loads nothing from other companies' servers.
+- Its formulas are built with the page, so they need no JavaScript.
+
+## Formulas
+
+A formula can sit inside a sentence, like $3 + 4 = 7$, or on its own line:
+
+$$
+\sqrt{\frac{9}{16}} = \frac{3}{4}
+$$
+
+Two pairs of numbers, each written as a column, can be added row by row:
+
+$$
+\begin{bmatrix} 3 \\ 1 \end{bmatrix} + \begin{bmatrix} 1 \\ 2 \end{bmatrix} =
+\begin{bmatrix} 3 + 1 \\ 1 + 2 \end{bmatrix} = \begin{bmatrix} 4 \\ 3 \end{bmatrix}
+$$
+
+A formula too wide for the screen scrolls by itself, and the rest of the page stays still:
+
+$$
+1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16 + 17 + 18 + 19 + 20 = 210
+$$
