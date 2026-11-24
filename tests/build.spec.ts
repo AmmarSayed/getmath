@@ -1,36 +1,5 @@
-import { execFile } from "node:child_process";
-import { cp, mkdir, readdir, symlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
-import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
-
-const execute = promisify(execFile);
-
-/** Builds a copy of the site in `folder`, with one extra page made of `metadata` and `text`. */
-async function buildWithPage(folder: string, metadata: string, text = "Text.") {
-  await mkdir(join(folder, "node_modules"), { recursive: true });
-  for (const item of ["src", "public", "astro.config.mjs", "package.json", "tsconfig.json"]) {
-    await cp(item, join(folder, item), { recursive: true });
-  }
-  // Link each package, not the folder, so that Astro's cache is not shared.
-  // Windows allows a junction without administrator rights.
-  for (const name of await readdir("node_modules")) {
-    if (!name.startsWith(".")) {
-      await symlink(join(process.cwd(), "node_modules", name), join(folder, "node_modules", name), "junction");
-    }
-  }
-  await writeFile(join(folder, "src/content/pages/extra.mdx"), `---\n${metadata}\n---\n\n${text}\n`);
-  const astro = join(process.cwd(), "node_modules/astro/bin/astro.mjs");
-  try {
-    // Colour codes, which Astro adds in CI, would split the messages checked below.
-    const env = { ...process.env, NO_COLOR: "1", FORCE_COLOR: "0" };
-    const { stdout, stderr } = await execute(process.execPath, [astro, "build"], { cwd: folder, env });
-    return { built: true, output: stdout + stderr };
-  } catch (error) {
-    const { stdout, stderr } = error as { stdout: string; stderr: string };
-    return { built: false, output: stdout + stderr };
-  }
-}
+import { buildWithPage } from "./build-with-page";
 
 const withoutStatus = "title: Extra\ndescription: An extra page.";
 
@@ -63,3 +32,19 @@ for (const [formula, message] of [
     expect(result.built).toBe(false);
   });
 }
+
+const withStatus = `${withoutStatus}\nstatus: technical-test`;
+const importExample = 'import Example from "../../snippets/Example.astro";';
+
+test("an example whose program or output file is missing fails the build", async ({}, testInfo) => {
+  const text = `${importExample}\n\n<Example name="no-such-example" />`;
+  const result = await buildWithPage(testInfo.outputPath("site"), withStatus, text);
+  expect(result.output).toContain('The example "no-such-example" needs src/snippets/no-such-example.py and no-such-example.txt');
+  expect(result.built).toBe(false);
+});
+
+test("an example with both files builds", async ({}, testInfo) => {
+  const text = `${importExample}\n\n<Example name="add-vectors" />`;
+  const result = await buildWithPage(testInfo.outputPath("site"), withStatus, text);
+  expect(result.built).toBe(true);
+});

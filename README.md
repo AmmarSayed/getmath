@@ -6,7 +6,7 @@ An open, interactive book on the mathematics behind machine learning. `CHARTER.m
 
 ## Working on it
 
-You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvmrc`. Then run `npm install --global pnpm`; pnpm itself switches to the version recorded in `package.json`.
+You need Git, [uv](https://docs.astral.sh/uv/) and [Node.js](https://nodejs.org) at the version in `.nvmrc`. Then run `npm install --global pnpm`; pnpm itself switches to the version recorded in `package.json`. uv installs the Python that `.python-version` names, so Python itself is not needed.
 
 | Command | What it does |
 | --- | --- |
@@ -17,7 +17,7 @@ You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvm
 | `pnpm build` | Builds the site into `dist/` |
 | `pnpm preview` | Serves that build under the real base path |
 | `pnpm test` | Tests the state of interactions, builds the site, then tests that build in Chromium, Firefox and WebKit. Stop `pnpm dev` and `pnpm preview` first |
-| `python3 scripts/check_toc.py` | Checks the table of contents against the gap assessment. On Windows the command may be `python` or `py` |
+| `pnpm verify` | Builds the site, then checks the table of contents against the gap assessment, runs every Python program in `src/snippets/` with the locked Python and compares its output, and checks that every program and output in the built pages comes from those files |
 
 The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`.
 
@@ -38,6 +38,8 @@ The status sets the label that readers see. The allowed statuses are in `src/sta
 A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or between `$$` lines on its own line. KaTeX draws it during the build, and a formula that it cannot draw, or that has a link, an image or HTML, fails the build. A dollar sign that is not a formula is written `\$`.
 
 An interaction is a Svelte component, such as `src/arrows/AddArrows.svelte`. One plain module holds the mathematical state and its arithmetic, and the drawing, numbers, words and formula are calculated from that. In the component, the element with the class `interaction` is replaced, without JavaScript, by the still figure with the class `still`.
+
+A Python example is two files in `src/snippets/`, `name.py` with the program and `name.txt` with exactly what it prints, and `<Example name="name" />` in the page, after `import Example from "../../snippets/Example.astro";`. The page shows both files as they are, and `pnpm verify` runs the program and fails if its output differs from the `.txt`. To change an example, change the files and run `pnpm verify`. Nothing runs on the site: Run only reveals the expected output. A code block written by hand in a page has no source, so `pnpm verify` fails on it.
 
 ## Publishing
 

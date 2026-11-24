@@ -1,0 +1,22 @@
+---
+import RunExample from "./RunExample.svelte";
+
+interface Props {
+  /** The name of `name.py`, the program, and `name.txt`, its output, in this folder. */
+  name: string;
+}
+
+const { name } = Astro.props;
+// The one source of what the page shows. `scripts/verify.py` runs the same files.
+// Vite reads the options of a glob as written, so they cannot be shared.
+const programs = import.meta.glob<string>("./*.py", { eager: true, query: "?raw", import: "default" });
+const outputs = import.meta.glob<string>("./*.txt", { eager: true, query: "?raw", import: "default" });
+const program = programs[`./${name}.py`];
+const output = outputs[`./${name}.txt`];
+if (program === undefined || output === undefined) {
+  throw new Error(`The example "${name}" needs src/snippets/${name}.py and ${name}.txt`);
+}
+---
+
+<pre data-program={name} class="code" tabindex="0" role="group" aria-label="Python program"><code>{program}</code></pre>
+<RunExample client:idle {name} {output} />

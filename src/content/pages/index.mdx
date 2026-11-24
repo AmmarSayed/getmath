@@ -5,6 +5,7 @@ status: technical-test
 ---
 
 import AddArrows from "../../arrows/AddArrows.svelte";
+import Example from "../../snippets/Example.astro";
 
 This page tests the website that will hold the GetMath book. It is not a lesson, and it will be deleted when the testing is finished.
 
@@ -15,7 +16,8 @@ This page tests the website that will hold the GetMath book. It is not a lesson,
 - It loads nothing from other companies' servers.
 - It is tested automatically in the Chromium, Firefox and WebKit browser engines. Safari is not tested by hand.
 - The formulas in its text are built with the page, so they need no JavaScript.
-- Its one interaction works without a mouse. Without JavaScript, a still figure and its explanation replace it.
+- Its interaction with arrows works without a mouse. Without JavaScript, a still figure and its explanation replace it.
+- Its Python program is for reading only. Run shows an output that was checked with real Python before the page was published, and nothing is calculated on the page. Without JavaScript, that output is shown at once.
 
 ## Formulas
 
@@ -51,3 +53,9 @@ along a copy of $\mathbf{b}$. The sum, written $\mathbf{a} + \mathbf{b}$, is the
 straight to where you end. Where is that?
 
 <AddArrows client:idle />
+
+## Adding two vectors in Python
+
+A **vector** can be written as a list of numbers, and Python writes a list between square brackets. Here the two vectors are called `u` and `v`. Python counts the places in a list from 0, so `u[0]` is the first number of `u` and `u[1]` is the second. `print` shows a result. What will this program print?
+
+<Example name="add-vectors" />
