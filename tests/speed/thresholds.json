@@ -21,21 +21,21 @@
       "unit": "ms",
       "deterministic": false,
       "ceiling": 1000,
-      "why": "About 2 times the runner's median of 436 ms and below the public 'good' guidance of 2500 ms. The developer machine's slowest run was 740 ms.",
+      "why": "About 2 times the runner's median of 476 ms and below the public 'good' guidance of 2500 ms. The developer machine's slowest run was 572 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 508,
+          "min": 496,
           "median": 524,
-          "max": 580,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "max": 572,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 428,
-          "median": 436,
-          "max": 448,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 464,
+          "median": 476,
+          "max": 520,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -51,14 +51,14 @@
           "min": 0,
           "median": 0,
           "max": 0,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
           "min": 0,
           "median": 0,
           "max": 0,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -67,21 +67,21 @@
       "unit": "bytes",
       "deterministic": true,
       "ceiling": 215000,
-      "why": "Deterministic, from the weight measured in both places. About 10% above it, so 20 kB of new font, picture or library fails. Not a time, so there is no public guidance.",
+      "why": "The same in every run (4 bytes apart in the two places). About 10% above it, so 20 kB of new font, picture or library fails. Not a time, so there is no public guidance.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 195280,
-          "median": 195280,
-          "max": 195280,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "min": 195570,
+          "median": 195570,
+          "max": 195570,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 195275,
-          "median": 195275,
-          "max": 195275,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 195566,
+          "median": 195566,
+          "max": 195566,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -90,21 +90,21 @@
       "unit": "bytes",
       "deterministic": true,
       "ceiling": 118000,
-      "why": "Deterministic, from the weight measured in both places. About 10% above it, so 11 kB of new script fails.",
+      "why": "The same in every run and in both places. About 10% above it, so 11 kB of new script fails.",
       "measured": {
         "developer": {
           "runs": 25,
           "min": 107320,
           "median": 107320,
           "max": 107320,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
           "min": 107320,
           "median": 107320,
           "max": 107320,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -113,21 +113,21 @@
       "unit": "requests",
       "deterministic": true,
       "ceiling": 14,
-      "why": "Deterministic, from the 12 requests in both places. Two more, so one new file passes and a third fails.",
+      "why": "12 in every run, in both places. Two more, so two new files pass and a third fails.",
       "measured": {
         "developer": {
           "runs": 25,
           "min": 12,
           "median": 12,
           "max": 12,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
           "min": 12,
           "median": 12,
           "max": 12,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -135,22 +135,22 @@
       "label": "Keyboard step, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 150,
-      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 62 ms and the slowest run 106 ms, so the earlier 100 ms was too tight; 150 ms is below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request.",
+      "ceiling": 120,
+      "why": "About 3 times the runner's median of 42.85 ms and below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request; the developer machine's worst of 25 runs was 110.3 ms, with a median of 51.5 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 51.9,
-          "median": 61.8,
-          "max": 105.7,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "min": 38.8,
+          "median": 51.5,
+          "max": 110.3,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 24,
-          "median": 24,
-          "max": 32,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 36.8,
+          "median": 42.85,
+          "max": 46.6,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -158,22 +158,22 @@
       "label": "Keyboard step, median",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 42 ms and the slowest run 52 ms, so the earlier 60 ms left little room; 100 ms is the limit in which an answer feels immediate, and a slowdown of 150 ms on every step is shown to fail it.",
+      "ceiling": 80,
+      "why": "About 2.4 times the runner's median of 33.15 ms and below the 100 ms in which an answer feels immediate. The developer machine's slowest run was 42.95 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 39.25,
-          "median": 41.95,
-          "max": 52.1,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "min": 32.75,
+          "median": 40.05,
+          "max": 42.95,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 14.1,
-          "median": 15.55,
-          "max": 17.55,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 31.75,
+          "median": 33.15,
+          "max": 35.1,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -181,22 +181,22 @@
       "label": "Drag move, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 150,
-      "why": "Provisional until the runner measures the harder run. On the developer machine the median of the runs is 41 ms and the slowest run 120 ms, so the earlier 100 ms was too tight; 150 ms is below the public INP 'good' guidance of 200 ms.",
+      "ceiling": 100,
+      "why": "About 3 times the runner's median of 35.55 ms and below the public INP 'good' guidance of 200 ms. The developer machine's worst of 25 runs was 85.5 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 35.1,
-          "median": 41,
-          "max": 120.5,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "min": 35.4,
+          "median": 42.3,
+          "max": 85.5,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 20.1,
-          "median": 23.85,
-          "max": 30.6,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 32.9,
+          "median": 35.55,
+          "max": 39.4,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     },
@@ -205,21 +205,21 @@
       "unit": "ms",
       "deterministic": false,
       "ceiling": 60,
-      "why": "About 5 times the runner's median of 12.175 ms and below the 100 ms in which an answer feels immediate.",
+      "why": "2 times the runner's median of 29.8 ms and below the 100 ms in which an answer feels immediate. The developer machine's slowest run was 35.95 ms.",
       "measured": {
         "developer": {
           "runs": 25,
-          "min": 28.4,
-          "median": 29.25,
-          "max": 30.95,
-          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, port 4321 free, with the prediction submitted and every step changing the arrow"
+          "min": 26,
+          "median": 29.8,
+          "max": 35.95,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
         },
         "runner": {
           "runs": 20,
-          "min": 11.15,
-          "median": 12.175,
-          "max": 14.45,
-          "where": "GitHub ubuntu-24.04 runner, 2026-11-24, from the earlier, lighter measurement (no prediction submitted, steps that did not always change the arrow); to be measured again"
+          "min": 28.2,
+          "median": 29.8,
+          "max": 30.4,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
         }
       }
     }
