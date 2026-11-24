@@ -14,8 +14,8 @@ Decisions made before any result was seen. They are never changed to match the t
 - PCA and the mixture use the 342 rows with all four measurements. So does the softmax fit,
   with LogisticRegression defaults except a large max_iter.
 - Separability, with linear programs from SciPy. Complete: some w, b has margin >= 1 for every point.
-  Quasi-complete: a nonzero direction (w, b) separates weakly, and some point lies on the plane;
-  the linear program minimises the sum of slacks. Tests on tiny hand-made cases show both are right.
+  Quasi-complete, when that fails: a direction (w, b) whose signed margins lie between 0 and 1 for
+  every point and have a positive sum; the linear program maximises the sum of the margins. Tests on tiny hand-made cases show both are right.
 - Outlier limit: on 414 rows, compare the slope of price on distance with and without the single
   highest price. "Barely moves" holds if the change is under 5% of the slope.
 - Kernels and a small network: penguins, four measurements, three species, the same folds, logistic
@@ -68,7 +68,7 @@ values = []  # every reproduced value, unrounded, for --values
 # Differences from the table that are known and reported to Ammar. Each is (row, label) ->
 # (table value, reproduced value, reason). The script fails if a reproduced value changes,
 # or if an entry is no longer needed. The table is corrected in a separate pull request.
-LOWER = "Neither the seeds nor the way the starts were drawn are recorded for the run behind the table, so it cannot be reproduced. The 20 starts fixed in advance reach these optima."
+LOWER = "The run behind the table did not record its seeds or how its starts were drawn. The seed here was fixed in advance."
 KNOWN = {
     ("Mixture of three Gaussians, standardised, full covariances", label): (table, got, LOWER)
     for label, table, got in [
@@ -81,8 +81,7 @@ KNOWN = {
         ("ARI lower 2", "0.52", "0.53"),
         ("ARI lower 3", "0.60", "0.58"),
         ("lower groups", "3", "4"),
-        ("lower 4", "none", "-1298.9"),
-        ("ARI lower 4", "none", "0.65"),
+        ("further lower groups", "none", "-1298.9 (ARI 0.65)"),
     ]
 }
 
@@ -223,14 +222,16 @@ def mixture():
         groups.setdefault(round(total, 1), []).append((total, ari))
     best, *lower = sorted(groups, reverse=True)
     values.extend((f"mixture: groups of log-likelihoods, {key}", [(round(t, 4), round(a, 4)) for t, a in groups[key]]) for key in sorted(groups, reverse=True))
-    fourth = lower[3:4]
+    for key, members in groups.items():
+        check(len({f"{ari:.2f}" for _, ari in members}) == 1, f"mixture: the starts at {key} do not agree on the ARI at two decimals")
+    further = "; ".join(f"{key} (ARI {groups[key][0][1]:.2f})" for key in lower[3:])
     lower = (lower + [None] * 3)[:3]
     return [
         groups[best][0][1], STARTS, len(groups[best]), best, sum(len(groups[key]) for key in groups if key != best),
         *(key if key is not None else "none" for key in lower),
         *(groups[key][0][1] if key is not None else "none" for key in lower),
         len(groups) - 1,
-        *(f"{fourth[0]}" if fourth else "none", f"{groups[fourth[0]][0][1]:.2f}" if fourth else "none"),
+        further or "none",
     ]
 
 
@@ -281,7 +282,7 @@ ROWS = [
     ("Adelie and Gentoo", r"(completely) separable", ["separation"], lambda: [{"complete": "completely"}.get(pair_separation("Adelie", "Gentoo"), "not completely")]),
     ("Adelie and Chinstrap", r"(neither) completely nor quasi-completely separable", ["separation"], lambda: [{"none": "neither"}.get(pair_separation("Adelie", "Chinstrap"), "separable")]),
     ("Three-class softmax", rf"{NUMBER}% accuracy, 5-fold cross-validation", ["accuracy %"], softmax),
-    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (three) stop lower: {NUMBER}, {NUMBER} and {NUMBER} \(ARI {NUMBER}, {NUMBER} and {NUMBER}\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower 1", "lower 2", "lower 3", "ARI lower 1", "ARI lower 2", "ARI lower 3", "lower groups", "lower 4", "ARI lower 4"], mixture),
+    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (three) stop lower: {NUMBER}, {NUMBER} and {NUMBER} \(ARI {NUMBER}, {NUMBER} and {NUMBER}\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower 1", "lower 2", "lower 3", "ARI lower 1", "ARI lower 2", "ARI lower 3", "lower groups", "further lower groups"], mixture),
     ("Adelie (151) and Chinstrap (68)", rf"Adelie \({NUMBER}\) and Chinstrap \({NUMBER}\) body mass.*\|\| difference {NUMBER} g, 95% interval {NUMBER} to {NUMBER} g, p = {NUMBER}", ["Adelie rows", "Chinstrap rows", "difference", "interval low", "interval high", "p"], welch),
     ("Price per unit area", rf"{NUMBER} rows \|\| in-sample R² {NUMBER}; {NUMBER} on log distance", ["rows", "R²", "R² on log distance"], price_curves),
     ("Coordinates", rf"{NUMBER} rows repeat an earlier row's exact coordinates", ["repeated rows"], coordinates),
@@ -370,7 +371,7 @@ def run():
         tokens = found.groups()
         if key == "Mixture of three Gaussians":
             # The table lists three lower groups and no fourth.
-            tokens += (tokens[4], "none", "none")
+            tokens += (tokens[4], "none")
         compare(cells[0], labels, tokens, function())
     for key, *_ in ROWS:
         check(key in keys, f"check without a table row: {key}")

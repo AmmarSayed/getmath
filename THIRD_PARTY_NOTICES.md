@@ -42,10 +42,10 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 | pnpm/action-setup | pnpm contributors | MIT | <https://github.com/pnpm/action-setup> |
 | astral-sh/setup-uv | Astral | MIT | <https://github.com/astral-sh/setup-uv> |
 | numpy | NumPy Developers (Travis E. Oliphant and others) | BSD-3-Clause, with notices for parts under 0BSD, MIT, Zlib and CC0-1.0 | <https://github.com/numpy/numpy> |
-| scipy | SciPy Developers | BSD-3-Clause | <https://github.com/scipy/scipy> |
+| scipy | SciPy Developers, and Enthought, Inc. (2001-2002) | BSD-3-Clause | <https://github.com/scipy/scipy> |
 | scikit-learn | scikit-learn developers | BSD-3-Clause | <https://github.com/scikit-learn/scikit-learn> |
 
-scikit-learn also brings joblib (BSD-3-Clause, Gael Varoquaux and others), cloudpickle (BSD-3-Clause), narwhals (MIT, Marco Gorelli) and threadpoolctl (BSD-3-Clause, Thomas Moreau and others), all pinned in `uv.lock`. Python 3.14.8, scikit-learn 1.9.1, SciPy 1.18.1 and NumPy 2.5.5 run `scripts/check_datasets.py`, which reproduces the table of data in `docs/table-of-contents.md`; none of them is distributed with the site.
+scikit-learn also brings joblib (BSD-3-Clause, Gael Varoquaux and others), cloudpickle (BSD-3-Clause, the cloudpickle developer team), narwhals (MIT, Marco Gorelli) and threadpoolctl (BSD-3-Clause, Thomas Moreau and others), all pinned in `uv.lock`. Python 3.14.8, scikit-learn 1.9.1, SciPy 1.18.1 and NumPy 2.5.5 run `scripts/check_datasets.py`, which reproduces the table of data in `docs/table-of-contents.md`; none of them is distributed with the site. Their Python wheels bundle runtime libraries (OpenBLAS, LAPACK, libgfortran and libquadmath) with their own notices and licences, which each wheel carries when it is installed.
 
 These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
 
