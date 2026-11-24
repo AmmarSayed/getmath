@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 /** Turns files such as `a/index.html` and `a.mdx` into page paths such as `a/`. */
 function pagePaths(files: string[]) {
   return files
-    .map((file) => file.replaceAll("\\", "/").replace(/(\/?index)?\.(html|mdx)$/, "/").replace(/^\//, ""))
+    .map((file) => file.replaceAll("\\", "/").replace(/\.(html|mdx)$/, "/").replace(/(^|\/)index\/$/, "$1"))
     .sort();
 }
 
