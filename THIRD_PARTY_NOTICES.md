@@ -36,6 +36,9 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 | Chromium, Firefox and WebKit builds that Playwright downloads | The Chromium, Mozilla and WebKit projects | BSD-3-Clause, MPL-2.0, and LGPL-2.1 with BSD-2-Clause, with the notices in each download | <https://playwright.dev/docs/browsers> |
 | @types/node | DefinitelyTyped contributors | MIT | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | pnpm | pnpm contributors | MIT | <https://github.com/pnpm/pnpm> |
+| nbformat | Jupyter Development Team | BSD-3-Clause | <https://github.com/jupyter/nbformat> |
+| nbclient | Jupyter Development Team | BSD-3-Clause | <https://github.com/jupyter/nbclient> |
+| ipykernel | IPython Development Team | BSD-3-Clause | <https://github.com/ipython/ipykernel> |
 | uv | Astral | MIT or Apache-2.0 | <https://github.com/astral-sh/uv> |
 | CPython builds that uv downloads (python-build-standalone) | The Python Software Foundation and Astral | PSF-2.0, with the notices in each download; the scripts that make the builds are under MPL-2.0 | <https://github.com/astral-sh/python-build-standalone> |
 | actions/checkout, actions/setup-node, actions/upload-artifact, actions/upload-pages-artifact, actions/deploy-pages | GitHub | MIT | <https://github.com/actions> |
@@ -47,7 +50,7 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 
 scikit-learn also brings joblib (BSD-3-Clause, Gael Varoquaux and others), cloudpickle (BSD-3-Clause, the cloudpickle developer team), narwhals (MIT, Marco Gorelli) and threadpoolctl (BSD-3-Clause, Thomas Moreau and others), all pinned in `uv.lock`. Python 3.14.8, scikit-learn 1.9.1, SciPy 1.18.1 and NumPy 2.5.5 run `scripts/check_datasets.py`, which reproduces the table of data in `docs/table-of-contents.md`; none of them is distributed with the site. Their Python wheels bundle runtime libraries (OpenBLAS, LAPACK, libgfortran and libquadmath) with their own notices and licences, which each wheel carries when it is installed.
 
-These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
+These packages bring further packages with them, listed in `pnpm-lock.yaml` and `uv.lock`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
 
 ## Data
 

@@ -74,3 +74,12 @@ test("the notices record every dependency of the project", () => {
   const recorded = headings.flatMap(rows).flatMap(([item]) => item.split(/,? /));
   expect(recorded).toEqual(expect.arrayContaining(Object.keys({ ...dependencies, ...devDependencies })));
 });
+
+test("the notices record every Python dependency of the project", () => {
+  const list = /^dependencies = \[([^\]]*)\]/m.exec(readFileSync("pyproject.toml", "utf8"))?.[1] ?? "";
+  const python = [...list.matchAll(/"([A-Za-z0-9_.-]+)/g)].map(([, name]) => name);
+  expect(python.length).toBeGreaterThan(0);
+  const headings = ["Used to build the site", "Used only in development and testing"];
+  const recorded = headings.flatMap(rows).flatMap(([item]) => item.split(/,? /));
+  expect(recorded).toEqual(expect.arrayContaining(python));
+});
