@@ -58,9 +58,10 @@
     announce(text);
   }
 
-  /** Takes the problem of this field away. */
+  /** Takes the problem of this field away. The problem of an incomplete prediction goes when both numbers are there. */
   function accept(place: Place, axis: Axis) {
-    if ((problems[place]?.axis ?? axis) === axis) problems = { ...problems, [place]: undefined };
+    const problem = problems[place];
+    if (problem?.axis ? problem.axis === axis : prediction) problems = { ...problems, [place]: undefined };
   }
 
   function setComponent(arrow: ArrowName, axis: Axis, value: number) {

@@ -104,6 +104,7 @@ test("picture, numbers, words and formula agree after every change", async ({ pa
   await expectViews(page, [4, 2], [-1, 2], [3, 4]);
   await enter(arrow(page, "a").getByLabel("y", { exact: true }), "-4");
   await expectViews(page, [4, -4], [-1, 2], [3, -2]);
+  await expect(view(page, "words")).toContainText("Arrow a goes 4 right and 4 down. Arrow b goes 1 left and 2 up.");
   await enter(arrow(page, "b").getByLabel("x", { exact: true }), "4");
   await expectViews(page, [4, -4], [4, 2], [8, -2]);
   await arrow(page, "b").getByRole("button", { name: "Decrease y" }).click();
@@ -213,9 +214,12 @@ test.describe("invalid input", () => {
     await page.getByRole("button", { name: "Submit prediction" }).click();
     await expect(prediction(page).getByText("Enter both numbers of your prediction.")).toBeVisible();
     await expect(prediction(page).getByLabel("x", { exact: true })).toBeFocused();
-    await prediction(page).getByLabel("x", { exact: true }).fill("2");
+    await enter(prediction(page).getByLabel("x", { exact: true }), "2");
+    await expect(prediction(page).getByText("Enter both numbers of your prediction.")).toBeVisible();
     await page.getByRole("button", { name: "Submit prediction" }).click();
     await expect(prediction(page).getByLabel("y", { exact: true })).toBeFocused();
+    await enter(prediction(page).getByLabel("y", { exact: true }), "5");
+    await expect(prediction(page).getByText("Enter both numbers of your prediction.")).toHaveCount(0);
     await expectViews(page, [3, 2], [-1, 2]);
   });
 
@@ -459,6 +463,29 @@ for (const width of [320, 1024, 1280]) {
       const controls = (await page.locator(".interaction .controls").boundingBox())!;
       expect(controls.x).toBeGreaterThanOrEqual(drawing.x + drawing.width);
     }
+  });
+}
+
+test("a button uses the number just typed in its own field", async ({ page }) => {
+  await arrow(page, "a").getByLabel("x", { exact: true }).fill("-2");
+  await arrow(page, "a").getByRole("button", { name: "Increase x" }).click();
+  await expectViews(page, [-1, 2], [-1, 2]);
+});
+
+for (const width of [320, 1280]) {
+  test(`everything fits with wider text spacing at ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    // The spacing that WCAG 1.4.12 names.
+    const spacing = "line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important;";
+    await page.addStyleTag({ content: `.interaction * { ${spacing} } .interaction p { margin-bottom: 2em !important; }` });
+    await enter(arrow(page, "a").getByLabel("x", { exact: true }), "9");
+    await predict(page, "4", "4");
+    await expect(view(page, "feedback")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    const cutOff = await page.locator(".interaction :is(p:not(.announcement), li, h3, legend, button, input):visible").evaluateAll((elements) =>
+      elements.filter((element) => element.scrollWidth > element.clientWidth + 1 && element.clientWidth).map((element) => element.outerHTML),
+    );
+    expect(cutOff).toEqual([]);
   });
 }
 
