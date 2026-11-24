@@ -29,5 +29,7 @@ export default defineConfig({
     { name: "chromium", testMatch: siteTests, use: devices["Desktop Chrome"] },
     { name: "firefox", testMatch: siteTests, use: devices["Desktop Firefox"] },
     { name: "webkit", testMatch: siteTests, use: devices["Desktop Safari"] },
+    // `pnpm test` runs this project alone, after the others, because tests beside it would slow the page it times.
+    { name: "speed", testMatch: "speed/speed.spec.ts", use: devices["Desktop Chrome"] },
   ],
 });

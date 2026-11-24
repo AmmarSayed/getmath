@@ -1,0 +1,145 @@
+{
+  "status": "provisional until Ammar accepts",
+  "environment": {
+    "description": "Chromium from Playwright on the production build under /getmath/, cold cache (a new browser context for every run), viewport 1280 by 800. Network: 150 ms round trip, 1600 kbit/s down, 750 kbit/s up (the slow 4G profile of Lighthouse), set through the Chrome DevTools Protocol. Processor: 4 times slower. Each run loads the page, waits for the interaction to start and for 1 second, presses 30 arrow keys on a handle, then drags it round a circle in 40 pointer moves. Arrow response is the time from the input to the next paint: Event Timing for the keyboard worst (it only reports events over 16 ms, in steps of 8 ms), and the event to the first frame and the task after it for the other three, because Event Timing does not cover pointer moves. The page weight counts bytes as the preview server sends them, without compression, so GitHub Pages sends less.",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "latencyMs": 150,
+    "downloadKbps": 1600,
+    "uploadKbps": 750,
+    "cpuSlowdown": 4,
+    "keySteps": 30,
+    "dragSteps": 40,
+    "runsInTest": 3
+  },
+  "measures": {
+    "lcp": {
+      "label": "Largest contentful paint",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 2500,
+      "why": "Public 'good' guidance is 2500 ms. Measured about 4 times lower, so a slow runner has room, and a real slowdown (a render-blocking heavy script costs seconds on this network) is far over it.",
+      "measured": {
+        "runs": 25,
+        "min": 512,
+        "median": 552,
+        "max": 760,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "cls": {
+      "label": "Cumulative layout shift",
+      "unit": "",
+      "deterministic": false,
+      "ceiling": 0.1,
+      "why": "Public 'good' guidance is 0.1. The page does not shift at all.",
+      "measured": {
+        "runs": 25,
+        "min": 0,
+        "median": 0,
+        "max": 0,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "bytes": {
+      "label": "Total transferred",
+      "unit": "bytes",
+      "deterministic": true,
+      "ceiling": 215000,
+      "why": "Deterministic. About 10% above the measured weight: a new font, picture or library of 20 kB or more fails.",
+      "measured": {
+        "runs": 25,
+        "min": 195280,
+        "median": 195280,
+        "max": 195280,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "scriptBytes": {
+      "label": "Script transferred",
+      "unit": "bytes",
+      "deterministic": true,
+      "ceiling": 118000,
+      "why": "Deterministic. About 10% above the measured weight: 11 kB of new script fails.",
+      "measured": {
+        "runs": 25,
+        "min": 107320,
+        "median": 107320,
+        "max": 107320,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "requests": {
+      "label": "Requests",
+      "unit": "requests",
+      "deterministic": true,
+      "ceiling": 14,
+      "why": "Deterministic. Two more than measured, so one new file passes and a third fails.",
+      "measured": {
+        "runs": 25,
+        "min": 12,
+        "median": 12,
+        "max": 12,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "keyWorst": {
+      "label": "Keyboard step, worst",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 200,
+      "why": "Public INP 'good' guidance is 200 ms. The median of the runs in the test is compared, so one slow step in one run does not fail a pull request; one run in 25 reached 152 ms.",
+      "measured": {
+        "runs": 25,
+        "min": 40,
+        "median": 56,
+        "max": 152,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "keyMedian": {
+      "label": "Keyboard step, median",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 100,
+      "why": "100 ms, the limit for an answer to feel immediate. Measured about 3 times lower.",
+      "measured": {
+        "runs": 25,
+        "min": 25.8,
+        "median": 29.2,
+        "max": 45.3,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "dragWorst": {
+      "label": "Drag move, worst",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 200,
+      "why": "Public INP 'good' guidance is 200 ms, as for the keyboard.",
+      "measured": {
+        "runs": 25,
+        "min": 37.1,
+        "median": 49.4,
+        "max": 97.7,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    },
+    "dragMedian": {
+      "label": "Drag move, median",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 100,
+      "why": "100 ms, as for the keyboard.",
+      "measured": {
+        "runs": 25,
+        "min": 22.65,
+        "median": 26.45,
+        "max": 45.25,
+        "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-24, machine quiet"
+      }
+    }
+  }
+}
