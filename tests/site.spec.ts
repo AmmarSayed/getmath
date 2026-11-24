@@ -96,22 +96,23 @@ test.describe("formulas without JavaScript", () => {
     await expect(page.locator(".katex-html")).toHaveCount(4);
     await expect(page.locator(".katex-html:not([aria-hidden=true])")).toHaveCount(0);
   });
+
+  test("are drawn with styles and fonts that the site serves", async ({ page, baseURL }) => {
+    const fonts: string[] = [];
+    page.on("request", (sent) => {
+      if (sent.resourceType() === "font") fonts.push(sent.url());
+    });
+    await page.goto("./");
+    await expect(page.locator(".katex").first()).toHaveCSS("font-family", /KaTeX_Main/);
+    await expect.poll(() => fonts.join()).toContain(`${baseURL}_astro/KaTeX_Main-Regular`);
+  });
 });
 
-test("formulas are drawn with mathematics fonts that the site serves", async ({ page, baseURL }) => {
-  const fonts: string[] = [];
-  page.on("request", (sent) => {
-    if (sent.resourceType() === "font") fonts.push(sent.url());
-  });
-  await page.goto("./");
-  const loaded = await page.evaluate(async () => {
-    await document.fonts.ready;
-    return [...document.fonts].filter((font) => font.status === "loaded").map((font) => font.family.replaceAll('"', ""));
-  });
-  expect(loaded).toContain("KaTeX_Main");
-  expect(fonts.length).toBeGreaterThan(0);
-  expect(fonts.filter((url) => !url.startsWith(baseURL!))).toEqual([]);
-});
+/** Opens a page and waits for its fonts. */
+async function openPage(page: Page, path = "") {
+  await page.goto(`./${path}`);
+  await page.evaluate(() => document.fonts.ready);
+}
 
 /**
  * Relative luminance, from 0 to 1, of the darkest and the lightest pixel shown
@@ -143,12 +144,15 @@ async function luminances(page: Page, clip: { x: number; y: number; width: numbe
   }, picture);
 }
 
-// The parts of the sample page that browsers draw in different ways: letters,
-// digits in a mathematics font, a border and an SVG shape.
+// Parts of the sample page that browsers draw in different ways, such as letters,
+// mathematics fonts, borders and SVG shapes.
 const drawnParts = {
   text: "main > p",
   "formula digits": "main .katex-html .mord",
   "fraction bar": "main .frac-line",
+  "matrix bracket": "main .delimcenter",
+  "validation label": ".status",
+  link: "header a",
   "root sign": "main .sqrt .hide-tail",
 };
 
@@ -159,8 +163,12 @@ for (const forcedColors of ["none", "active"] as const) {
     test(`text and formulas are visible in ${look}`, async ({ page, browserName }) => {
       test.skip(forcedColors === "active" && browserName === "webkit", "Playwright's WebKit has no forced colours");
       await page.emulateMedia({ colorScheme, forcedColors });
-      await page.goto("./");
-      await page.evaluate(() => document.fonts.ready);
+      await openPage(page);
+      const emulated = await page.evaluate(
+        (queries) => queries.map((query) => matchMedia(query).matches),
+        [`(forced-colors: ${forcedColors})`, `(prefers-color-scheme: ${colorScheme})`],
+      );
+      expect(emulated).toEqual([true, true]);
       const { darkest, lightest } = await luminances(page, { x: 0, y: 0, width: 4, height: 4 });
       expect(lightest, "the background is plain").toBe(darkest);
       const background = darkest;
@@ -187,9 +195,11 @@ for (const forcedColors of ["none", "active"] as const) {
 for (const width of [320, 390, 1280]) {
   for (const path of pages) {
     test(`page /${path} loses nothing and scrolls only wide formulas at ${width} px`, async ({ page }) => {
+      await openPage(page, path);
+      const content = () => page.evaluate(() => document.body.innerText.replace(/\s+/g, ""));
+      const wideContent = await content();
       await page.setViewportSize({ width, height: 800 });
-      await page.goto(`./${path}`);
-      await page.evaluate(() => document.fonts.ready);
+      expect(await content()).toBe(wideContent);
 
       // A phone keeps this width and size of text, instead of shrinking a wide page.
       await expect(page.locator('meta[name="viewport"]')).toHaveAttribute("content", /\bwidth=device-width\b/);
@@ -211,22 +221,32 @@ for (const width of [320, 390, 1280]) {
       );
       expect(outside).toEqual([]);
 
-      // A formula on its own line scrolls only if its drawing is too wide, and then to its very end.
+      // A formula on its own line scrolls only if its drawing is too wide, and then from its very start to its very end.
       for (const formula of await page.locator(".formula").all()) {
         const scrolled = await formula.evaluate((element) => {
           // Not a range over the drawing, because a root sign is a very long shape that is cut to size.
           const pieces = [...element.querySelectorAll(".katex-base")];
           const end = () => pieces.at(-1)!.getBoundingClientRect().right;
+          const box = element.getBoundingClientRect();
+          const drawing = element.querySelector(".katex-html")!.getBoundingClientRect();
           const drawnWidth = end() - pieces[0].getBoundingClientRect().left;
+          element.scrollLeft = 0;
+          const hiddenAtStart = box.left - pieces[0].getBoundingClientRect().left;
           element.scrollLeft = 1e6;
           return {
+            drawnWidth,
+            hiddenAtStart,
+            hiddenAbove: box.top - drawing.top,
             tooWide: drawnWidth > element.clientWidth + 1,
             scrolls: element.scrollLeft > 0,
-            hiddenAtEnd: end() - element.getBoundingClientRect().right,
+            hiddenAtEnd: end() - box.right,
             scrollsDown: element.scrollHeight > element.clientHeight,
           };
         });
+        expect(scrolled.drawnWidth).toBeGreaterThan(0);
         expect(scrolled.scrolls).toBe(scrolled.tooWide);
+        expect(scrolled.hiddenAtStart).toBeLessThanOrEqual(1);
+        expect(scrolled.hiddenAbove).toBeLessThanOrEqual(0);
         expect(scrolled.hiddenAtEnd).toBeLessThanOrEqual(1);
         expect(scrolled.scrollsDown).toBe(false);
       }

@@ -7,6 +7,11 @@ const licencesFile = "third-party-licences.txt";
 // Terms that a package does not include as a file, kept in `src/licences/`.
 const furtherTerms: Record<string, string> = { katex: "katex-fonts.txt" };
 
+const isStyle = (id: string) => /\.[a-z]*css(\?|$)/.test(id);
+
+/** Styles and components reach the pages, even when the browser gets no script. */
+const reachesPages = (id: string) => isStyle(id) || /\.(astro|svelte)(\?|$)/.test(id);
+
 /** The folder of the installed package that a module belongs to, if any. */
 function packageFolder(id: string) {
   return /^.*\/node_modules\/(?:@[^/]+\/)?[^/]+(?=\/)/.exec(id.split("?")[0].replaceAll("\\", "/"))?.[0];
@@ -21,8 +26,8 @@ function readTerms(folder: string) {
 
 /**
  * Notes which packages the built site distributes, and publishes their terms
- * next to the pages. Counted are the styles of every page, with their fonts,
- * and the scripts that reach the browser.
+ * next to the pages. Counted are styles, with the fonts and images that they
+ * use, components, and the scripts that reach the browser.
  */
 export function thirdParty(): AstroIntegration {
   const folders = new Set<string>();
@@ -30,7 +35,7 @@ export function thirdParty(): AstroIntegration {
     const folder = packageFolder(id);
     if (folder) folders.add(folder);
   };
-  let source: URL;
+  let srcDir: URL;
 
   return {
     name: "third-party",
@@ -42,8 +47,14 @@ export function thirdParty(): AstroIntegration {
               {
                 name: "third-party",
                 apply: "build",
-                transform(_code, id) {
-                  if (/\.css$/.test(id.split("?")[0])) note(id);
+                // Before Vite joins styles that import each other.
+                enforce: "pre",
+                transform(code, id) {
+                  if (!reachesPages(id)) return;
+                  note(id);
+                  if (isStyle(id) && code.includes("@import")) {
+                    throw new Error(`${id} uses @import, which hides where a style comes from. Import it in a component.`);
+                  }
                 },
                 generateBundle(_options, bundle) {
                   if (this.environment.name !== "client") return;
@@ -57,13 +68,13 @@ export function thirdParty(): AstroIntegration {
         });
       },
       "astro:config:done": ({ config }) => {
-        source = config.srcDir;
+        srcDir = config.srcDir;
       },
       "astro:build:done": async ({ dir }) => {
         const terms = [...folders].map(readTerms).sort((a, b) => a.title.localeCompare(b.title));
         const sections = terms.flatMap(({ title, name, text }) => {
           const further = furtherTerms[name];
-          return [title, text, ...(further ? [readFileSync(new URL(`licences/${further}`, source), "utf8").trim()] : [])];
+          return [title, text, ...(further ? [readFileSync(new URL(`licences/${further}`, srcDir), "utf8").trim()] : [])];
         });
         await writeFile(new URL(licencesFile, dir), `${sections.join("\n\n")}\n`);
       },

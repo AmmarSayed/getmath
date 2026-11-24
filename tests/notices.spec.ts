@@ -1,5 +1,5 @@
 import { globSync, readFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, relative } from "node:path";
 import { expect, test } from "@playwright/test";
 
 const notices = readFileSync("THIRD_PARTY_NOTICES.md", "utf8");
@@ -40,11 +40,14 @@ test("every distributed file is GetMath's own or comes from a package in the not
   const own = ["favicon.svg", "third-party-licences.txt"];
   const packages = distributedPackages().map(({ name }) => join("node_modules", name));
   const theirs = packages.flatMap((folder) => globSync(`${folder}/**/*.{woff2,woff,ttf}`));
-  const unexplained = globSync("dist/**/*.*").filter((file) => {
-    if (file.endsWith(".html") || own.includes(file.slice("dist/".length))) return false;
-    // Styles and scripts are bundles, and the build records what they are made of.
-    if (/\.(css|js)$/.test(file)) return false;
-    return !theirs.some((source) => readFileSync(source).equals(readFileSync(file)));
+  const files = globSync("**/*", { cwd: "dist", withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => relative("dist", join(entry.parentPath, entry.name)).replaceAll("\\", "/"));
+  const unexplained = files.filter((file) => {
+    // Pages, styles and scripts are bundles, and the build records what they are made of.
+    if (file.endsWith(".html") || /^_astro\/.*\.(css|js)$/.test(file) || own.includes(file)) return false;
+    const bytes = readFileSync(join("dist", file));
+    return !theirs.some((source) => readFileSync(source).equals(bytes));
   });
   expect(unexplained).toEqual([]);
 });
@@ -53,6 +56,9 @@ test("every distributed font is under the licence that the notices give it", () 
   expect(distributed.find(([item]) => item === "KaTeX fonts")?.[3]).toBe("OFL-1.1");
   const licence = "SIL Open Font License, Version 1.1";
   const fonts = globSync("dist/**/*.ttf");
+  // The compressed forms cannot be searched, so each must be a form of a font that can.
+  const names = fonts.map((font) => basename(font).split(".")[0]);
+  for (const compressed of globSync("dist/**/*.{woff,woff2}")) expect(names).toContain(basename(compressed).split(".")[0]);
   expect(fonts.length).toBeGreaterThan(0);
   for (const font of fonts) {
     const bytes = readFileSync(font);

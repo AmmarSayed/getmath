@@ -52,9 +52,14 @@ test("a page with an unknown status fails the build", async ({}, testInfo) => {
   expect(result.built).toBe(false);
 });
 
-test("a formula that is not valid LaTeX fails the build", async ({}, testInfo) => {
-  const metadata = `${withoutStatus}\nstatus: technical-test`;
-  const result = await buildWithPage(testInfo.outputPath("site"), metadata, "$\\frac{1}$");
-  expect(result.output).toContain("KaTeX parse error");
-  expect(result.built).toBe(false);
-});
+for (const [formula, message] of [
+  ["\\frac{1}", "KaTeX parse error"],
+  ["\\href{https://example.com}{x}", "\\href is not allowed in a formula"],
+]) {
+  test(`the formula ${formula} fails the build`, async ({}, testInfo) => {
+    const metadata = `${withoutStatus}\nstatus: technical-test`;
+    const result = await buildWithPage(testInfo.outputPath("site"), metadata, `$${formula}$`);
+    expect(result.output).toContain(message);
+    expect(result.built).toBe(false);
+  });
+}

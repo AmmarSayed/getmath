@@ -3,8 +3,8 @@ import katex from "katex";
 
 /**
  * Draws a formula while the site is built, so that it needs no JavaScript in
- * the browser. A formula that KaTeX cannot draw, or that is not standard
- * LaTeX, fails the build.
+ * the browser. A formula that KaTeX cannot draw, that is not standard
+ * LaTeX, or that has a link, an image or HTML fails the build.
  *
  * The result holds MathML for assistive technology, and the drawn form, which
  * is hidden from it.
@@ -15,6 +15,10 @@ function draw(source: string, onOwnLine: boolean) {
     output: "htmlAndMathml",
     throwOnError: true,
     strict: "error",
+    // KaTeX would draw such a command's name in red instead of failing.
+    trust: ({ command }) => {
+      throw new Error(`${command} is not allowed in a formula`);
+    },
   });
 }
 
