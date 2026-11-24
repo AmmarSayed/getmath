@@ -286,6 +286,27 @@ for (const width of [320, 1280]) {
   }
 }
 
+for (const width of [320, 1280]) {
+  test(`controls stay where they are while the arrows change, at ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    const top = () =>
+      page.getByRole("button", { name: "Reset" }).evaluate((button) => button.getBoundingClientRect().top + window.scrollY);
+    for (const submitted of [false, true]) {
+      if (submitted) await predict(page, "2", "4");
+      const before = await top();
+      for (const value of ["-4", "0"]) {
+        for (const name of ["a", "b"] as const) {
+          for (const axis of ["x", "y"]) {
+            await enter(arrow(page, name).getByLabel(axis, { exact: true }), value);
+            expect(await top(), `${axis} of ${name} is ${value}`).toBe(before);
+          }
+        }
+      }
+      await page.getByRole("button", { name: "Reset" }).click();
+    }
+  });
+}
+
 test("Reset restores the start and keeps the focus", async ({ page }) => {
   await predict(page, "2", "4");
   await enter(arrow(page, "a").getByLabel("x", { exact: true }), "-2");
