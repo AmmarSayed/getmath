@@ -249,12 +249,12 @@ test.describe("dragging", () => {
     await page.setViewportSize({ width: 320, height: 800 });
     await enter(arrow(page, "a").getByLabel("x", { exact: true }), "0");
     await drag(page, [-1, 2], [-3, 2]);
-    await expect(handle(page, "b")).toBeFocused();
+    await expectViews(page, [0, 2], [-3, 2]);
     await page.mouse.up();
     await expectViews(page, [0, 2], [-3, 2]);
     await enter(arrow(page, "a").getByLabel("x", { exact: true }), "-2");
     await drag(page, [-2, 2], [0, 0]);
-    await expect(handle(page, "a")).toBeFocused();
+    await expectViews(page, [0, 0], [-3, 2]);
     await page.mouse.up();
     await expectViews(page, [0, 0], [-3, 2]);
   });
@@ -308,34 +308,56 @@ test.describe("dragging", () => {
     await drag(page, [3, 2], [1, 1]);
     expect(await spoken()).toEqual([]);
     await page.mouse.up();
-    // The tip has the focus, so a screen reader reads its new value.
-    await expect.poll(spoken).toEqual(["x = 1, y = 1"]);
-    await expect(page.getByRole("status")).toHaveText("");
+    await expect.poll(spoken).toEqual(["Arrow a is (1, 1)."]);
+    await expect(page.getByRole("status")).toHaveText("Arrow a is (1, 1).");
 
     await predict(page, "2", "4");
     await drag(page, [1, 1], [4, -4], [-4, -4], [2, -1]);
     expect(await spoken()).toHaveLength(1);
     await page.mouse.up();
-    await expect.poll(spoken).toHaveLength(3);
-    expect((await spoken()).slice(1).sort()).toEqual(["The sum is (1, 1).", "x = 2, y = −1"]);
+    await expect.poll(spoken).toEqual(["Arrow a is (1, 1).", "Arrow a is (2, −1). The sum is (1, 1)."]);
 
     // A drag that ends where it began has no result.
     await drag(page, [2, -1], [0, 0], [2, -1]);
     await page.mouse.up();
     await expectViews(page, [2, -1], [-1, 2], [1, 1]);
-    expect(await spoken()).toHaveLength(3);
+    expect(await spoken()).toHaveLength(2);
   });
-  test("ends when the focus leaves the tip, and Reset is not undone", async ({ page, browserName }) => {
+
+  test("announces a number just typed, and then the drag", async ({ page }) => {
+    const spoken = await listen(page);
+    await arrow(page, "a").getByLabel("x", { exact: true }).fill("2");
+    await drag(page, [3, 2], [2, 3]);
+    await page.mouse.up();
+    await expectViews(page, [1, 3], [-1, 2]);
+    await expect.poll(spoken).toEqual(["Arrow a is (2, 2).", "Arrow a is (1, 3)."]);
+  });
+
+  test("leaves no tip with the focus, also if it had it before", async ({ page }) => {
+    const focused = page.locator("[role=slider]:focus");
+    await handle(page, "a").focus();
+    await drag(page, [3, 2], [1, 1]);
+    await expect(focused).toHaveCount(0);
+    await page.mouse.up();
+    await expect(focused).toHaveCount(0);
+    await expectViews(page, [1, 1], [-1, 2]);
+    await handle(page, "a").focus();
+    await page.keyboard.press("ArrowRight");
+    await expectViews(page, [2, 1], [-1, 2]);
+  });
+
+  test("ends when anything gets the focus, and Reset is not undone", async ({ page, browserName }) => {
     const tab = browserName === "webkit" ? "Alt+Tab" : "Tab";
     const spoken = await listen(page);
     await drag(page, [3, 2], [1, 1]);
     await page.keyboard.press(tab);
-    await expect(handle(page, "b")).toBeFocused();
-    // The tip has lost the focus, so its value is not read.
+    await expect(page.locator(":focus")).not.toHaveCount(0);
+    await expect(page.locator("body:focus")).toHaveCount(0);
     await expect.poll(spoken).toEqual(["Arrow a is (1, 1)."]);
     await page.mouse.move(...(await onScreen(page, [0, -4])));
     await page.mouse.up();
     await expectViews(page, [1, 1], [-1, 2]);
+    expect(await spoken()).toHaveLength(1);
 
     await drag(page, [1, 1], [2, 2]);
     await page.getByRole("button", { name: "Reset" }).focus();
@@ -398,7 +420,7 @@ test.describe("touch", () => {
     await finger.move([1, 1]);
     await finger.cancel();
     await expectViews(page, [1, 1], [-1, 2]);
-    await expect.poll(spoken).toEqual(["x = 1, y = 1"]);
+    await expect.poll(spoken).toEqual(["Arrow a is (1, 1)."]);
   });
 
   test("a second finger does not disturb a drag", async ({ page }) => {

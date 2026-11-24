@@ -98,14 +98,9 @@
     problems = { ...problems, [arrow]: undefined };
   }
 
-  function announceMove(arrow: ArrowName, hasFocus: boolean) {
-    // A screen reader reads the new value of a tip that has the focus. Only the rest is left to announce.
-    if (hasFocus) announce(sumSentence());
-    else announceArrow(arrow);
-  }
-
   function stepTip(arrow: ArrowName, axis: Axis, step: number) {
-    if (setComponent(arrow, axis, current[arrow][axis] + step)) announceMove(arrow, true);
+    // A screen reader reads the new value of the tip, which has the focus. Only the sum is left to announce.
+    if (setComponent(arrow, axis, current[arrow][axis] + step)) announce(sumSentence());
   }
 
   function readComponent(arrow: ArrowName, axis: Axis, field: HTMLInputElement) {
@@ -189,7 +184,7 @@
   <div class="views">
     <Drawing arrows={current} {sum} {prediction} describedby="{id}-words">
       {#if live}
-        <Tips arrows={current} describedby="{id}-tip-hint" ondrag={dragTip} ondrop={announceMove} onstep={stepTip} />
+        <Tips arrows={current} describedby="{id}-tip-hint" ondrag={dragTip} ondrop={announceArrow} onstep={stepTip} />
       {/if}
     </Drawing>
     {@render key()}

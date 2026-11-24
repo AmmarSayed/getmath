@@ -9,8 +9,8 @@
     describedby: string;
     /** The learner drags the tip of an arrow to a point of the drawing. */
     ondrag: (arrow: ArrowName, point: Vector) => void;
-    /** The learner lets go of a tip that is at another place than before. It can have lost the focus. */
-    ondrop: (arrow: ArrowName, hasFocus: boolean) => void;
+    /** The learner lets go of a tip that is at another place than before. */
+    ondrop: (arrow: ArrowName) => void;
     /** The learner moves a tip by one step with the keyboard. */
     onstep: (arrow: ArrowName, axis: Axis, step: number) => void;
   }
@@ -34,12 +34,9 @@
   }
 
   let layer = $state<HTMLElement>();
-  const tips: { [name in ArrowName]?: HTMLElement } = $state({});
   let drag = $state.raw<Drag>();
 
   const percent = (distance: number) => `${(100 * distance) / (2 * drawingEdge)}%`;
-  /** The value changes only when a drag ends, so that it is read once. */
-  const valueToRead = (name: ArrowName) => (drag?.arrow === name ? drag.from : arrows[name]);
 
   function pointAt({ clientX, clientY }: PointerEvent): Vector {
     const { left, top, width } = layer!.getBoundingClientRect();
@@ -55,8 +52,9 @@
     // Targets of tips that are close to each other overlap.
     const other = pressed === "a" ? "b" : "a";
     const arrow = distance(other) < distance(pressed) ? other : pressed;
-    // Before its place is read, because leaving a field can still change it.
-    tips[arrow]!.focus({ preventScroll: true });
+    // The focus stays off the tips, so that the end of a drag is announced in full. Before the place is read,
+    // because leaving a field can still change it.
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const from = arrows[arrow];
     drag = { pointer: event.pointerId, arrow, from, held: { x: point.x - from.x, y: point.y - from.y } };
   }
@@ -76,7 +74,7 @@
     if (!drag) return;
     const { arrow, from } = drag;
     drag = undefined;
-    if (!same(arrows[arrow], from)) ondrop(arrow, document.activeElement === tips[arrow]);
+    if (!same(arrows[arrow], from)) ondrop(arrow);
   }
 
   function pressKey(event: KeyboardEvent, name: ArrowName) {
@@ -85,10 +83,13 @@
     event.preventDefault();
     const [axis, step] = change;
     // Held down, the key stops at the bound without a message for every repeat.
-    if (drag || (event.repeat && Math.abs(arrows[name][axis] + step) > arrowLimit)) return;
+    if (event.repeat && Math.abs(arrows[name][axis] + step) > arrowLimit) return;
     onstep(name, axis, step);
   }
 </script>
+
+<!-- A drag also ends where anything gets the focus, so that a release later does not undo what the learner did. -->
+<svelte:window onfocusin={endDrag} />
 
 <!-- Over the drawing, and not in it: an image has no parts for assistive technology, and targets keep their size. -->
 <div class="tips" bind:this={layer}>
@@ -98,14 +99,13 @@
       class="tip {name}"
       style:left={percent(drawingEdge + x)}
       style:top={percent(drawingEdge - y)}
-      bind:this={tips[name]}
       role="slider"
       tabindex="0"
       aria-label="Tip of arrow {name}"
       aria-valuemin={-arrowLimit}
       aria-valuemax={arrowLimit}
-      aria-valuenow={valueToRead(name).x}
-      aria-valuetext="x = {numeral(valueToRead(name).x)}, y = {numeral(valueToRead(name).y)}"
+      aria-valuenow={x}
+      aria-valuetext="x = {numeral(x)}, y = {numeral(y)}"
       aria-describedby={describedby}
       onkeydown={(event) => pressKey(event, name)}
       onpointerdown={(event) => startDrag(event, name)}
@@ -114,9 +114,8 @@
       onlostpointercapture={(event) => {
         if (drag?.pointer === event.pointerId) endDrag();
       }}
-      onblur={endDrag}
       onmousedown={(event) => {
-        // The focus is already on the tip that is dragged, which can be the other one.
+        // The browser would focus the tip, and the one that is dragged can be the other one.
         if (event.button === 0) event.preventDefault();
       }}
     >
