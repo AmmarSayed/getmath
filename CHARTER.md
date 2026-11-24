@@ -2,7 +2,7 @@
 
 **An Open, Interactive Book on the Mathematics Behind Machine Learning**
 
-**Status:** approved by Ammar on 2026-11-24, including the changes of the same day to sections 3, 8 (with the proof register), 9 and 10. Ammar left one further change, completing the square in Part I instead of Part II, to Claude's judgement.
+**Status:** approved by Ammar on 2026-11-24, including the changes of the same day to sections 3, 6, 8 (with the proof register), 9 and 10. Ammar left one further change, completing the square in Part I instead of Part II, to Claude's judgement.
 
 This is the project's only governing document. A change to it needs Ammar's approval and is made here; Git history records what changed and why.
 
@@ -78,9 +78,10 @@ It is delivered in two milestones:
 - **Prerequisites.** Every symbol, operation and result is introduced before use or explained at the point of need.
 - **Misconceptions.** Each major concept names its predictable misconceptions and includes activities that reveal them.
 - **Derivations** are required reading, with expandable hints and steps. Every result used is derived in full, except the few whose proofs need out-of-scope mathematics; those are labelled "not proved here" and tested numerically.
-- **Practice** uses small skills, immediate feedback, stepwise hints, mixed review and later retrieval. Full solutions are available after a meaningful attempt. Quizzes are used where useful, not at the end of every lesson.
+- **Practice** uses small skills, immediate feedback, stepwise hints, mixed review and later retrieval. The site checks only answers it can mark reliably: choices, numbers, vectors and matrices, dragging, and ordering the steps of a derivation. Longer derivations are written on paper, compared with a full solution and a checklist, and shown as self-marked. Full solutions are available after a meaningful attempt. Quizzes are used where useful, not at the end of every lesson.
 - **Transfer** problems differ meaningfully from the examples; changing the numbers is not enough.
 - **Progress** has four evidence-based states: Encountered, Practised, Provisional mastery, Retained mastery. Mastery can drop, retained mastery needs successful later retrieval, and opening a page proves nothing. There are no points, badges or streaks. Khan Academy inspires this learning loop; its content is not used.
+- **Voice.** A friendly tutor: "you" for the learner, "we" when working together, short sentences and light humour, but no jokes inside derivations.
 - **Honesty.** The text distinguishes exact results from approximations, definitions from analogies, facts from modelling assumptions, and simulations from real behaviour. Correctness comes before simplicity. Notation is consistent, and the role and dimensions of every variable are explained.
 
 ## 5. Gap assessment
@@ -96,16 +97,16 @@ Chapter order follows dependencies, not any reference text.
 | Area | Decision |
 | --- | --- |
 | Site | Static, computer-first site on GitHub Pages at its default address. No account, server or behavioural tracking. The host changes only if the proof of concept shows a concrete unmet need. |
-| Stack | Astro, MDX, TypeScript, Zod, Svelte islands, SVG and D3, with Three.js only where 3D helps learning. KaTeX, with MathJax only if accessibility testing shows a need. Workbox and IndexedDB. Vitest, Playwright and axe-core in GitHub Actions. pnpm on a supported Node LTS. The proof of concept validates the stack. |
+| Stack | Astro, MDX, TypeScript, Zod, Svelte islands, SVG and D3, with Three.js only where 3D helps learning. KaTeX, with MathJax only if accessibility testing shows a need. IndexedDB. Vitest, Playwright and axe-core in GitHub Actions. pnpm on a supported Node LTS. The proof of concept validates the stack. |
 | Python | Read-only; never executed on the site. **Run** reveals a verified output or a JavaScript-computed equivalent, visibly labelled **expected/simulated**. **Reset** restores the start. Every snippet and output is verified against real Python in development or CI. |
 | Colab | Optional matching notebooks for running real Python. Lessons and assessments never depend on them. The site explains that Colab is external, online and may need a Google account. |
-| Offline | Two separately tested modes: the installed website, and a downloadable package served locally. Both cover content, assets, interactions and expected outputs, but not Colab. |
+| Offline | Not supported. The book is a website only. |
 | Accessibility | WCAG 2.2 AA, checked automatically and manually with keyboard and assistive technology. Every graphical interaction has an accessible alternative meeting the same objective. Colour is never the only cue. |
-| Screens | Designed for 1280 px and wider; fully supported from 1024 px and on landscape tablets. On phones, text and mathematics stay readable and reflow; complex interactions may use accessible alternatives. |
-| Browsers | Latest two versions of Chrome, Edge, Firefox and Safari on Windows and macOS. Safari on iPad is tested on a real device. |
+| Screens | Computer first: designed for 1280 px and wider, and fully supported from 1024 px. On phones, text and mathematics stay readable and reflow, but interactions are not promised to work well. |
+| Browsers | Latest two versions of Chrome, Edge, Firefox and Safari on computers. Automated tests run on the Chromium, Firefox and WebKit engines. Hand checks are on Windows; the site states that Safari is not tested by hand. |
 | Progress data | Stored locally, with export, import and reset. No personal data is needed. |
 | Security | No learner-supplied code runs. Inputs are constrained, and rendering, validation, resource use and dependencies are tested. |
-| Language | English first, with an architecture ready for Arabic (right to left). |
+| Language | English first, in British spelling. Arabic may come later and is not prepared for or tested now. |
 | Data | Seeded synthetic data with its generating script. Real datasets only under CC0 or CC BY, with provenance recorded. |
 
 Content is kept in portable, version-controlled source with machine-readable curriculum metadata, documented schemas and reproducible builds. Shared components have regression tests.
@@ -129,14 +130,16 @@ Content is kept in portable, version-controlled source with machine-readable cur
 | Role | Who | Work |
 | --- | --- | --- |
 | Owner and test learner | Ammar | Sets direction, approves, tests chapters, settles disagreements |
-| Author and engineer | Claude | Drafts the gap assessment and specifications; builds chapters, site and tests; checks the hidden problems' solutions |
-| Independent reviewer | An assistant from a different AI vendor, currently Codex; OpenCode with a non-Anthropic model is the backup | Reviews mathematics and teaching; writes the hidden test problems from approved goals |
+| Author and engineer | Claude | Drafts the gap assessment and specifications; builds chapters, site and tests; checks the hidden problems' solutions. May delegate code to other models, but reviews it and stays responsible; lesson text, mathematics and proofs are not delegated |
+| Independent reviewer | An assistant from a different AI vendor, currently Codex; ChatGPT run by Ammar, or OpenCode with a non-Anthropic model, are the other accepted routes | Reviews mathematics and teaching; writes the hidden test problems from approved goals |
 
-- No one's own checks count as independent review. Agreement between assistants does not prove correctness.
+- No one's own checks count as independent review, and a model never reviews work it helped to make. Agreement between assistants does not prove correctness.
 - Disagreements go to Ammar with both positions and a recommendation.
 - Ordinary Git authorship is enough; no assistant credit labels are required.
 - Reviews are recorded on the chapter's GitHub issue or pull request. The project record is the repository and its issues, not conversations.
 - The book must not depend on any one assistant, proprietary workflow or contributor.
+- Work is managed with the Matt Pocock skills (specification, tickets, then one ticket per session), inside the steps below. They do not replace Ammar's approvals or independent review.
+- Each ticket has a branch and a pull request. Claude merges code once the automated tests and independent review pass. Ammar merges changes to the charter, gap assessment, table of contents, design specification and chapters, and is asked before the first public deployment.
 - A new document is added only when an existing one cannot hold the content.
 
 **Each chapter:**
@@ -159,7 +162,7 @@ The pilot is approved at each major stage. Later chapters may be approved in bat
 | Mathematics | Numerical examples and answers are verified by script where practicable; derivations and claims are independently reviewed; assumptions and approximations are explicit |
 | Learning | Ammar finishes it using only the book, solves the unseen transfer problems, passes a later retrieval check, and wants to continue; points of boredom or difficulty are recorded and addressed |
 | Interaction | Every interaction has a purpose, useful feedback, correct mathematics and an accessible alternative; pictures, numbers and symbols agree; Python outputs are accurate and labelled |
-| Engineering | Tests, build, deployment, offline use, accessibility and browser checks pass against thresholds set in the proof of concept |
+| Engineering | Tests, build, deployment, accessibility and browser checks pass against thresholds set in the proof of concept |
 | Publication | Rights, attribution and editorial review are complete; release-blocking defects are fixed; known limitations are stated |
 
 The retrieval check comes at least two weeks after the test, at Ammar's own pace. It does not delay acceptance or later chapters, but a failed check reopens the chapter, and 1.0 needs every check passed.
@@ -171,8 +174,8 @@ Releases use semantic versions and state their completion status, supported envi
 ## 10. Order of work
 
 1. Ammar approves this charter.
-2. Gap assessment, and in parallel a technical proof of concept: a GitHub Pages build, one accessible interaction, one Run/Reset Python example, one Colab notebook, an offline bundle, and performance, accessibility and output-verification tests.
-3. Ammar approves the gap assessment, then the table of contents and a short design specification covering components, notation, verification and accessibility.
+2. Gap assessment, and in parallel a technical proof of concept: a GitHub Pages build, one accessible interaction (adding two draggable arrows), one Run/Reset Python example, one Colab notebook, the script that reproduces the dataset checks, and performance, accessibility and output-verification tests. Its page is public, labelled "technical test, not a lesson", and asks search engines not to list it. It is finished when every check passes or Ammar accepts the limitation, its results set the section 9 thresholds, and Ammar has used the page. Its machinery is kept; only its sample page is deleted.
+3. Ammar approves the gap assessment, then the table of contents. After the proof of concept, Ammar chooses the look from three prototypes and approves a short design specification covering components, notation, verification and accessibility.
 4. Pilot chapter: vectors, unless the dependency map shows a better choice.
 5. Ammar tests the pilot. Its method, meaning layout, tools and process, is revised and approved as the standard for later chapters. The pilot itself is then deleted.
 6. All chapters, written in reading order from Part 0, including vectors again: Ready to Start ML, then Full Book.

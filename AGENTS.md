@@ -13,7 +13,7 @@ An open, interactive book on the mathematics behind machine learning.
 
 ## Roles
 
-Ammar is the owner and test learner, Claude is the author and engineer, and an assistant from a different AI vendor (currently Codex) is the independent reviewer (section 8). An implementer's own checks are evidence; independent review comes from someone else. Never show Ammar a chapter's hidden test problems before the test.
+Ammar is the owner and test learner, Claude is the author and engineer, and an assistant from a different AI vendor (currently Codex, or ChatGPT run by Ammar, or OpenCode) is the independent reviewer (section 8). An implementer's own checks are evidence; independent review comes from someone else. Never show Ammar a chapter's hidden test problems before the test.
 
 ## Before you work on
 
