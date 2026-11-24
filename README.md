@@ -6,7 +6,7 @@ An open, interactive book on the mathematics behind machine learning. `CHARTER.m
 
 ## Working on it
 
-You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvmrc`. Then install the pnpm version recorded in `package.json`, for example with `npm install --global pnpm@12.23.0`.
+You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvmrc`. Then run `npm install --global pnpm`; pnpm itself switches to the version recorded in `package.json`.
 
 | Command | What it does |
 | --- | --- |
@@ -16,8 +16,8 @@ You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvm
 | `pnpm check` | Checks types and page metadata |
 | `pnpm build` | Builds the site into `dist/` |
 | `pnpm preview` | Serves that build under the real base path |
-| `pnpm test` | Tests that build in Chromium, Firefox and WebKit. Run `pnpm build` first |
-| `python3 scripts/check_toc.py` | Checks the table of contents against the gap assessment |
+| `pnpm test` | Builds the site, then tests that build in Chromium, Firefox and WebKit. Stop `pnpm dev` and `pnpm preview` first |
+| `python3 scripts/check_toc.py` | Checks the table of contents against the gap assessment. On Windows the command may be `python` or `py` |
 
 The same checks run on every pull request, in `.github/workflows/checks.yml`.
 

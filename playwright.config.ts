@@ -2,18 +2,20 @@ import { defineConfig, devices } from "@playwright/test";
 
 const ci = Boolean(process.env.CI);
 
-// The tests open the production build, so run `pnpm build` first.
+const url = "http://127.0.0.1:4321/getmath/";
+
+// The tests open the production build, which `pnpm test` makes first.
 export default defineConfig({
   testDir: "tests",
   fullyParallel: true,
   forbidOnly: ci,
   reporter: ci ? [["list"], ["github"]] : "list",
-  use: { baseURL: "http://127.0.0.1:4321/getmath/" },
+  use: { baseURL: url },
   webServer: {
     // Without --ignore-lock, Astro moves the server to the background when an
     // AI assistant runs the tests, and Playwright takes that for a crash.
     command: "pnpm preview --ignore-lock",
-    url: "http://127.0.0.1:4321/getmath/",
+    url,
   },
   projects: [
     { name: "build", testMatch: "build.spec.ts" },
