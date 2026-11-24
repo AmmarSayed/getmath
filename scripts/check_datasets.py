@@ -35,3 +35,5 @@ DATA = {
     "penguins.csv": "f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93",
     "real-estate-valuation.csv": "0730a5687ec285a3c2f9921a808855bd1bde21fc53e6377561cbdce2dda9cbb1",
 }
+DOMINANT_LOADING = 0.99  # "almost entirely body mass": its share of the first direction, in absolute value
+SEPARATION_TOLERANCE = 1e-6  # the sum of slacks above which a direction separates
