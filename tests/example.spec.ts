@@ -199,6 +199,54 @@ test("if the scripts fail to load, the buttons are off and a link leads to the o
   await expectRevealed(page);
 });
 
+test("an output that the link shows stays when the scripts start late", async ({ page }) => {
+  let release = () => {};
+  const released = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/*.js", async (route) => {
+    await released;
+    await route.continue();
+  });
+  await page.goto("./", { waitUntil: "commit" });
+  await page.getByRole("link", { name: "See the expected output" }).click({ timeout: 10_000 });
+  await expectRevealed(page);
+  release();
+  await expect(run(page)).toBeEnabled();
+  await expectRevealed(page);
+  await reset(page).click();
+  await expect(shownOutput(page)).toHaveCount(0);
+});
+
+for (const width of [320, 1280]) {
+  test(`nothing is cut off with wider text spacing at ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    // The spacing that WCAG 1.4.12 names.
+    const spacing = "line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important;";
+    await page.addStyleTag({ content: `.code, .code *, .interaction * { ${spacing} } .interaction p { margin-bottom: 2em !important; }` });
+    await run(page).click();
+    await expectRevealed(page);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    const cutOff = await interaction(page).locator(":is(p:not(.announcement), button)").evaluateAll((elements) =>
+      elements
+        .filter((element) => element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1)
+        .map((element) => element.outerHTML),
+    );
+    expect(cutOff).toEqual([]);
+    for (const button of [run(page), reset(page)]) {
+      const { width: wide, height } = (await button.boundingBox())!;
+      expect(Math.min(wide, height)).toBeGreaterThanOrEqual(44);
+    }
+    // A line that is too long now scrolls, up and down nothing does.
+    for (const block of [shownProgram(page), shownOutput(page)]) {
+      const look = await block.evaluate((element) => ({
+        overflow: getComputedStyle(element).overflowX,
+        down: element.scrollHeight - element.clientHeight,
+      }));
+      expect(look.overflow).toBe("auto");
+      expect(look.down).toBeLessThanOrEqual(1);
+    }
+  });
+}
+
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 

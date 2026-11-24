@@ -11,6 +11,8 @@
   let live = $state(false);
 
   onMount(() => {
+    // The link to the output was followed before the scripts started.
+    shown = location.hash === `#${id}-still`;
     live = true;
   });
 

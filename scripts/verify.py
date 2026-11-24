@@ -45,10 +45,10 @@ def build():
 
 def check_toc():
     done = subprocess.run([sys.executable, "-I", "-X", "utf8", str(ROOT / "scripts" / "check_toc.py")], capture_output=True, encoding="utf-8")
-    lines = done.stdout.strip().splitlines()
+    lines = (done.stdout + done.stderr).strip().splitlines()
     if done.returncode == 0 and lines and not done.stderr:
         return lines[-1].removeprefix("OK: ")
-    errors.extend(f"table of contents: {line}" for line in lines + done.stderr.strip().splitlines())
+    errors.extend(f"table of contents: {line}" for line in lines)
     if not lines:
         errors.append(f"table of contents: check_toc.py printed nothing, with exit code {done.returncode}")
 
@@ -103,7 +103,11 @@ class Page(HTMLParser):
                     self.problem(f"island output for unknown example {name!r}", output)
                 else:
                     compare(f"{self.page}: the data of the island for {name} differs from", SNIPPETS / f"{name}.txt", output)
-        elif tag in ("pre", "samp") and not self.block:
+        elif tag in ("pre", "samp") and self.block:
+            # Only the <samp> of an output is inside another one.
+            if (tag, self.block["kind"]) != ("samp", "output"):
+                self.problem(f"<{tag}> inside another block", self.block["text"])
+        elif tag in ("pre", "samp"):
             # A <samp> alone is a displayed output too, and has no source.
             kinds = ("program", "output") if tag == "pre" else ()
             kind = next((kind for kind in kinds if f"data-{kind}" in attrs), None)

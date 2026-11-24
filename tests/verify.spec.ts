@@ -82,6 +82,19 @@ test("a displayed output that differs from its file fails", async ({}, testInfo)
   expect(result.passed).toBe(false);
 });
 
+for (const [where, edit] of [
+  ["a program", (text: string) => text.replace("</code></pre>", "</code><samp></samp></pre>")],
+  ["an output", (text: string) => text.replace("</samp></pre>", "</samp><pre></pre>stray text</pre>")],
+] as const) {
+  test(`an output inside ${where} fails`, async ({}, testInfo) => {
+    const copy = await setUp(testInfo.outputPath("copy"));
+    await copy.change("dist/index.html", edit);
+    const result = await copy.verify("--no-build");
+    expect(result.output).toContain("no source");
+    expect(result.passed).toBe(false);
+  });
+}
+
 test("a displayed program that differs from its file fails", async ({}, testInfo) => {
   const copy = await setUp(testInfo.outputPath("copy"));
   await copy.change("dist/index.html", (text) => text.replace("u = [3, 1]\nv", "u = [3, 9]\nv"));
