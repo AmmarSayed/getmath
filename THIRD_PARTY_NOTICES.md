@@ -41,8 +41,24 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 | actions/checkout, actions/setup-node, actions/upload-artifact, actions/upload-pages-artifact, actions/deploy-pages | GitHub | MIT | <https://github.com/actions> |
 | pnpm/action-setup | pnpm contributors | MIT | <https://github.com/pnpm/action-setup> |
 | astral-sh/setup-uv | Astral | MIT | <https://github.com/astral-sh/setup-uv> |
+| numpy | NumPy Developers (Travis E. Oliphant and others) | BSD-3-Clause, with notices for parts under 0BSD, MIT, Zlib and CC0-1.0 | <https://github.com/numpy/numpy> |
+| scipy | SciPy Developers, and Enthought, Inc. (2001-2002) | BSD-3-Clause | <https://github.com/scipy/scipy> |
+| scikit-learn | scikit-learn developers | BSD-3-Clause | <https://github.com/scikit-learn/scikit-learn> |
+
+scikit-learn also brings joblib (BSD-3-Clause, Gael Varoquaux and others), cloudpickle (BSD-3-Clause, the cloudpickle developer team), narwhals (MIT, Marco Gorelli) and threadpoolctl (BSD-3-Clause, Thomas Moreau and others), all pinned in `uv.lock`. Python 3.14.8, scikit-learn 1.9.1, SciPy 1.18.1 and NumPy 2.5.5 run `scripts/check_datasets.py`, which reproduces the table of data in `docs/table-of-contents.md`; none of them is distributed with the site. Their Python wheels bundle runtime libraries (OpenBLAS, LAPACK, libgfortran and libquadmath) with their own notices and licences, which each wheel carries when it is installed.
 
 These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
+
+## Data
+
+Copies are in `data/`. `scripts/check_datasets.py` checks their SHA-256 before it reads them.
+
+| Item | Creator | Licence | Source | Attribution | Changes |
+| --- | --- | --- | --- | --- | --- |
+| `data/penguins.csv`: Palmer Penguins, 344 rows | Kristen B. Gorman, Palmer Station Antarctica LTER (data); Allison M. Horst and Alison Presmanes Hill (the palmerpenguins package) | CC0 1.0, stated in the package's README ("Data are available by CC-0 license in accordance with the Palmer Station LTER Data Policy") and in its `LICENSE.md` | `inst/extdata/penguins.csv` at release v0.1.0 (commit e5bfd5f2c7da95b0823e9501b9013eb2ef124fa7) of <https://github.com/allisonhorst/palmerpenguins>; SHA-256 `f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93` | None required. Credit: Horst AM, Hill AP, Gorman KB (2020), palmerpenguins: Palmer Archipelago (Antarctica) penguin data, R package version 0.1.0, <https://allisonhorst.github.io/palmerpenguins/>; data from Gorman KB, Williams TD, Fraser WR (2014), PLoS ONE 9(3):e90081, <https://doi.org/10.1371/journal.pone.0090081> | None |
+| `data/real-estate-valuation.csv`: Real Estate Valuation, 414 rows | I-Cheng Yeh | CC BY 4.0, stated on the dataset's page | UCI Machine Learning Repository, dataset 477, <https://archive.ics.uci.edu/dataset/477/real+estate+valuation+data+set>, file <https://archive.ics.uci.edu/static/public/477/data.csv>; DOI <https://doi.org/10.24432/C5J30W>; SHA-256 `0730a5687ec285a3c2f9921a808855bd1bde21fc53e6377561cbdce2dda9cbb1` | Yeh, I-Cheng (2018). Real Estate Valuation [Dataset]. UCI Machine Learning Repository. <https://doi.org/10.24432/C5J30W>. Licensed under CC BY 4.0, <https://creativecommons.org/licenses/by/4.0/>. Paper: Yeh I-C, Hsu T-K (2018), Building real estate valuation models with comparative approach through case-based reasoning, Applied Soft Computing | None. The file is UCI's own CSV, as downloaded on 2026-11-24, not a conversion of the xlsx |
+
+Where a dataset's file is used in a lesson, its credit and licence are shown with it.
 
 ## Licence texts
 

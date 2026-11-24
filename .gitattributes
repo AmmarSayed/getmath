@@ -1,3 +1,6 @@
 # Also on Windows, because pages show these files exactly.
 src/snippets/*.py text eol=lf
 src/snippets/*.txt text eol=lf
+
+# The script checks their SHA-256, so no line-ending changes.
+data/*.csv text eol=lf

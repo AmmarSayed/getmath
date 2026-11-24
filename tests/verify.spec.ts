@@ -11,7 +11,7 @@ test.setTimeout(180_000);
 
 /** Copies what the verify command reads into `folder`, takes the built pages from `dist`, and runs it there. */
 async function setUp(folder: string, dist = "dist") {
-  for (const item of ["scripts", "docs", "pyproject.toml", "uv.lock", ".python-version"]) {
+  for (const item of ["scripts", "docs", "data", "pyproject.toml", "uv.lock", ".python-version"]) {
     await cp(item, join(folder, item), { recursive: true });
   }
   await cp("src/snippets", join(folder, "src/snippets"), { recursive: true, filter: (path) => !path.endsWith(".astro") });
@@ -40,6 +40,7 @@ async function setUp(folder: string, dist = "dist") {
 test("the site as built passes", async ({}, testInfo) => {
   const result = await (await setUp(testInfo.outputPath("copy"))).verify("--no-build");
   expect(result.output).toMatch(/^OK: /m);
+  expect(result.output).toMatch(/^known difference: /m);
   expect(result.passed).toBe(true);
 });
 
@@ -51,11 +52,19 @@ test("an output file that differs from what Python prints fails, and both are sh
     text.replace("<samp>[4, 3]", "<samp>[4, 4]").replace("[0,&quot;[4, 3]", "[0,&quot;[4, 4]"),
   );
   const result = await copy.verify("--no-build");
-  expect(result.output.trim().split(/\r?\n/)).toEqual([
+  expect(result.output.trim().split(/\r?\n/).filter((line) => !line.startsWith("known difference: "))).toEqual([
     "add-vectors: the output differs from add-vectors.txt",
     String.raw`  expected: '[4, 4]\n'`,
     String.raw`  actual:   '[4, 3]\n'`,
   ]);
+  expect(result.passed).toBe(false);
+});
+
+test("a value in the table of data that the pinned data does not give fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await copy.change("docs/table-of-contents.md", (text) => text.replace("slope 49.7 g per mm", "slope 49.8 g per mm"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("datasets: Body mass on flipper length, 342 rows: slope: table 49.8, reproduced 49.7");
   expect(result.passed).toBe(false);
 });
 
