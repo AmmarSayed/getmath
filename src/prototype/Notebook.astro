@@ -1,0 +1,88 @@
+---
+// PROTOTYPE, throwaway. Look 3: a study notebook. Numbered cells, code and output cells, exercises as a checklist.
+import AddArrows from "../arrows/AddArrows.svelte";
+import RunReset from "./RunReset.svelte";
+import * as c from "./content";
+---
+
+<div class="look notebook">
+  <header class="n-top">
+    <div>
+      <p class="n-kicker">Study notebook &middot; 6 steps</p>
+      <h1>{c.title}</h1>
+    </div>
+    <p class="n-stamp">{c.mark}</p>
+  </header>
+  <ol class="n-cells">
+    <li class="n-cell" id="n-1">
+      <div class="n-gutter">1</div>
+      <div class="n-body">
+        <h2>A puzzle</h2>
+        {c.puzzle.map((p) => <p set:html={p} />)}
+      </div>
+    </li>
+
+    <li class="n-cell" id="n-2">
+      <div class="n-gutter">2</div>
+      <div class="n-body">
+        <h2>Arrows</h2>
+        <p class="n-comment"><span>Note</span> {c.notes.arrows}</p>
+        <p set:html={c.arrows.before} />
+        <Fragment set:html={c.arrows.formula} />
+        <p set:html={c.arrows.after} />
+      </div>
+    </li>
+
+    <li class="n-cell n-live" id="n-3">
+      <div class="n-gutter">3</div>
+      <div class="n-body">
+        <h2>Try it</h2>
+        <p>{c.tryIt}</p>
+        <div class="n-box"><p class="n-tag">interactive</p><AddArrows client:visible /></div>
+      </div>
+    </li>
+
+    <li class="n-cell" id="n-4">
+      <div class="n-gutter">4</div>
+      <div class="n-body">
+        <h2>Why the components add</h2>
+        <p class="n-comment"><span>Note</span> <Fragment set:html={c.notes.why} /></p>
+        <p>{c.why.before}</p>
+        <Fragment set:html={c.why.formula} />
+        <p set:html={c.why.after} />
+        <p class="n-flag" set:html={c.why.key} />
+        <p class="n-flag n-mistake" set:html={c.why.mistake} />
+      </div>
+    </li>
+
+    <li class="n-cell" id="n-5">
+      <div class="n-gutter">5</div>
+      <div class="n-body">
+        <h2>The same sum in Python</h2>
+        <p set:html={c.python.intro} />
+        <div class="n-box n-code">
+          <p class="n-tag">In [ ]</p>
+          <pre tabindex="0"><code>{c.python.code}</code></pre>
+          <RunReset client:visible output={c.python.output} label={c.python.label} />
+        </div>
+      </div>
+    </li>
+
+    <li class="n-cell" id="n-6">
+      <div class="n-gutter">6</div>
+      <div class="n-body">
+        <h2>Your turn</h2>
+        <ol class="n-exercises">
+          {c.exercises.map((e, i) => (
+            <li class="n-box">
+              <p class="n-tag">exercise {i + 1}</p>
+              <p set:html={e.question} />
+              <details><summary>Hint</summary><p set:html={e.hint} /></details>
+              <details><summary>Answer</summary><p set:html={e.answer} /></details>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </li>
+  </ol>
+</div>

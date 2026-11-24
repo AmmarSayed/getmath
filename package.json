@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "looks": "LOOKS=1 astro dev --port 4399 --open \"/getmath/looks/?look=quiet\"",
     "check": "astro check && svelte-check --fail-on-warnings",
     "build": "astro build",
     "preview": "astro preview",

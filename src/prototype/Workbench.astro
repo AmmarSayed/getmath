@@ -1,0 +1,81 @@
+---
+// PROTOTYPE, throwaway. Look 2: tools and text side by side. The interaction sits in a workspace that stays in view.
+import AddArrows from "../arrows/AddArrows.svelte";
+import RunReset from "./RunReset.svelte";
+import * as c from "./content";
+const steps = ["A puzzle", "Arrows", "Try it", "Why the components add", "The same sum in Python", "Your turn"];
+---
+
+<div class="look workbench">
+  <header class="w-top">
+    <strong class="w-brand">GetMath</strong>
+    <span class="w-crumb">Sample / {c.title}</span>
+    <span class="w-badge">{c.mark}</span>
+  </header>
+  <div class="w-main">
+    <div class="w-text">
+      <h1>{c.title}</h1>
+      <nav class="w-outline" aria-label="Sections">
+        {steps.map((s, i) => <a href={`#w-${i + 1}`}><span>{String(i + 1).padStart(2, "0")}</span> {s}</a>)}
+      </nav>
+
+      <section id="w-1">
+        <h2><span>01</span> {steps[0]}</h2>
+        {c.puzzle.map((p) => <p set:html={p} />)}
+      </section>
+
+      <section id="w-2">
+        <h2><span>02</span> {steps[1]}</h2>
+        <p set:html={c.arrows.before} />
+        <Fragment set:html={c.arrows.formula} />
+        <p set:html={c.arrows.after} />
+        <p class="w-note"><b>Note</b> {c.notes.arrows}</p>
+      </section>
+
+      <section id="w-3">
+        <h2><span>03</span> {steps[2]}</h2>
+        <p>{c.tryIt}</p>
+        <p class="w-pointer">The workspace is on the right.</p>
+      </section>
+
+      <section id="w-4">
+        <h2><span>04</span> {steps[3]}</h2>
+        <p>{c.why.before}</p>
+        <Fragment set:html={c.why.formula} />
+        <p set:html={c.why.after} />
+        <p class="w-key" set:html={c.why.key} />
+        <p class="w-key w-mistake" set:html={c.why.mistake} />
+        <p class="w-note"><b>Note</b> <Fragment set:html={c.notes.why} /></p>
+      </section>
+
+      <section id="w-5">
+        <h2><span>05</span> {steps[4]}</h2>
+        <p set:html={c.python.intro} />
+        <div class="w-console">
+          <pre class="w-code" tabindex="0"><code>{c.python.code}</code></pre>
+          <RunReset client:visible output={c.python.output} label={c.python.label} />
+        </div>
+      </section>
+
+      <section id="w-6">
+        <h2><span>06</span> {steps[5]}</h2>
+        <ol class="w-exercises">
+          {c.exercises.map((e) => (
+            <li>
+              <p set:html={e.question} />
+              <div class="w-reveals">
+                <details><summary>Hint</summary><p set:html={e.hint} /></details>
+                <details><summary>Answer</summary><p set:html={e.answer} /></details>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
+
+    <aside class="w-stage" aria-label="Workspace" tabindex="0">
+      <p class="w-stage-head"><span>Workspace</span> 03 Try it</p>
+      <AddArrows client:visible />
+    </aside>
+  </div>
+</div>

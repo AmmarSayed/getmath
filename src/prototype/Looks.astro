@@ -1,0 +1,107 @@
+---
+// PROTOTYPE, throwaway (issue #14). One page, three looks, chosen by ?look=quiet|workbench|notebook.
+// Only `pnpm looks` serves it. See looks-route.ts.
+import "katex/dist/katex.min.css";
+import "./looks.css";
+import Notebook from "./Notebook.astro";
+import Quiet from "./Quiet.astro";
+import Workbench from "./Workbench.astro";
+---
+
+<!doctype html>
+<html lang="en-GB" data-look="quiet" data-theme="system">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three looks (prototype) – GetMath</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="data:," />
+    <script is:inline>
+      (() => {
+        const query = new URLSearchParams(location.search);
+        let look = query.get("look");
+        if (!["quiet", "workbench", "notebook"].includes(look)) look = "quiet";
+        let theme = query.get("theme");
+        try {
+          if (!theme) theme = localStorage.getItem("looks-theme");
+        } catch {}
+        if (!["light", "dark", "system"].includes(theme)) theme = "system";
+        document.documentElement.dataset.look = look;
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <Quiet />
+    <Workbench />
+    <Notebook />
+
+    <div class="bar" role="group" aria-label="Prototype controls">
+      <span class="bar-name">Prototype</span>
+      <div class="bar-set" role="group" aria-label="Look">
+        <button type="button" data-look-button="quiet">Quiet book</button>
+        <button type="button" data-look-button="workbench">Workbench</button>
+        <button type="button" data-look-button="notebook">Notebook</button>
+      </div>
+      <div class="bar-set" role="group" aria-label="Colours">
+        <button type="button" data-theme-button="light">Light</button>
+        <button type="button" data-theme-button="dark">Dark</button>
+        <button type="button" data-theme-button="system">System</button>
+      </div>
+      <span class="bar-hint">Arrow keys switch the look when no control has the focus</span>
+    </div>
+
+    <script>
+      const looks = ["quiet", "workbench", "notebook"];
+      const root = document.documentElement;
+
+      function show() {
+        for (const button of document.querySelectorAll<HTMLElement>("[data-look-button]")) {
+          button.setAttribute("aria-pressed", String(button.dataset.lookButton === root.dataset.look));
+        }
+        for (const button of document.querySelectorAll<HTMLElement>("[data-theme-button]")) {
+          button.setAttribute("aria-pressed", String(button.dataset.themeButton === root.dataset.theme));
+        }
+      }
+
+      function setLook(look: string) {
+        root.dataset.look = look;
+        const url = new URL(location.href);
+        url.searchParams.set("look", look);
+        history.replaceState(null, "", url);
+        show();
+      }
+
+      function setTheme(theme: string) {
+        root.dataset.theme = theme;
+        try {
+          localStorage.setItem("looks-theme", theme);
+        } catch {}
+        const url = new URL(location.href);
+        if (url.searchParams.has("theme")) {
+          url.searchParams.set("theme", theme);
+          history.replaceState(null, "", url);
+        }
+        show();
+      }
+
+      document.addEventListener("click", (event) => {
+        const button = (event.target as Element).closest<HTMLElement>("button");
+        if (button?.dataset.lookButton) setLook(button.dataset.lookButton);
+        if (button?.dataset.themeButton) setTheme(button.dataset.themeButton);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+        // Arrow keys belong to a control that has the focus: fields, buttons, the sliders on the arrow tips, scrolling formulas.
+        const target = event.target as Element;
+        if (target !== document.body && target !== root) return;
+        const step = event.key === "ArrowRight" ? 1 : -1;
+        setLook(looks[(looks.indexOf(root.dataset.look!) + step + looks.length) % looks.length]);
+      });
+
+      show();
+    </script>
+  </body>
+</html>

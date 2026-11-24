@@ -1,0 +1,69 @@
+{/* PROTOTYPE, throwaway (issue #14). The same text in all three looks. Not an approved lesson. */}
+
+# Two steps, one arrow
+
+## A puzzle
+
+A delivery robot obeys two commands. The first moves it 3 tiles right and 2 tiles up. The second moves it 1 tile left and 2 tiles up. It starts on tile $(0, 0)$.
+
+**Before you read on:** on which tile does it stop? Would it stop on a different tile if it obeyed the second command first?
+
+## Arrows
+
+Draw each command as an arrow. Write an arrow as two numbers, its **components**: $x$, how far right, and $y$, how far up. A step to the left is a negative $x$.
+
+$$
+\mathbf{a} = \begin{bmatrix} 3 \\ 2 \end{bmatrix} \qquad \mathbf{b} = \begin{bmatrix} -1 \\ 2 \end{bmatrix}
+$$
+
+The letter **a** is bold to show that it names an arrow and not a single number.
+
+## Try it
+
+Set the two arrows to any commands you like. Say where the robot stops before you look.
+
+[[INTERACTION: the existing AddArrows component]]
+
+## Why the components add
+
+Steps to the right and steps up do not disturb each other. Moving up never changes how far right you are. So count each kind separately:
+
+$$
+\mathbf{a} + \mathbf{b} = \begin{bmatrix} 3 + (-1) \\ 2 + 2 \end{bmatrix} = \begin{bmatrix} 2 \\ 4 \end{bmatrix}
+$$
+
+The robot stops on tile $(2, 4)$. The order does not matter, because $3 + (-1) = (-1) + 3$ and $2 + 2$ is the same either way round.
+
+> **Key idea.** To add two arrows, add their $x$ components, and add their $y$ components.
+
+> **A common mistake.** The length of the sum is usually *not* the sum of the lengths. Walking 3 right and then 3 left is a walk of 6 tiles, yet it ends where it began.
+
+## The same sum in Python
+
+Python can hold an arrow as a list. `a[0]` is the first number of the list and `a[1]` is the second.
+
+```python
+a = [3, 2]
+b = [-1, 2]
+print([a[0] + b[0], a[1] + b[1]])
+```
+
+[[RUN/RESET: button reveals the text below, labelled "Expected output. No code runs here."]]
+
+```
+[2, 4]
+```
+
+## Your turn
+
+1. The robot starts at $(0, 0)$ and obeys $(4, -1)$ and then $(-2, 3)$. Where does it stop?
+   - Hint: work out the total right, then the total up.
+   - Answer: $(4 + (-2),\ -1 + 3) = (2, 2)$.
+2. Find the one command that undoes $(3, 2)$.
+   - Hint: after both commands the robot must be back on $(0, 0)$.
+   - Answer: $(-3, -2)$, because $3 + (-3) = 0$ and $2 + (-2) = 0$.
+
+## Margin notes (beside the text where a look has room, otherwise in place)
+
+- Beside "Arrows": An arrow says how far and which way. It does not say where you start.
+- Beside "Why the components add": This is the first result of the book that you can prove yourself. It rests on one fact: for ordinary numbers, $p + q = q + p$.

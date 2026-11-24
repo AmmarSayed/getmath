@@ -1,0 +1,65 @@
+---
+// PROTOTYPE, throwaway. Look 1: a calm, well-set printed book. One column, margin notes, a wide figure.
+import AddArrows from "../arrows/AddArrows.svelte";
+import RunReset from "./RunReset.svelte";
+import * as c from "./content";
+---
+
+<div class="look quiet">
+  <p class="q-mark"><span>{c.mark}</span></p>
+  <article class="q-page">
+    <p class="q-kicker">Chapter sample</p>
+    <h1>{c.title}</h1>
+
+    <section class="q-sec">
+      <h2><span class="q-num">1</span>A puzzle</h2>
+      {c.puzzle.map((p) => <p set:html={p} />)}
+    </section>
+
+    <section class="q-sec">
+      <h2><span class="q-num">2</span>Arrows</h2>
+      <aside class="q-note"><span class="q-note-label">Note</span> {c.notes.arrows}</aside>
+      <p set:html={c.arrows.before} />
+      <Fragment set:html={c.arrows.formula} />
+      <p set:html={c.arrows.after} />
+    </section>
+
+    <section class="q-sec">
+      <h2><span class="q-num">3</span>Try it</h2>
+      <p>{c.tryIt}</p>
+      <figure class="q-figure">
+        <AddArrows client:visible />
+      </figure>
+    </section>
+
+    <section class="q-sec">
+      <h2><span class="q-num">4</span>Why the components add</h2>
+      <aside class="q-note"><span class="q-note-label">Note</span> <Fragment set:html={c.notes.why} /></aside>
+      <p>{c.why.before}</p>
+      <Fragment set:html={c.why.formula} />
+      <p set:html={c.why.after} />
+      <p class="q-key" set:html={c.why.key} />
+      <p class="q-key q-mistake" set:html={c.why.mistake} />
+    </section>
+
+    <section class="q-sec">
+      <h2><span class="q-num">5</span>The same sum in Python</h2>
+      <p set:html={c.python.intro} />
+      <pre class="q-code" tabindex="0"><code>{c.python.code}</code></pre>
+      <RunReset client:visible output={c.python.output} label={c.python.label} />
+    </section>
+
+    <section class="q-sec">
+      <h2><span class="q-num">6</span>Your turn</h2>
+      <ol class="q-exercises">
+        {c.exercises.map((e) => (
+          <li>
+            <p set:html={e.question} />
+            <details><summary>Hint</summary><p set:html={e.hint} /></details>
+            <details><summary>Answer</summary><p set:html={e.answer} /></details>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </article>
+</div>
