@@ -1,5 +1,13 @@
+<script module lang="ts">
+  import { sumLimit } from "./state";
+
+  /** The drawing goes from minus this to this, both ways. */
+  export const drawingEdge = sumLimit + 2;
+</script>
+
 <script lang="ts">
-  import { add, sumLimit, type Arrows, type Vector } from "./state";
+  import type { Snippet } from "svelte";
+  import { add, clamp, type Arrows, type Vector } from "./state";
   import { numeral } from "./words";
 
   interface Props {
@@ -7,13 +15,14 @@
     sum: Vector | undefined;
     prediction: Vector | undefined;
     describedby: string;
+    /** What lies over the drawing. */
+    children?: Snippet;
   }
 
-  const { arrows, sum, prediction, describedby }: Props = $props();
+  const { arrows, sum, prediction, describedby, children }: Props = $props();
   const { a, b } = $derived(arrows);
 
   const origin: Vector = { x: 0, y: 0 };
-  const edge = sumLimit + 2;
   const steps = Array.from({ length: 2 * sumLimit + 1 }, (_, i) => i - sumLimit);
   const grid = steps.map((i) => `M${i} ${-sumLimit}V${sumLimit}M${-sumLimit} ${i}H${sumLimit}`).join("");
   const ticks = steps.filter((i) => i && i % 4 === 0);
@@ -30,7 +39,6 @@
   const turnsLeft = $derived(a.x * b.y - a.y * b.x > 0);
   const label = $derived({ a: beside(a, !turnsLeft), b: beside(b, turnsLeft) });
 
-  const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
   const sumLabel = $derived(sum && { x: clamp(sum.x, sumLimit), y: sum.y + (sum.y < 0 ? -0.9 : 0.9) });
 </script>
 
@@ -52,46 +60,53 @@
   </g>
 {/snippet}
 
-<svg viewBox="{-edge} {-edge} {2 * edge} {2 * edge}" role="img" aria-label="Arrows on a grid" aria-describedby={describedby}>
-  <path class="grid" d={grid} />
-  <path class="axes" d="M{-sumLimit} 0H{sumLimit}M0 {-sumLimit}V{sumLimit}" />
-  {#each ticks as tick (tick)}
-    <text class="tick" x={tick} y="0.7">{numeral(tick)}</text>
-    <text class="tick" x="-0.6" y={-tick}>{numeral(tick)}</text>
-  {/each}
-  <text class="tick" x={sumLimit + 0.8} y="0">x</text>
-  <text class="tick" x="0" y={-sumLimit - 0.8}>y</text>
+<div class="drawing">
+  <svg viewBox="{-drawingEdge} {-drawingEdge} {2 * drawingEdge} {2 * drawingEdge}" role="img" aria-label="Arrows on a grid" aria-describedby={describedby}>
+    <path class="grid" d={grid} />
+    <path class="axes" d="M{-sumLimit} 0H{sumLimit}M0 {-sumLimit}V{sumLimit}" />
+    {#each ticks as tick (tick)}
+      <text class="tick" x={tick} y="0.7">{numeral(tick)}</text>
+      <text class="tick" x="-0.6" y={-tick}>{numeral(tick)}</text>
+    {/each}
+    <text class="tick" x={sumLimit + 0.8} y="0">x</text>
+    <text class="tick" x="0" y={-sumLimit - 0.8}>y</text>
 
-  {#if sum}
-    {@render arrow("sum", origin, sum)}
-    {#if length(a) && length(b)}
-      {@render arrow("copy", a, add(a, b))}
+    {#if sum}
+      {@render arrow("sum", origin, sum)}
+      {#if length(a) && length(b)}
+        {@render arrow("copy", a, add(a, b))}
+      {/if}
     {/if}
-  {/if}
-  {@render arrow("b", origin, b)}
-  {@render arrow("a", origin, a)}
-  {#if prediction}
-    {@const { x, y } = prediction}
-    <path class="prediction" data-x={x} data-y={y} d="M{x - 0.4} {-y - 0.4}l.8 .8m0 -.8l-.8 .8" />
-  {/if}
+    {@render arrow("b", origin, b)}
+    {@render arrow("a", origin, a)}
+    {#if prediction}
+      {@const { x, y } = prediction}
+      <path class="prediction" data-x={x} data-y={y} d="M{x - 0.4} {-y - 0.4}l.8 .8m0 -.8l-.8 .8" />
+    {/if}
 
-  <text class="a" x={label.a.x} y={-label.a.y}>a</text>
-  <text class="b" x={label.b.x} y={-label.b.y}>b</text>
-  {#if sumLabel}
-    <text class="sum" x={sumLabel.x} y={-sumLabel.y}>a + b</text>
-  {/if}
-</svg>
+    <text class="a" x={label.a.x} y={-label.a.y}>a</text>
+    <text class="b" x={label.b.x} y={-label.b.y}>b</text>
+    {#if sumLabel}
+      <text class="sum" x={sumLabel.x} y={-sumLabel.y}>a + b</text>
+    {/if}
+  </svg>
+  {@render children?.()}
+</div>
 
 <style>
-  svg {
-    display: block;
-    width: 100%;
+  .drawing {
+    position: relative;
     max-width: 32rem;
     margin: 0 auto;
     --a: var(--link);
     --b: light-dark(#a03c00, #ffb37a);
     --sum: light-dark(#6b2fa0, #d4b0ff);
     --faint: light-dark(#d5d8dd, #3a3f4a);
+  }
+
+  svg {
+    display: block;
+    width: 100%;
   }
 
   .grid,
@@ -170,7 +185,7 @@
 
   /* Browsers leave the colours of drawings alone, so the drawing takes the system's. */
   @media (forced-colors: active) {
-    svg {
+    .drawing {
       --a: CanvasText;
       --b: CanvasText;
       --sum: CanvasText;

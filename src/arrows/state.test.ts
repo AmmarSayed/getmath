@@ -9,6 +9,7 @@ import {
   visibleSum,
   withComponent,
   withPrediction,
+  withTip,
   type Arrows,
   type State,
 } from "./state";
@@ -57,6 +58,29 @@ describe("changing an arrow", () => {
 
   test.each([-5, 5, 1.5, NaN, Infinity])("%d is refused", (value) => {
     expect(withComponent(start, "a", "x", value)).toBeUndefined();
+  });
+});
+
+describe("moving a tip", () => {
+  test.each([
+    ["onto the grid", { x: 1.4, y: -2.6 }, { x: 1, y: -3 }],
+    ["not beyond the bounds", { x: 4.6, y: -100 }, { x: 4, y: -4 }],
+    ["to the start, with no negative zero", { x: -0.3, y: 0.3 }, { x: 0, y: 0 }],
+  ])("it goes %s", (_, point, tip) => {
+    const moved = withTip(start, "b", point);
+    expect(moved.b).toEqual(tip);
+    expect(moved.a).toEqual({ x: 3, y: 2 });
+    expect(start.b).toEqual({ x: -1, y: 2 });
+  });
+
+  test("the state stays the same while the tip stays at its place", () => {
+    expect(withTip(start, "a", { x: 3.4, y: 1.6 })).toBe(start);
+  });
+
+  test("the result is the same as with the components", () => {
+    const submitted = predict(start, 2, 4);
+    const components = withComponent(withComponent(submitted, "a", "x", -4)!, "a", "y", 1)!;
+    expect(withTip(submitted, "a", { x: -4, y: 1 })).toEqual(components);
   });
 });
 
