@@ -1,3 +1,14 @@
+/* Follows the system setting, also for what the browser draws itself. */
+:root {
+  color-scheme: light dark;
+  color: light-dark(#1b1b1b, #e4e6ea);
+  background: light-dark(#fff, #16181d);
+}
+
+a {
+  color: light-dark(#0b4fb3, #9cc3ff);
+}
+
 body {
   max-width: 40rem;
   margin: 0 auto;
@@ -9,4 +20,15 @@ body {
   padding: 0.5rem 1rem;
   border: 2px solid;
   font-weight: bold;
+}
+
+.formula {
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  /* Room for drawn parts that reach outside the formula's own box. */
+  padding: 0.5rem 0;
+}
+
+.formula > .katex-display {
+  margin: 0;
 }

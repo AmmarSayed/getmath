@@ -1,5 +1,8 @@
+import { satteri } from "@astrojs/markdown-satteri";
 import mdx from "@astrojs/mdx";
 import { defineConfig } from "astro/config";
+import { formulas } from "./src/formulas.ts";
+import { thirdParty } from "./src/third-party.ts";
 
 // GitHub Pages serves the project below the domain root, so every internal
 // link and asset must start with this base path.
@@ -9,6 +12,9 @@ export default defineConfig({
   trailingSlash: "always",
   // Separate style files are cached between pages, and tested under the base path.
   build: { inlineStylesheets: "never" },
-  integrations: [mdx()],
+  markdown: { processor: satteri({ features: { math: true }, mdastPlugins: formulas }) },
+  integrations: [mdx(), thirdParty()],
+  // Small fonts stay files of their own, so that what the site distributes can be checked.
+  vite: { build: { assetsInlineLimit: 0 } },
   server: { host: "127.0.0.1", port: 4321 },
 });

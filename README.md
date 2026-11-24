@@ -35,6 +35,8 @@ status: technical-test
 
 The status sets the label that readers see. The allowed statuses are in `src/statuses.ts`, and a page without one of them fails the build.
 
+A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or between `$$` lines on its own line. KaTeX draws it during the build, and a formula that it cannot draw fails the build. A dollar sign that is not a formula is written `\$`.
+
 ## Licences
 
 | Material | Licence |

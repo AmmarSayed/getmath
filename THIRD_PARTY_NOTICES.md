@@ -1,16 +1,21 @@
 # Third-party notices
 
-Material from others that GetMath uses (`CHARTER.md` section 7). Nothing here has been changed. Exact versions are in `package.json`, `pnpm-lock.yaml` and `.github/workflows/`.
+Material from others that GetMath uses (`CHARTER.md` section 7). Nothing here has been changed, except as stated. Exact versions are in `package.json`, `pnpm-lock.yaml` and `.github/workflows/`.
 
 ## Distributed with the site
 
-None. The built pages hold only GetMath's own HTML, styles and images.
+| Item | Package | Creator | Licence | Source |
+| --- | --- | --- | --- | --- |
+| katex | katex | Khan Academy and other contributors | MIT | <https://github.com/KaTeX/KaTeX> |
+| KaTeX fonts | katex | Design Science, Inc. (MathJax) and Khan Academy | OFL-1.1 | <https://github.com/KaTeX/katex-fonts> |
+
+The site serves KaTeX's styles and fonts, and formulas that KaTeX has drawn. The build joins the styles with GetMath's own and adds a code to each font's file name; the fonts themselves are unchanged. The fonts' repository is under MIT, but the fonts themselves state OFL-1.1, so the terms of both are kept. Each build publishes the full terms as `third-party-licences.txt`, linked from every page. The tests compare this table with what the build distributes, and the licence of each font with the one in the font itself.
 
 ## Used to build the site
 
 | Item | Creator | Licence | Source |
 | --- | --- | --- | --- |
-| astro, @astrojs/mdx | The Astro authors | MIT | <https://github.com/withastro/astro> |
+| astro, @astrojs/mdx, @astrojs/markdown-satteri | The Astro authors | MIT | <https://github.com/withastro/astro> |
 | zod, through `astro/zod` | Colin McDonnell | MIT | <https://github.com/colinhacks/zod> |
 
 ## Used only in development and testing
@@ -27,8 +32,10 @@ None. The built pages hold only GetMath's own HTML, styles and images.
 | actions/checkout, actions/setup-node, actions/upload-artifact | GitHub | MIT | <https://github.com/actions> |
 | pnpm/action-setup | pnpm contributors | MIT | <https://github.com/pnpm/action-setup> |
 
-These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of them is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
+These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages in these two tables is copied into this repository or distributed with the site, so each carries its own notices when it is installed.
 
 ## Licence texts
 
 `LICENSE-TEXT` and `LICENSE-DATA` are the legal texts of CC BY 4.0 and CC0 1.0, copied from <https://creativecommons.org>. Creative Commons dedicates its licence texts to the public domain under CC0.
+
+`src/licences/katex-fonts.txt` holds the notice in the KaTeX fonts' own data, with the fonts' names joined into one list, and the text of the SIL Open Font License 1.1, copied from <https://github.com/spdx/license-list-data>.
