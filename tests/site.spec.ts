@@ -2,7 +2,7 @@ import { globSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { expectArrowKeyScrolls } from "./mac";
+import { expectArrowKeyScrolls } from "./webkit";
 import { openPage } from "./open-page";
 
 /** Turns files such as `a/index.html` and `a.mdx` into page paths such as `a/`. */

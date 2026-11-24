@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { listen } from "./listen";
-import { expectArrowKeyScrolls, expectFocusAfterClick } from "./mac";
+import { expectArrowKeyScrolls, expectFocusAfterClick } from "./webkit";
 import { openPage } from "./open-page";
 
 // The only source of the program and of its output.
