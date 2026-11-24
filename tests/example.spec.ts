@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { listen } from "./listen";
@@ -123,6 +123,47 @@ test("running needs no request and loads no Python", async ({ page }) => {
   expect(requests).toEqual([]);
   expect(await resources()).toBe(before);
   expect(await page.evaluate(() => "loadPyodide" in window || "pyodide" in window)).toBe(false);
+});
+
+const colab = "https://colab.research.google.com/github/AmmarSayed/getmath/blob/main/notebooks/add-vectors.ipynb";
+const notebookLink = (page: Page) => page.getByRole("link", { name: "open the same program in a Colab notebook" });
+
+test("the notebook link is derived from the example, and says what Colab is", async ({ page }) => {
+  await expect(notebookLink(page)).toBeVisible();
+  await expect(notebookLink(page)).toHaveAttribute("href", colab);
+  const paragraph = page.locator("p.notebook");
+  await expect(paragraph).toContainText("outside service");
+  await expect(paragraph).toContainText("only online");
+  await expect(paragraph).toContainText("Google account");
+  await expect(paragraph).toContainText("works fully without it");
+  expect(existsSync("notebooks/add-vectors.ipynb")).toBe(true);
+  // No badge image.
+  await expect(paragraph.locator("img")).toHaveCount(0);
+});
+
+test("nothing is requested from Colab, or prepared for it, until the link is followed", async ({ page, context }) => {
+  const requests: string[] = [];
+  context.on("request", (sent) => requests.push(sent.url()));
+  await page.reload();
+  await openPage(page, "", true);
+  await run(page).click();
+  await reset(page).click();
+  await notebookLink(page).focus();
+  await notebookLink(page).hover();
+  await page.evaluate(() => new Promise((done) => setTimeout(done, 300)));
+  expect(requests.filter((url) => /google|colab/.test(new URL(url).hostname))).toEqual([]);
+  expect(await page.locator('link[rel~="preconnect"], link[rel~="prefetch"], link[rel~="dns-prefetch"], link[rel~="prerender"]').count()).toBe(0);
+  await expect(notebookLink(page)).not.toHaveAttribute("rel", /prefetch|preconnect/);
+});
+
+test.describe("the notebook link without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("is shown, and leads to the same notebook", async ({ page }) => {
+    await page.goto("./");
+    await expect(notebookLink(page)).toBeVisible();
+    await expect(notebookLink(page)).toHaveAttribute("href", colab);
+  });
 });
 
 for (const colorScheme of ["light", "dark"] as const) {

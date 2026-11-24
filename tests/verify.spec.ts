@@ -11,9 +11,10 @@ test.setTimeout(180_000);
 
 /** Copies what the verify command reads into `folder`, takes the built pages from `dist`, and runs it there. */
 async function setUp(folder: string, dist = "dist") {
-  for (const item of ["scripts", "docs", "pyproject.toml", "uv.lock", ".python-version"]) {
+  for (const item of ["scripts", "docs", "notebooks", "pyproject.toml", "uv.lock", ".python-version"]) {
     await cp(item, join(folder, item), { recursive: true });
   }
+  await cp("src/statuses.ts", join(folder, "src/statuses.ts"));
   await cp("src/snippets", join(folder, "src/snippets"), { recursive: true, filter: (path) => !path.endsWith(".astro") });
   if (dist !== join(folder, "dist")) await cp(dist, join(folder, "dist"), { recursive: true });
   return {
@@ -51,11 +52,13 @@ test("an output file that differs from what Python prints fails, and both are sh
     text.replace("<samp>[4, 3]", "<samp>[4, 4]").replace("[0,&quot;[4, 3]", "[0,&quot;[4, 4]"),
   );
   const result = await copy.verify("--no-build");
-  expect(result.output.trim().split(/\r?\n/)).toEqual([
+  // The notebook is made from the wrong output, so it differs too, and is listed after.
+  expect(result.output.trim().split(/\r?\n/).slice(0, 3)).toEqual([
     "add-vectors: the output differs from add-vectors.txt",
     String.raw`  expected: '[4, 4]\n'`,
     String.raw`  actual:   '[4, 3]\n'`,
   ]);
+  expect(result.output).toContain("notebooks/add-vectors.ipynb differs");
   expect(result.passed).toBe(false);
 });
 
@@ -208,4 +211,75 @@ test("a lock file that does not match the project fails", async ({}, testInfo) =
   const result = await copy.verify("--no-build");
   expect(result.output).toMatch(/lock/i);
   expect(result.passed).toBe(false);
+});
+
+test("the notebook carries the label, the licences and the warning about Colab's environment", async () => {
+  const notebook = JSON.parse(await readFile("notebooks/add-vectors.ipynb", "utf8"));
+  const text = notebook.cells[0].source.join("");
+  expect(text).toContain("Technical test, not a lesson");
+  expect(text).toContain("MIT");
+  expect(text).toContain("CC BY 4.0");
+  expect(text).toContain("Colab's own Python is not the same one");
+  expect(notebook.cells[1].source.join("")).toBe(await readFile("src/snippets/add-vectors.py", "utf8"));
+  expect(notebook.cells[1].outputs[0].text.join("")).toBe(await readFile("src/snippets/add-vectors.txt", "utf8"));
+});
+
+test("a notebook that differs from its program fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await copy.change("notebooks/add-vectors.ipynb", (text) => text.replace("u = [3, 1]", "u = [3, 9]"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("notebooks/add-vectors.ipynb differs from its program and output");
+  expect(result.passed).toBe(false);
+});
+
+test("a notebook that is not stored fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await rm(copy.path("notebooks/add-vectors.ipynb"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("add-vectors: has no notebooks/add-vectors.ipynb");
+  expect(result.passed).toBe(false);
+});
+
+test("a notebook without a program and output fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await cp(copy.path("notebooks/add-vectors.ipynb"), copy.path("notebooks/orphan.ipynb"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("notebooks/orphan.ipynb: no program and output");
+  expect(result.passed).toBe(false);
+});
+
+test("a label that changed in the site makes the notebook differ", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await copy.change("src/statuses.ts", (text) => text.replace("Technical test, not a lesson", "A different label"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("notebooks/add-vectors.ipynb differs");
+  expect(result.passed).toBe(false);
+});
+
+test("a program that runs as a file but not in a notebook fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  // Only a program run as a file has a name for it.
+  await writeFile(copy.path("src/snippets/file.py"), "print(__file__ != '')\n");
+  await writeFile(copy.path("src/snippets/file.txt"), "True\n");
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("file: the notebook did not run");
+  expect(result.output).toContain("NameError");
+  expect(result.passed).toBe(false);
+});
+
+test("a page that links to a notebook that does not exist fails", async ({}, testInfo) => {
+  const copy = await setUp(testInfo.outputPath("copy"));
+  await copy.change("dist/index.html", (text) => text.replace("notebooks/add-vectors.ipynb", "notebooks/ghost.ipynb"));
+  const result = await copy.verify("--no-build");
+  expect(result.output).toContain("a link to the notebook 'ghost', which does not exist");
+  expect(result.passed).toBe(false);
+});
+
+test("an example without a notebook does not build", async ({}, testInfo) => {
+  const site = testInfo.outputPath("site");
+  const metadata = "title: Extra\ndescription: An extra page.\nstatus: technical-test";
+  const text = 'import Example from "../../snippets/Example.astro";\n\n<Example name="add-vectors" />';
+  const built = await buildWithPage(site, metadata, text, false);
+  expect(built.built).toBe(false);
+  expect(built.output).toContain("needs notebooks/add-vectors.ipynb");
 });
