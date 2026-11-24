@@ -4,6 +4,7 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,3 +43,24 @@ jobs:
             test-results/
             !test-results/**/node_modules/
           retention-days: 7
+      # Last, so that what is published is the build that passed, not a second one.
+      - if: github.ref == 'refs/heads/main' && github.event.repository.has_pages
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist/
+
+  # Skipped while GitHub Pages is off, so later pushes cannot publish a site that was taken down.
+  deploy:
+    needs: checks
+    if: github.ref == 'refs/heads/main' && github.event.repository.has_pages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

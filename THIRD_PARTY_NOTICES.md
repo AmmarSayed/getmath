@@ -29,7 +29,7 @@ The site serves KaTeX's styles and fonts, and formulas that KaTeX has drawn. The
 | Chromium, Firefox and WebKit builds that Playwright downloads | The Chromium, Mozilla and WebKit projects | BSD-3-Clause, MPL-2.0, and LGPL-2.1 with BSD-2-Clause, with the notices in each download | <https://playwright.dev/docs/browsers> |
 | @types/node | DefinitelyTyped contributors | MIT | <https://github.com/DefinitelyTyped/DefinitelyTyped> |
 | pnpm | pnpm contributors | MIT | <https://github.com/pnpm/pnpm> |
-| actions/checkout, actions/setup-node, actions/upload-artifact | GitHub | MIT | <https://github.com/actions> |
+| actions/checkout, actions/setup-node, actions/upload-artifact, actions/upload-pages-artifact, actions/deploy-pages | GitHub | MIT | <https://github.com/actions> |
 | pnpm/action-setup | pnpm contributors | MIT | <https://github.com/pnpm/action-setup> |
 
 These packages bring further packages with them, listed in `pnpm-lock.yaml`. `pnpm licenses list` prints the licence of each one. Most are MIT, ISC, BSD or Apache-2.0; the copyleft ones are axe-core and lightningcss (MPL-2.0) and sharp's copy of libvips (LGPL-3.0-or-later). None of the packages used only to build, develop or test the site is copied into this repository or distributed with the site, so each carries its own notices when it is installed.

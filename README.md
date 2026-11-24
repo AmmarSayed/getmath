@@ -19,7 +19,7 @@ You need Git, Python 3 and [Node.js](https://nodejs.org) at the version in `.nvm
 | `pnpm test` | Builds the site, then tests that build in Chromium, Firefox and WebKit. Stop `pnpm dev` and `pnpm preview` first |
 | `python3 scripts/check_toc.py` | Checks the table of contents against the gap assessment. On Windows the command may be `python` or `py` |
 
-The same checks run on every pull request, in `.github/workflows/checks.yml`.
+The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`.
 
 ## Pages
 
@@ -36,6 +36,15 @@ status: technical-test
 The status sets the label that readers see. The allowed statuses are in `src/statuses.ts`, and a page without one of them fails the build.
 
 A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or between `$$` lines on its own line. KaTeX draws it during the build, and a formula that it cannot draw, or that has a link, an image or HTML, fails the build. A dollar sign that is not a formula is written `\$`.
+
+## Publishing
+
+The site is meant for <https://ammarsayed.github.io/getmath/>. While GitHub Pages is on, each push to `main` that passes every check publishes the build that was checked. While it is off, nothing is published. Ammar is asked before the first deployment (`CHARTER.md` section 8).
+
+- **Turn it on:** `gh api -X POST repos/AmmarSayed/getmath/pages -f build_type=workflow`. Check that `gh api repos/AmmarSayed/getmath/environments/github-pages/deployment-branch-policies --jq '.branch_policies[].name'` prints only `main`, so that no other branch can publish. Then run `gh workflow run checks.yml --ref main`.
+- **Publish again:** use that last command, not "Re-run all jobs", which would publish the older commit or fail.
+- **Check the published site:** build the same commit with `pnpm build`, set the environment variable `SITE_URL` to `https://ammarsayed.github.io/getmath/`, and run `pnpm exec playwright test site.spec.ts`. Copies can be up to ten minutes old just after publishing.
+- **Take it down:** `gh api -X DELETE repos/AmmarSayed/getmath/pages`. Later pushes are checked but not published. Without `gh`, open Settings → Pages on GitHub, set the source to "Deploy from a branch", choose the branch "None" and save. Do not use "Unpublish site" for this, because the next push to `main` would publish again. Then open the address to see that it is gone; copies can last ten minutes.
 
 ## Licences
 
