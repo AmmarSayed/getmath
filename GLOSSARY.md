@@ -36,6 +36,10 @@ _Avoid_: Phase, release
 
 ### Testing
 
+**Proof of concept**:
+The small site that tests the technology before the pilot. Its machinery becomes the book's foundation; only its sample page is deleted.
+_Avoid_: Demo, prototype, pilot
+
 **Pilot**:
 The first chapter built, on vectors, to test the method. It is later deleted and its subject is written again in reading order.
 _Avoid_: Sample chapter, draft chapter
