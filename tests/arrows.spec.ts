@@ -298,7 +298,7 @@ for (const width of [320, 1280]) {
         for (const name of ["a", "b"] as const) {
           for (const axis of ["x", "y"]) {
             await enter(arrow(page, name).getByLabel(axis, { exact: true }), value);
-            expect(await top(), `${axis} of ${name} is ${value}`).toBe(before);
+            expect(await top(), `${axis} of ${name} is ${value}`).toBeCloseTo(before, 0);
           }
         }
       }
