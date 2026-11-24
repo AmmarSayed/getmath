@@ -29,3 +29,17 @@ Ammar is the project owner, ChatGPT leads curriculum and independent review, and
 - Introduce every symbol and prerequisite before using it, or explain it at the point of need.
 - Give every graphical interaction an accessible alternative that meets the same learning objective (WCAG 2.2 AA).
 - Public source is not approved instruction: label unfinished content with its validation status.
+
+## Agent skills
+
+### Issue tracker
+
+Tickets are GitHub issues on `AmmarSayed/getmath`; approved chapter specifications are committed to the repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default roles, each label named after its role. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md`, with decisions in `DECISIONS.md`. See `docs/agents/domain.md`.
