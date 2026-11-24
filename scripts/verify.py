@@ -1,4 +1,5 @@
-"""Build the site, then check the table of contents, every displayed Python program and output, and every Colab notebook.
+"""Build the site, then check the table of contents, the table of data, every displayed Python program and output,
+and every Colab notebook.
 
 With --no-build, check the pages that are already in dist."""
 
@@ -61,6 +62,23 @@ def check_toc():
     errors.extend(f"table of contents: {line}" for line in lines)
     if not lines:
         errors.append(f"table of contents: check_toc.py printed nothing, with exit code {done.returncode}")
+
+
+def check_datasets():
+    """Reproduces the table of data. Its known differences are shown on every run."""
+    command = [sys.executable, "-I", "-X", "utf8", str(ROOT / "scripts" / "check_datasets.py")]
+    try:
+        done = subprocess.run(command, capture_output=True, encoding="utf-8", timeout=600)
+    except subprocess.TimeoutExpired:
+        errors.append("datasets: check_datasets.py did not finish in 600 seconds")
+        return
+    lines = (done.stdout + done.stderr).strip().splitlines()
+    if done.returncode == 0 and lines and not done.stderr:
+        print("\n".join(lines[:-1]))
+        return lines[-1].removeprefix("OK: ")
+    errors.extend(f"datasets: {line}" for line in lines)
+    if not lines:
+        errors.append(f"datasets: check_datasets.py printed nothing, with exit code {done.returncode}")
 
 
 def run_programs():
@@ -223,8 +241,9 @@ def check_pages(known):
 # In case a Windows terminal cannot show what a problem quotes.
 sys.stdout.reconfigure(encoding="utf-8")
 toc = check_toc()
+datasets = check_datasets()
 known = run_programs()
 notebooks = check_notebooks(known)
 pages, shown = check_pages(known) if "--no-build" in sys.argv or build() else (0, 0)
-print("\n".join(errors) or f"OK: {toc}; {len(known)} programs, {notebooks} notebooks, {pages} pages, {shown} displayed programs and outputs")
+print("\n".join(errors) or f"OK: {toc}; datasets: {datasets}; {len(known)} programs, {notebooks} notebooks, {pages} pages, {shown} displayed programs and outputs")
 sys.exit(bool(errors))
