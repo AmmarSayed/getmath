@@ -5,12 +5,13 @@ import { promisify } from "node:util";
 
 const execute = promisify(execFile);
 
-/** Builds a copy of the site in `folder`, with one extra page made of `metadata` and `text`. */
-export async function buildWithPage(folder: string, metadata: string, text = "Text.") {
+/** Builds a copy of the site in `folder`, with one extra page made of `metadata` and `text`, and the notebooks unless `notebooks` is false. */
+export async function buildWithPage(folder: string, metadata: string, text = "Text.", notebooks = true) {
   await mkdir(join(folder, "node_modules"), { recursive: true });
   for (const item of ["src", "public", "astro.config.mjs", "package.json", "tsconfig.json"]) {
     await cp(item, join(folder, item), { recursive: true });
   }
+  if (notebooks) await cp("notebooks", join(folder, "notebooks"), { recursive: true });
   // Link each package, not the folder, so that Astro's cache is not shared.
   // Windows allows a junction without administrator rights.
   for (const name of await readdir("node_modules")) {
