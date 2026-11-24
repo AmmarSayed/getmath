@@ -49,7 +49,7 @@ jobs:
         with:
           path: dist/
 
-  # Skipped while GitHub Pages is off, so turning it off takes the site down for good.
+  # Skipped while GitHub Pages is off, so later pushes cannot publish a site that was taken down.
   deploy:
     needs: checks
     if: github.ref == 'refs/heads/main' && github.event.repository.has_pages

@@ -2,18 +2,19 @@ import { defineConfig, devices } from "@playwright/test";
 
 const ci = Boolean(process.env.CI);
 
-// With SITE_URL, the tests open the published site instead of the local build.
-const published = process.env.SITE_URL;
-const url = published ?? "http://127.0.0.1:4321/getmath/";
+// The tests open the production build, which `pnpm test` makes first. With
+// SITE_URL, they open the published site instead, and compare it with that build.
+const siteUrl = process.env.SITE_URL;
+if (siteUrl && !siteUrl.endsWith("/")) throw new Error("SITE_URL must end with a slash");
+const url = siteUrl || "http://127.0.0.1:4321/getmath/";
 
-// The tests open the production build, which `pnpm test` makes first.
 export default defineConfig({
   testDir: "tests",
   fullyParallel: true,
   forbidOnly: ci,
   reporter: ci ? [["list"], ["github"]] : "list",
   use: { baseURL: url },
-  webServer: published
+  webServer: siteUrl
     ? undefined
     : {
         // Without --ignore-lock, Astro moves the server to the background when an
