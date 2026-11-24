@@ -4,22 +4,23 @@ An open, interactive book on the mathematics behind machine learning.
 
 ## Authority
 
-`CHARTER.md` is the baseline. `DECISIONS.md` records the owner's amendments and prevails where the two differ. This repository, not any conversation, is the project record.
+`CHARTER.md` is the only governing document, and Git history is the decision record. The project record is this repository and its issues, not any conversation.
 
-- Check the approval status at the top of `CHARTER.md` before starting a development stage (section 9). Only Ammar approves the charter, the audit, the table of contents, and chapters.
-- Record significant curriculum, scope, technical, or licensing decisions in `DECISIONS.md` with date, decision, rationale, authority, and consequences. It is the only decision record. Changes to direction wait for Ammar's approval.
-- When you disagree with a decision or another contributor, write up both positions and a recommendation for Ammar (section 7.5).
+- Check the approval status at the top of `CHARTER.md` before starting a stage (section 10). Only Ammar approves the charter, gap assessment, table of contents, and chapters.
+- A significant curriculum, scope, technical, or licensing decision is a change to `CHARTER.md`, with the reason in the commit message. Changes to direction wait for Ammar's approval.
+- Add a document only when an existing one cannot hold the content.
+- When you disagree with a decision or another contributor, write up both positions and a recommendation for Ammar (section 8).
 
 ## Roles
 
-Ammar is the project owner, ChatGPT leads curriculum and independent review, and Claude leads implementation and engineering (section 7.1). An implementer's own checks are evidence; independent review comes from someone else.
+Ammar is the owner and test learner, Claude is the author and engineer, and an assistant from a different AI vendor (currently Codex) is the independent reviewer (section 8). An implementer's own checks are evidence; independent review comes from someone else. Never show Ammar a chapter's hidden test problems before the test.
 
 ## Before you work on
 
-- **Curriculum, chapters, or exercises**: read sections 3, 4, 11, and 12. A chapter starts from an approved specification (section 7.6).
-- **Site code or components**: read section 6 and decisions D3, D4, D10, and D11 in section 10.
-- **Anything from a third party** (text, figure, dataset, font, dependency): read section 5 and record its source and licence in the same change.
-- **Declaring work complete or releasing**: read section 8 and section 14.3.
+- **Curriculum, chapters, or exercises**: read sections 2 to 5. A chapter starts from an approved specification (section 8).
+- **Site code or components**: read section 6.
+- **Anything from a third party** (text, figure, dataset, font, dependency): read section 7 and record its source and licence in the same change.
+- **Declaring work complete or releasing**: read section 9.
 
 ## Rules that are easy to break
 
@@ -42,4 +43,4 @@ The five default roles, each label named after its role. See `docs/agents/triage
 
 ### Domain docs
 
-Single-context: root `GLOSSARY.md`, with decisions in `DECISIONS.md`. See `docs/agents/domain.md`.
+Single-context: root `GLOSSARY.md`, with decisions in `CHARTER.md`. See `docs/agents/domain.md`.

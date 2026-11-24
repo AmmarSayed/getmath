@@ -1,0 +1,5 @@
+# Legally obtained reference copies; never published (CHARTER.md section 7)
+references/local/
+
+# Local delegate lanes; depend on this machine's subscriptions
+.delegate/
