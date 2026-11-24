@@ -1,0 +1,152 @@
+/* PROTOTYPE, throwaway (issue #14). Looks 4 and 5, and the bar for five looks. */
+html[data-look="open"] .look:not(.open),
+html[data-look="steps"] .look:not(.steps) { display: none; }
+html:not([data-js]) [data-js-only] { display: none !important; }
+
+.bar-hint { flex-basis: 100%; }
+.bar-set { flex-wrap: wrap; justify-content: center; }
+
+/* ===== 4. Opening book: the quiet book, widening at the interaction ===== */
+.open {
+  --ink: light-dark(#23201b, #e9e4da);
+  --paper: light-dark(#fbf8f0, #1a1814);
+  --band: light-dark(#f1ecdd, #24211b);
+  --link: light-dark(#0b4fb3, #9cc3ff);
+  --muted: light-dark(#5a5448, #b8b0a0);
+  --rule: light-dark(#bdb49f, #5a5446);
+  --focus: light-dark(#0b4fb3, #ffd479);
+  font: 1.1875rem/1.7 Charter, "Bitstream Charter", "Sitka Text", "Iowan Old Style", Cambria, Georgia, serif;
+}
+.open .o-mark { margin: 0; padding: 1rem 1.5rem 0; text-align: center; font: 0.8125rem/1.2 system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+.open .o-mark span { padding: 0.25rem 0.75rem; border: 1px solid var(--muted); color: var(--muted); }
+.open .o-col { position: relative; max-width: 38rem; margin-left: max(1.5rem, calc(50% - 27rem)); margin-right: 1.5rem; }
+.open .o-kicker { margin: 4rem 0 0; font-size: 0.9375rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.open h1 { margin: 0.4rem 0 3.5rem; font-size: 3rem; line-height: 1.1; font-weight: 400; letter-spacing: -0.01em; }
+.open .o-sec { margin-bottom: 3rem; }
+.open h2 { margin: 0 0 1rem; font-size: 1.5rem; line-height: 1.25; font-weight: 400; font-style: italic; }
+.open .o-num { display: inline-block; min-width: 1.6rem; margin-right: 0.4rem; font-style: normal; color: var(--muted); }
+.open .o-sec > p:not(.o-key) { text-align: justify; hyphens: auto; }
+.open .o-note { margin: 0 0 1rem; font: 0.9375rem/1.5 system-ui, sans-serif; color: var(--muted); }
+.open .o-note-label { display: block; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+@media (min-width: 70rem) {
+  .open .o-note { position: absolute; top: 0.45rem; left: calc(100% + 2.5rem); width: 13rem; margin: 0; }
+}
+/* The widening: a band across the page, with the drawing kept in view beside the controls. */
+.open .o-band { margin: 0 0 3rem; padding: 2.5rem 0; background: var(--band); border-block: 1px solid var(--rule); }
+.open .o-wide { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; font-family: inherit; }
+.open .o-wide > p { max-width: 38rem; }
+.open .o-wide .interaction { font: 1rem/1.55 system-ui, sans-serif; }
+.open .o-wide .interaction .views { top: 1.25rem; }
+@media (min-width: 64rem) {
+  .open .o-wide .interaction { column-gap: 3rem; }
+}
+/* The derivation. */
+.open .o-derive { margin: 1.5rem 0; border-top: 2px solid var(--ink); }
+.open .o-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 0 1.75rem; padding: 0.75rem 0 0.25rem; border-bottom: 1px solid var(--rule); }
+.open .o-row > * { min-width: 0; margin: 0 0 0.6rem; }
+.open .o-head { padding: 0.4rem 0 0.2rem; font: 0.75rem/1.2 system-ui, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.open .o-head > * { margin: 0; }
+.open .o-why { font: 0.9375rem/1.5 system-ui, sans-serif; color: var(--muted); }
+.open .o-why.o-from { font-style: italic; }
+.open .o-row .formula { margin: 0.25rem 0; }
+@media (max-width: 40rem) { .open .o-row { grid-template-columns: minmax(0, 1fr); } .open .o-head { display: none; } }
+.open .o-key { margin: 1.6rem 0; padding: 1rem 0; border-block: 1px solid var(--rule); text-align: center; }
+.open .o-mistake { font-style: italic; }
+/* Numbered notebook steps. */
+.open .o-step { display: grid; grid-template-columns: 4.25rem minmax(0, 1fr); gap: 0.75rem; margin: 1.25rem 0; }
+.open .o-step-no { margin: 0; padding-top: 0.45rem; font: 700 0.8125rem/1.3 ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.open .o-step > div { min-width: 0; padding: 0 0 0.75rem; border-bottom: 1px solid var(--rule); }
+.open .o-code { padding: 0.75rem 1rem; border: 1px solid var(--rule); background: var(--band); font: 1rem/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.open .run { margin-top: 0.75rem; }
+.open .run button { font-family: system-ui, sans-serif; font-size: 0.9375rem; }
+.open .run-label { font-family: system-ui, sans-serif; color: var(--muted); }
+.open .run-out { padding: 0.5rem 1rem; font: 1rem/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.open details { font: 0.9375rem/1.5 system-ui, sans-serif; margin: 0 0 0.25rem; }
+.open summary { display: inline-block; padding: 0.25rem 0; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
+.open details > p { padding-left: 1rem; font: 1.1875rem/1.6 Charter, "Bitstream Charter", Cambria, Georgia, serif; }
+@media (max-width: 40rem) { .open h1 { font-size: 2.25rem; } .open .o-step { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+/* ===== 5. One step at a time ============================================ */
+.steps {
+  --ink: light-dark(#1a211e, #e8ece9);
+  --paper: light-dark(#f7f8f5, #131715);
+  --panel: light-dark(#ecefe9, #1d2320);
+  --line: light-dark(#8d9890, #4a544e);
+  --link: light-dark(#0b4fb3, #9cc3ff);
+  --muted: light-dark(#4a554f, #b0bab4);
+  --focus: light-dark(#0b4fb3, #ffd479);
+  font: 1.25rem/1.7 "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+.steps .s-track { position: sticky; top: 0; z-index: 4; height: 0.4rem; background: var(--line); }
+.steps .s-fill { height: 100%; width: 16.7%; background: var(--ink); transition: width 0.25s; }
+@media (prefers-reduced-motion: reduce) { .steps .s-fill { transition: none; } }
+html:not([data-js]) .steps .s-fill { width: 100%; }
+.steps .s-top { max-width: 44rem; margin: 0 auto; padding: 1.25rem 1.5rem 0; }
+.steps .s-mark { display: inline-block; margin: 0; padding: 0.2rem 0.7rem; border: 1px solid var(--muted); color: var(--muted); font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.steps .s-title { margin: 0.75rem 0 0; font-size: 1rem; color: var(--muted); }
+.steps .s-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.25rem; margin-top: 0.5rem; font-size: 1rem; }
+.steps .s-count { margin: 0; }
+.steps .s-jump { display: flex; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
+.steps .s-jump button { width: 2.75rem; height: 2.75rem; border-radius: 50%; font: 1rem/1 inherit; color: inherit; border: 1px solid var(--line); background: transparent; cursor: pointer; }
+.steps .s-jump button[aria-current="step"] { color: var(--paper); background: var(--ink); border-color: var(--ink); font-weight: 700; }
+.steps .s-all, .steps .s-nav button { min-height: 2.75rem; padding: 0 1.1rem; font: inherit; font-size: 1rem; color: inherit; border: 1px solid var(--ink); border-radius: 0.5rem; background: transparent; cursor: pointer; }
+.steps .s-all { margin-left: auto; }
+.steps button:disabled { opacity: 0.55; cursor: default; }
+.steps .s-main { max-width: 74rem; margin: 0 auto; padding: 2.5rem 1.5rem 1rem; }
+.steps .s-step { max-width: 40rem; margin: 0 auto 4rem; }
+.steps .s-step.s-wide { max-width: 66rem; }
+html[data-js] .steps:not(.all) .s-step:not(.current) { display: none; }
+html[data-js] .steps:not(.all) .s-step { margin-bottom: 2rem; }
+.steps h2 { margin: 0 0 1.5rem; font-size: 2.5rem; line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; }
+.steps h2 { width: fit-content; max-width: 100%; }
+.steps h2:focus { outline: none; }
+.steps h2:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.steps .s-step > p { font-size: 1.5rem; line-height: 1.6; }
+.steps .s-step .formula .katex { font-size: 1.4em; }
+.steps .s-note { padding: 0.75rem 1rem; border: 1px dashed var(--line); border-radius: 0.5rem; font-size: 1.0625rem !important; color: var(--muted); }
+.steps .s-note > span:first-child { margin-right: 0.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8125rem; }
+.steps .s-think { padding: 0.9rem 1.1rem; border-radius: 0.5rem; background: var(--panel); font-size: 1.125rem !important; }
+.steps .s-key { padding: 1rem 1.25rem; border: 2px solid var(--ink); border-radius: 0.5rem; }
+.steps .s-mistake { border-style: dashed; }
+.steps .s-wide .interaction { margin-top: 1.5rem; font-size: 1.0625rem; line-height: 1.55; }
+.steps .s-wide .interaction .views { top: 1.25rem; }
+@media (min-width: 64rem) { .steps .s-wide .interaction { column-gap: 3rem; } }
+.steps .s-code { padding: 1rem 1.25rem; border-radius: 0.5rem; background: var(--panel); border: 1px solid var(--line); font: 1.125rem/1.6 ui-monospace, Menlo, Consolas, monospace; }
+.steps .run { margin-top: 1rem; }
+.steps .run button { border-radius: 0.5rem; font-size: 1.0625rem; }
+.steps .run-out { padding: 0.75rem 1.25rem; border: 1px solid var(--line); border-radius: 0.5rem; font: 1.125rem/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.steps .run-label { color: var(--muted); font-size: 1rem; }
+.steps .s-exercises { margin: 0; padding-left: 1.75rem; font-size: 1.5rem; line-height: 1.6; }
+.steps .s-exercises > li { margin-bottom: 2rem; }
+.steps details { margin: 0.4rem 0; font-size: 1.0625rem; }
+.steps summary { display: inline-block; padding: 0.4rem 0.9rem; border: 1px solid var(--line); border-radius: 2rem; }
+.steps details > p { margin: 0.5rem 0 0; padding: 0.6rem 1rem; border-radius: 0.5rem; background: var(--panel); font-size: 1.25rem; }
+.steps .s-nav { display: flex; justify-content: space-between; gap: 1rem; max-width: 40rem; margin: 0 auto; padding: 0 1.5rem; }
+.steps .s-nav .s-primary { color: var(--paper); background: var(--ink); }
+.steps:is(.all) .s-nav { display: none; }
+@media (max-width: 40rem) {
+  .steps { font-size: 1.125rem; }
+  .steps h2 { font-size: 1.875rem; }
+  .steps .s-step > p, .steps .s-exercises { font-size: 1.25rem; }
+  .steps .s-all { margin-left: 0; }
+  .steps .s-nav button { flex: 1; }
+  .steps .s-jump button { width: 2.75rem; }
+}
+
+/* Hint and Answer as the Workbench has them: boxed, full-width rows with the native triangle that turns on opening.
+   Nothing animates, so reduced motion is respected. Restyled to the page's own colours and type. */
+.quiet .q-reveals, .open .o-reveals { display: grid; gap: 0.5rem; margin: 0.5rem 0 0; }
+:is(.quiet .q-reveals, .open .o-reveals) details {
+  margin: 0; border: 1px solid var(--rule); border-radius: 0.25rem;
+  font: 0.9375rem/1.5 system-ui, sans-serif;
+}
+:is(.quiet .q-reveals, .open .o-reveals) summary {
+  display: list-item; padding: 0.5rem 0.75rem; font-weight: 600; text-decoration: none; color: var(--ink);
+  list-style-position: inside;
+}
+:is(.quiet .q-reveals, .open .o-reveals) summary::marker { color: var(--muted); }
+:is(.quiet .q-reveals, .open .o-reveals) details[open] summary { border-bottom: 1px dotted var(--rule); }
+:is(.quiet .q-reveals, .open .o-reveals) details > p {
+  margin: 0; padding: 0.5rem 0.75rem 0.6rem; text-align: left;
+  font: 1.125rem/1.55 Charter, "Bitstream Charter", "Sitka Text", "Iowan Old Style", Cambria, Georgia, serif;
+}

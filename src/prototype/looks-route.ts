@@ -12,7 +12,7 @@ export function looksRoute(): AstroIntegration {
       },
       "astro:server:start": ({ address, logger }) => {
         if (process.env.LOOKS) {
-          logger.info(`Three looks: http://${address.address}:${address.port}/getmath/looks/?look=quiet|workbench|notebook`);
+          logger.info(`Five looks: http://${address.address}:${address.port}/getmath/looks/?look=quiet|workbench|notebook|open|steps`);
         }
       },
     },

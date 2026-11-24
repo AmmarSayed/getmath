@@ -1,0 +1,99 @@
+---
+// PROTOTYPE, throwaway. Look 4: the quiet book that widens at the interaction. Numbered notebook steps for
+// Python and the exercises, and a derivation (claim, reason) for "Why the components add".
+import AddArrows from "../arrows/AddArrows.svelte";
+import RunReset from "./RunReset.svelte";
+import * as c from "./content";
+
+// The existing sentences, cut at their full stops and before one "because".
+const i1 = c.why.before.indexOf(" Moving");
+const i2 = c.why.before.indexOf(" So count");
+const claim1 = c.why.before.slice(0, i1);
+const reason1 = c.why.before.slice(i1 + 1, i2);
+const claim2 = c.why.before.slice(i2 + 1);
+const j = c.why.after.indexOf(" The order");
+const claim3 = c.why.after.slice(0, j);
+const k = c.why.after.indexOf(" because");
+const claim4 = c.why.after.slice(j + 1, k);
+const reason4 = c.why.after.slice(k + 1);
+---
+
+<div class="look open">
+  <p class="o-mark"><span>{c.mark}</span></p>
+  <div class="o-col">
+    <p class="o-kicker">Chapter sample</p>
+    <h1>{c.title}</h1>
+  </div>
+
+  <section class="o-col o-sec">
+    <h2><span class="o-num">1</span>A puzzle</h2>
+    {c.puzzle.map((p) => <p set:html={p} />)}
+  </section>
+
+  <section class="o-col o-sec">
+    <h2><span class="o-num">2</span>Arrows</h2>
+    <aside class="o-note"><span class="o-note-label">Note</span> {c.notes.arrows}</aside>
+    <p set:html={c.arrows.before} />
+    <Fragment set:html={c.arrows.formula} />
+    <p set:html={c.arrows.after} />
+  </section>
+
+  <section class="o-band">
+    <div class="o-wide">
+      <h2><span class="o-num">3</span>Try it</h2>
+      <p>{c.tryIt}</p>
+      <AddArrows client:visible />
+    </div>
+  </section>
+
+  <section class="o-col o-sec">
+    <h2><span class="o-num">4</span>Why the components add</h2>
+    <aside class="o-note"><span class="o-note-label">Note</span> <Fragment set:html={c.notes.why} /></aside>
+    <div class="o-derive" role="table" aria-label="Derivation, claim and reason">
+      <div class="o-row o-head" role="row"><span role="columnheader">Claim</span><span role="columnheader">Reason</span></div>
+      <div class="o-row" role="row">
+        <p role="cell">{claim1}</p>
+        <p role="cell" class="o-why">{reason1}</p>
+      </div>
+      <div class="o-row" role="row">
+        <div role="cell"><p>{claim2}</p><Fragment set:html={c.why.formula} /></div>
+        <p role="cell" class="o-why o-from">from the row above</p>
+      </div>
+      <div class="o-row" role="row">
+        <p role="cell" set:html={claim3} />
+        <p role="cell" class="o-why o-from">from the row above</p>
+      </div>
+      <div class="o-row" role="row">
+        <p role="cell">{claim4}</p>
+        <p role="cell" class="o-why" set:html={reason4} />
+      </div>
+    </div>
+    <p class="o-key" set:html={c.why.key} />
+    <p class="o-key o-mistake" set:html={c.why.mistake} />
+  </section>
+
+  <section class="o-col o-sec">
+    <h2><span class="o-num">5</span>The same sum in Python</h2>
+    <p set:html={c.python.intro} />
+    <div class="o-step">
+      <p class="o-step-no">Step 1</p>
+      <div>
+        <pre class="o-code" tabindex="0"><code>{c.python.code}</code></pre>
+        <RunReset client:visible output={c.python.output} label={c.python.label} />
+      </div>
+    </div>
+  </section>
+
+  <section class="o-col o-sec">
+    <h2><span class="o-num">6</span>Your turn</h2>
+    {c.exercises.map((e, i) => (
+      <div class="o-step">
+        <p class="o-step-no">Step {i + 2}</p>
+        <div>
+          <p set:html={e.question} />
+          <div class="o-reveals"><details><summary>Hint</summary><p set:html={e.hint} /></details><details><summary>Answer</summary><p set:html={e.answer} /></details></div>
+        </div>
+      </div>
+    ))}
+  </section>
+</div>

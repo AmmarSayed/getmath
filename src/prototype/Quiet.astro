@@ -55,8 +55,7 @@ import * as c from "./content";
         {c.exercises.map((e) => (
           <li>
             <p set:html={e.question} />
-            <details><summary>Hint</summary><p set:html={e.hint} /></details>
-            <details><summary>Answer</summary><p set:html={e.answer} /></details>
+            <div class="q-reveals"><details><summary>Hint</summary><p set:html={e.hint} /></details><details><summary>Answer</summary><p set:html={e.answer} /></details></div>
           </li>
         ))}
       </ol>

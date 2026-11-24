@@ -1,9 +1,12 @@
 ---
-// PROTOTYPE, throwaway (issue #14). One page, three looks, chosen by ?look=quiet|workbench|notebook.
+// PROTOTYPE, throwaway (issue #14). One page, five looks, chosen by ?look=quiet|workbench|notebook|open|steps.
 // Only `pnpm looks` serves it. See looks-route.ts.
 import "katex/dist/katex.min.css";
 import "./looks.css";
+import "./looks-more.css";
 import Notebook from "./Notebook.astro";
+import Open from "./Open.astro";
+import Steps from "./Steps.astro";
 import Quiet from "./Quiet.astro";
 import Workbench from "./Workbench.astro";
 ---
@@ -13,20 +16,21 @@ import Workbench from "./Workbench.astro";
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Three looks (prototype) – GetMath</title>
+    <title>Five looks (prototype) – GetMath</title>
     <meta name="robots" content="noindex" />
     <link rel="icon" href="data:," />
     <script is:inline>
       (() => {
         const query = new URLSearchParams(location.search);
         let look = query.get("look");
-        if (!["quiet", "workbench", "notebook"].includes(look)) look = "quiet";
+        if (!["quiet", "workbench", "notebook", "open", "steps"].includes(look)) look = "quiet";
         let theme = query.get("theme");
         try {
           if (!theme) theme = localStorage.getItem("looks-theme");
         } catch {}
         if (!["light", "dark", "system"].includes(theme)) theme = "system";
         document.documentElement.dataset.look = look;
+        document.documentElement.dataset.js = "";
         document.documentElement.dataset.theme = theme;
       })();
     </script>
@@ -35,6 +39,8 @@ import Workbench from "./Workbench.astro";
     <Quiet />
     <Workbench />
     <Notebook />
+    <Open />
+    <Steps />
 
     <div class="bar" role="group" aria-label="Prototype controls">
       <span class="bar-name">Prototype</span>
@@ -42,6 +48,8 @@ import Workbench from "./Workbench.astro";
         <button type="button" data-look-button="quiet">Quiet book</button>
         <button type="button" data-look-button="workbench">Workbench</button>
         <button type="button" data-look-button="notebook">Notebook</button>
+        <button type="button" data-look-button="open">Opening book</button>
+        <button type="button" data-look-button="steps">One step at a time</button>
       </div>
       <div class="bar-set" role="group" aria-label="Colours">
         <button type="button" data-theme-button="light">Light</button>
@@ -52,7 +60,7 @@ import Workbench from "./Workbench.astro";
     </div>
 
     <script>
-      const looks = ["quiet", "workbench", "notebook"];
+      const looks = ["quiet", "workbench", "notebook", "open", "steps"];
       const root = document.documentElement;
 
       function show() {
@@ -96,7 +104,7 @@ import Workbench from "./Workbench.astro";
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
         // Arrow keys belong to a control that has the focus: fields, buttons, the sliders on the arrow tips, scrolling formulas.
         const target = event.target as Element;
-        if (target !== document.body && target !== root) return;
+        if (target !== document.body && target !== root && !target.hasAttribute("data-passive")) return;
         const step = event.key === "ArrowRight" ? 1 : -1;
         setLook(looks[(looks.indexOf(root.dataset.look!) + step + looks.length) % looks.length]);
       });

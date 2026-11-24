@@ -1,0 +1,139 @@
+---
+// PROTOTYPE, throwaway. Look 5: one idea or question per screen. Without JavaScript every step shows.
+import AddArrows from "../arrows/AddArrows.svelte";
+import RunReset from "./RunReset.svelte";
+import * as c from "./content";
+const names = ["A puzzle", "Arrows", "Try it", "Why the components add", "The same sum in Python", "Your turn"];
+---
+
+<div class="look steps" id="steps">
+  <div class="s-track" aria-hidden="true"><div class="s-fill"></div></div>
+  <header class="s-top">
+    <p class="s-mark">{c.mark}</p>
+    <p class="s-title">{c.title}</p>
+    <div class="s-progress" data-js-only>
+      <p class="s-count" aria-live="polite">Step <b data-n>1</b> of 6: <span data-name>{names[0]}</span></p>
+      <ol class="s-jump" aria-label="Go to a step">
+        {names.map((n, i) => <li><button type="button" data-go={i + 1} aria-label={`Step ${i + 1}, ${n}`}>{i + 1}</button></li>)}
+      </ol>
+      <button type="button" class="s-all" data-all aria-pressed="false">Show everything</button>
+    </div>
+  </header>
+
+  <main class="s-main">
+    <section class="s-step" id="step-1" data-step="1">
+      <h2 tabindex="-1" data-passive>{names[0]}</h2>
+      {c.puzzle.map((p) => <p set:html={p} />)}
+    </section>
+
+    <section class="s-step" id="step-2" data-step="2">
+      <h2 tabindex="-1" data-passive>{names[1]}</h2>
+      <p set:html={c.arrows.before} />
+      <Fragment set:html={c.arrows.formula} />
+      <p set:html={c.arrows.after} />
+      <p class="s-note"><span>Note</span> {c.notes.arrows}</p>
+    </section>
+
+    <section class="s-step s-wide" id="step-3" data-step="3">
+      <h2 tabindex="-1" data-passive>{names[2]}</h2>
+      <p>{c.tryIt}</p>
+      <AddArrows client:load />
+      <p class="s-think" data-js-only>Pause. Decide where the robot stops, and why. Continue when you are ready: nothing is locked.</p>
+    </section>
+
+    <section class="s-step" id="step-4" data-step="4">
+      <h2 tabindex="-1" data-passive>{names[3]}</h2>
+      <p class="s-note"><span>Note</span> <Fragment set:html={c.notes.why} /></p>
+      <p>{c.why.before}</p>
+      <Fragment set:html={c.why.formula} />
+      <p set:html={c.why.after} />
+      <p class="s-key" set:html={c.why.key} />
+      <p class="s-key s-mistake" set:html={c.why.mistake} />
+    </section>
+
+    <section class="s-step" id="step-5" data-step="5">
+      <h2 tabindex="-1" data-passive>{names[4]}</h2>
+      <p set:html={c.python.intro} />
+      <pre class="s-code" tabindex="0"><code>{c.python.code}</code></pre>
+      <RunReset client:load output={c.python.output} label={c.python.label} />
+    </section>
+
+    <section class="s-step" id="step-6" data-step="6">
+      <h2 tabindex="-1" data-passive>{names[5]}</h2>
+      <ol class="s-exercises">
+        {c.exercises.map((e) => (
+          <li>
+            <p set:html={e.question} />
+            <details><summary>Hint</summary><p set:html={e.hint} /></details>
+            <details><summary>Answer</summary><p set:html={e.answer} /></details>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </main>
+
+  <nav class="s-nav" data-js-only aria-label="Steps">
+    <button type="button" data-back>Back</button>
+    <button type="button" data-next class="s-primary">Continue</button>
+  </nav>
+</div>
+
+<script>
+  const root = document.getElementById("steps")!;
+  const sections = [...root.querySelectorAll<HTMLElement>("[data-step]")];
+  const total = sections.length;
+  let current = 1;
+  let all = false;
+
+  function read() {
+    const hash = location.hash;
+    all = hash === "#all";
+    const n = /^#step-(\d)$/.exec(hash)?.[1];
+    current = n && +n >= 1 && +n <= total ? +n : 1;
+  }
+
+  function render(moveFocus: boolean) {
+    root.classList.toggle("all", all);
+    sections.forEach((s, i) => s.classList.toggle("current", i + 1 === current));
+    root.querySelector<HTMLElement>("[data-n]")!.textContent = String(current);
+    root.querySelector<HTMLElement>("[data-name]")!.textContent = sections[current - 1].querySelector("h2")!.textContent;
+    root.querySelector<HTMLElement>(".s-count")!.hidden = all;
+    root.querySelector<HTMLElement>(".s-fill")!.style.width = `${all ? 100 : (current / total) * 100}%`;
+    for (const b of root.querySelectorAll<HTMLButtonElement>("[data-go]")) {
+      if (!all && +b.dataset.go! === current) b.setAttribute("aria-current", "step");
+      else b.removeAttribute("aria-current");
+    }
+    const toggle = root.querySelector<HTMLElement>("[data-all]")!;
+    toggle.textContent = all ? "Show one step at a time" : "Show everything";
+    toggle.setAttribute("aria-pressed", String(all));
+    root.querySelector<HTMLButtonElement>("[data-back]")!.disabled = all || current === 1;
+    root.querySelector<HTMLButtonElement>("[data-next]")!.disabled = all || current === total;
+    if (moveFocus) {
+      const target = all ? root.querySelector<HTMLElement>("h2") : sections[current - 1].querySelector<HTMLElement>("h2");
+      target?.focus({ preventScroll: false });
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function go(hash: string) {
+    if (location.hash === hash) return;
+    location.hash = hash;
+  }
+
+  root.addEventListener("click", (event) => {
+    const button = (event.target as Element).closest("button");
+    if (!button) return;
+    if (button.hasAttribute("data-back")) go(`#step-${Math.max(1, current - 1)}`);
+    if (button.hasAttribute("data-next")) go(`#step-${Math.min(total, current + 1)}`);
+    if (button.dataset.go) go(`#step-${button.dataset.go}`);
+    if (button.hasAttribute("data-all")) go(all ? `#step-${current}` : "#all");
+  });
+
+  window.addEventListener("hashchange", () => {
+    read();
+    render(true);
+  });
+
+  read();
+  render(false);
+</script>
