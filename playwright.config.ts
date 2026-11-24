@@ -2,7 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const ci = Boolean(process.env.CI);
 
-const url = "http://127.0.0.1:4321/getmath/";
+// With SITE_URL, the tests open the published site instead of the local build.
+const published = process.env.SITE_URL;
+const url = published ?? "http://127.0.0.1:4321/getmath/";
 
 // The tests open the production build, which `pnpm test` makes first.
 export default defineConfig({
@@ -11,12 +13,14 @@ export default defineConfig({
   forbidOnly: ci,
   reporter: ci ? [["list"], ["github"]] : "list",
   use: { baseURL: url },
-  webServer: {
-    // Without --ignore-lock, Astro moves the server to the background when an
-    // AI assistant runs the tests, and Playwright takes that for a crash.
-    command: "pnpm preview --ignore-lock",
-    url,
-  },
+  webServer: published
+    ? undefined
+    : {
+        // Without --ignore-lock, Astro moves the server to the background when an
+        // AI assistant runs the tests, and Playwright takes that for a crash.
+        command: "pnpm preview --ignore-lock",
+        url,
+      },
   projects: [
     { name: "build", testMatch: ["build.spec.ts", "notices.spec.ts"] },
     { name: "chromium", testMatch: "site.spec.ts", use: devices["Desktop Chrome"] },

@@ -37,6 +37,14 @@ The status sets the label that readers see. The allowed statuses are in `src/sta
 
 A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or between `$$` lines on its own line. KaTeX draws it during the build, and a formula that it cannot draw, or that has a link, an image or HTML, fails the build. A dollar sign that is not a formula is written `\$`.
 
+## Publishing
+
+The site is meant for <https://ammarsayed.github.io/getmath/>. While GitHub Pages is on, each push to `main` that passes every check publishes the build that was checked. While it is off, nothing is published. Only Ammar decides to turn it on.
+
+- **Turn it on:** `gh api -X POST repos/AmmarSayed/getmath/pages -f build_type=workflow`, then `gh workflow run checks.yml --ref main`.
+- **Check the published site:** build the same commit with `pnpm build`, then run `SITE_URL=https://ammarsayed.github.io/getmath/ pnpm exec playwright test site.spec.ts`. Copies can be up to ten minutes old just after publishing.
+- **Take it down:** `gh api -X DELETE repos/AmmarSayed/getmath/pages`. Later pushes are checked but not published. Without `gh`, open Settings → Pages on GitHub, set the source to "Deploy from a branch", choose the branch "None" and save. Do not use "Unpublish site" for this, because the next push to `main` would publish again. Then open the address to see that it is gone; copies can last ten minutes.
+
 ## Licences
 
 | Material | Licence |

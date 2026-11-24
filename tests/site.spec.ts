@@ -1,4 +1,5 @@
-import { globSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
@@ -14,6 +15,18 @@ const pages = pagePaths(globSync("**/*.html", { cwd: "dist" }));
 test("every built page comes from an MDX page with checked metadata", () => {
   expect(pages).toEqual(pagePaths(globSync("**/*.mdx", { cwd: "src/content/pages" })));
   expect(pages).toContain("");
+});
+
+test("every built file is served unchanged", async ({ request }) => {
+  const files = globSync("**/*", { cwd: "dist", withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => relative("dist", join(entry.parentPath, entry.name)).replaceAll("\\", "/"));
+  expect(files).toContain("index.html");
+  for (const file of files) {
+    const response = await request.get(`./${file}`);
+    expect(response.status(), file).toBe(200);
+    expect((await response.body()).equals(readFileSync(join("dist", file))), file).toBe(true);
+  }
 });
 
 for (const path of pages) {
