@@ -19,7 +19,8 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 
 | Item | Creator | Licence | Source |
 | --- | --- | --- | --- |
-| astro, @astrojs/mdx, @astrojs/markdown-satteri | The Astro authors | MIT | <https://github.com/withastro/astro> |
+| astro, @astrojs/mdx, @astrojs/markdown-satteri, @astrojs/svelte | The Astro authors | MIT | <https://github.com/withastro/astro> |
+| svelte | Svelte contributors | MIT | <https://github.com/sveltejs/svelte> |
 | zod, through `astro/zod` | Colin McDonnell | MIT | <https://github.com/colinhacks/zod> |
 
 ## Used only in development and testing

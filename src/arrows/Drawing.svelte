@@ -1,5 +1,6 @@
 <script lang="ts">
   import { add, sumLimit, type Arrows, type Vector } from "./state";
+  import { numeral } from "./words";
 
   interface Props {
     arrows: Arrows;
@@ -22,8 +23,8 @@
   /** The label of an arrow, beside its middle and on the side away from the other arrow. */
   function beside(arrow: Vector, left: boolean): Vector {
     const side = (left ? 0.8 : -0.8) / (length(arrow) || 1);
-    const still = length(arrow) ? 0 : left ? -0.8 : 0.8;
-    return { x: arrow.x / 2 - arrow.y * side + still, y: arrow.y / 2 + arrow.x * side };
+    const aside = length(arrow) ? 0 : left ? -0.8 : 0.8;
+    return { x: arrow.x / 2 - arrow.y * side + aside, y: arrow.y / 2 + arrow.x * side };
   }
 
   const turnsLeft = $derived(a.x * b.y - a.y * b.x > 0);
@@ -34,7 +35,7 @@
 </script>
 
 <!-- The drawing's y goes down, so every y is negated. -->
-{#snippet arrow(name: string, from: Vector, to: Vector)}
+{#snippet arrow(name: "a" | "b" | "sum" | "copy", from: Vector, to: Vector)}
   {@const along = { x: to.x - from.x, y: to.y - from.y }}
   {@const size = length(along)}
   <g class="arrow {name}" data-arrow={name}>
@@ -55,8 +56,8 @@
   <path class="grid" d={grid} />
   <path class="axes" d="M{-sumLimit} 0H{sumLimit}M0 {-sumLimit}V{sumLimit}" />
   {#each ticks as tick (tick)}
-    <text class="tick" x={tick} y="0.7">{tick < 0 ? `−${-tick}` : tick}</text>
-    <text class="tick" x="-0.6" y={-tick}>{tick < 0 ? `−${-tick}` : tick}</text>
+    <text class="tick" x={tick} y="0.7">{numeral(tick)}</text>
+    <text class="tick" x="-0.6" y={-tick}>{numeral(tick)}</text>
   {/each}
   <text class="tick" x={sumLimit + 0.8} y="0">x</text>
   <text class="tick" x="0" y={-sumLimit - 0.8}>y</text>
@@ -67,8 +68,8 @@
       {@render arrow("copy", a, add(a, b))}
     {/if}
   {/if}
-  {@render arrow("a", origin, a)}
   {@render arrow("b", origin, b)}
+  {@render arrow("a", origin, a)}
   {#if prediction}
     {@const { x, y } = prediction}
     <path class="prediction" data-x={x} data-y={y} d="M{x - 0.4} {-y - 0.4}l.8 .8m0 -.8l-.8 .8" />
@@ -87,12 +88,10 @@
     width: 100%;
     max-width: 32rem;
     margin: 0 auto;
-    --a: light-dark(#0b4fb3, #9cc3ff);
+    --a: var(--link);
     --b: light-dark(#a03c00, #ffb37a);
     --sum: light-dark(#6b2fa0, #d4b0ff);
-    --ink: light-dark(#1b1b1b, #e4e6ea);
     --faint: light-dark(#d5d8dd, #3a3f4a);
-    --paper: light-dark(#fff, #16181d);
   }
 
   .grid,
@@ -108,7 +107,7 @@
 
   .arrow line {
     stroke: currentColor;
-    stroke-width: 0.16;
+    stroke-width: 0.12;
   }
 
   .arrow polygon,
@@ -125,7 +124,9 @@
     color: var(--b);
   }
 
+  /* Thicker and under a, so that both are seen where they lie on each other. */
   .b line {
+    stroke-width: 0.26;
     stroke-dasharray: 0.5 0.25;
   }
 
@@ -139,8 +140,8 @@
   }
 
   .sum line {
-    stroke-width: 0.3;
-    stroke-dasharray: 0 0.5;
+    stroke-width: 0.4;
+    stroke-dasharray: 0 0.6;
     stroke-linecap: round;
   }
 
@@ -174,8 +175,12 @@
       --b: CanvasText;
       --sum: CanvasText;
       --ink: CanvasText;
-      --faint: GrayText;
+      --faint: CanvasText;
       --paper: Canvas;
+    }
+
+    .grid {
+      stroke-opacity: 0.3;
     }
   }
 </style>

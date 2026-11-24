@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { drawFormula } from "../draw-formula";
+  import { drawFormulaOnOwnLine } from "../draw-formula";
   import Drawing from "./Drawing.svelte";
   import {
     add,
@@ -14,7 +14,6 @@
     withPrediction,
     type ArrowName,
     type Axis,
-    type State,
   } from "./state";
   import { arrowRange, explain, formula, mistakes, moves, numeral, pair, predictionRange } from "./words";
 
@@ -23,7 +22,9 @@
   const names = ["a", "b"] as const;
 
   let current = $state.raw(start);
-  let problem = $state.raw<{ place: ArrowName | "prediction"; text: string }>();
+  // What was refused in each place, until a value is accepted in the same field.
+  type Place = ArrowName | "prediction";
+  let problems = $state.raw<{ readonly [place in Place]?: { axis?: Axis; text: string } }>({});
   // A new object each time, so that the same words are announced again.
   let announcement = $state.raw({ text: "" });
   // The page is built with the controls off and the still figure in place.
@@ -34,13 +35,14 @@
   const answer = $derived(feedback(current));
 
   // For the still figure, which shows the start as it is after a right prediction.
-  const { x, y } = add(start.a, start.b);
-  const still = submit(withPrediction(withPrediction(start, "x", x)!, "y", y)!)!;
+  const startSum = add(start.a, start.b);
+  const still = submit(withPrediction(withPrediction(start, "x", startSum.x)!, "y", startSum.y)!)!;
 
   let verdict = $state<HTMLElement>();
   const predictionFields: { [axis in Axis]?: HTMLInputElement } = $state({});
-  // A prediction that was just refused must not be submitted as the one before it.
-  let refused: Axis | undefined;
+  // Whether the key or click that is still being handled had a prediction refused.
+  // The same key or click must not submit the prediction before it.
+  let justRefused = false;
 
   onMount(() => {
     live = true;
@@ -50,19 +52,25 @@
     announcement = { text };
   };
 
-  function refuse(place: ArrowName | "prediction", text: string) {
-    problem = { place, text };
+  function refuse(place: Place, axis: Axis, range: string, kept: number | undefined) {
+    const text = `${axis} must be ${range}. It is still ${numeral(kept) || "empty"}.`;
+    problems = { ...problems, [place]: { axis, text } };
     announce(text);
+  }
+
+  /** Takes the problem of this field away. */
+  function accept(place: Place, axis: Axis) {
+    if ((problems[place]?.axis ?? axis) === axis) problems = { ...problems, [place]: undefined };
   }
 
   function setComponent(arrow: ArrowName, axis: Axis, value: number) {
     const before = current[arrow][axis];
     const next = withComponent(current, arrow, axis, value);
     if (!next) {
-      refuse(arrow, `${axis} of arrow ${arrow} must be ${arrowRange}. It is still ${numeral(before)}.`);
+      refuse(arrow, axis, arrowRange, before);
       return;
     }
-    problem = undefined;
+    accept(arrow, axis);
     if (value === before) return;
     current = next;
     announce(`Arrow ${arrow} is ${pair(current[arrow])}.${sum ? ` The sum is ${pair(sum)}.` : ""}`);
@@ -77,52 +85,58 @@
     const next = withPrediction(current, axis, field.value.trim() === "" ? undefined : readNumber(field.value));
     if (next) {
       current = next;
-      problem = undefined;
-      if (refused === axis) refused = undefined;
+      accept("prediction", axis);
+      announce("");
     } else {
-      const before = numeral(current.prediction[axis]) || "empty";
-      refused = axis;
-      refuse("prediction", `${axis} of your prediction must be ${predictionRange}. It is still ${before}.`);
+      justRefused = true;
+      refuse("prediction", axis, predictionRange, current.prediction[axis]);
     }
     field.value = numeral(current.prediction[axis]);
   }
 
   async function submitPrediction(event: SubmitEvent) {
     event.preventDefault();
+    // In case a browser submits before it says that a field has changed.
     for (const axis of axes) {
       const field = predictionFields[axis]!;
       if (field.value !== numeral(current.prediction[axis])) readPrediction(axis, field);
     }
+    if (justRefused) {
+      justRefused = false;
+      return;
+    }
     const next = submit(current);
-    if (next && !refused) {
+    if (next) {
       current = next;
-      problem = undefined;
+      problems = { ...problems, prediction: undefined };
+      announce("");
       await tick();
       // Moving the focus here also announces the result.
       verdict?.focus();
       return;
     }
-    const axis = refused ?? axes.find((name) => current.prediction[name] === undefined)!;
-    if (!refused) problem = { place: "prediction", text: "Enter both numbers of your prediction." };
-    refused = undefined;
+    const text = "Enter both numbers of your prediction.";
+    problems = { ...problems, prediction: { text } };
     await tick();
-    const field = predictionFields[axis]!;
+    const field = predictionFields[axes.find((axis) => current.prediction[axis] === undefined)!]!;
     // Moving the focus to the field also announces the problem, which describes it.
-    if (document.activeElement === field) announce(problem!.text);
+    if (document.activeElement === field) announce(text);
     else field.focus();
   }
 
   function reset() {
     current = start;
-    problem = undefined;
-    refused = undefined;
+    problems = {};
+    justRefused = false;
     announce("Back at the start. The sum is hidden until you submit a prediction.");
+  }
+
+  function startGesture() {
+    justRefused = false;
   }
 </script>
 
-{#snippet problemAt(place: ArrowName | "prediction")}
-  <p class="problem" id="{id}-{place}-problem">{problem?.place === place ? problem.text : ""}</p>
-{/snippet}
+<svelte:window onkeydowncapture={startGesture} onpointerdowncapture={startGesture} />
 
 {#snippet key()}
   <ul class="key">
@@ -139,12 +153,6 @@
   </p>
 {/snippet}
 
-{#snippet formulaOf(state: State)}
-  <!-- It can be scrolled with the keyboard, like every formula on its own line. -->
-  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-  <div class="formula" role="group" aria-label="Formula" tabindex="0">{@html drawFormula(formula(state), true)}</div>
-{/snippet}
-
 <div class="interaction">
   <div class="views">
     <Drawing arrows={current} {sum} {prediction} describedby="{id}-words" />
@@ -157,13 +165,10 @@
   </div>
 
   <div class="controls">
-    {#if !live}
-      <p>The controls work once the page has loaded. If they stay off, <a href="#{id}-still">see a still figure</a>.</p>
-    {/if}
     {#if answer}
       <div data-view="feedback">
         <h3 tabindex="-1" bind:this={verdict}>
-          {answer.right.x && answer.right.y ? "Yes" : "Not quite"}: the sum ends at {pair(answer.sum)}
+          {answer.right.x && answer.right.y ? "Yes" : "Not quite"}: {pair(answer.a)} + {pair(answer.b)} = {pair(answer.sum)}
         </h3>
         <p>You predicted {pair(answer.prediction)} for <b>a</b> = {pair(answer.a)} and <b>b</b> = {pair(answer.b)}.</p>
         <ul>
@@ -171,7 +176,9 @@
             <li>{axis}: {explain(answer, axis)}</li>
           {/each}
         </ul>
-        {#if answer.mistake}<p>{mistakes[answer.mistake]}</p>{/if}
+        {#each answer.mistakes as mistake (mistake)}
+          <p>{mistakes[mistake]}</p>
+        {/each}
         {@render reason()}
       </div>
     {:else}
@@ -194,9 +201,11 @@
             {/each}
             <button>Submit prediction</button>
           </div>
-          <!-- Below the button, so that a click just after typing does not miss it. -->
-          <p class="echo">{#if prediction}Your prediction is marked × at {pair(prediction)}.{/if}</p>
-          {@render problemAt("prediction")}
+          <!-- Below the button, and with room for its longest text, so that a click just after typing is not lost. -->
+          <p class="message" id="{id}-prediction-problem">
+            {#if problems.prediction}<b>{problems.prediction.text}</b>
+            {:else if prediction}Your prediction is marked × at {pair(prediction)}.{/if}
+          </p>
         </fieldset>
       </form>
     {/if}
@@ -206,43 +215,50 @@
     {#each names as name (name)}
       <fieldset disabled={!live}>
         <legend>Arrow <b>{name}</b></legend>
-        {#each axes as axis (axis)}
-          {@const value = current[name][axis]}
-          <div class="row">
-            <label for="{id}-{name}-{axis}">{axis}</label>
-            <button
-              type="button"
-              aria-label="Decrease {axis}"
-              aria-disabled={!withComponent(current, name, axis, value - 1)}
-              onclick={() => setComponent(name, axis, value - 1)}>−</button
-            >
-            <input
-              id="{id}-{name}-{axis}"
-              value={numeral(value)}
-              onchange={(event) => readComponent(name, axis, event.currentTarget)}
-              aria-describedby="{id}-arrow-hint {id}-{name}-problem"
-              autocomplete="off"
-              size="3"
-            />
-            <button
-              type="button"
-              aria-label="Increase {axis}"
-              aria-disabled={!withComponent(current, name, axis, value + 1)}
-              onclick={() => setComponent(name, axis, value + 1)}>+</button
-            >
+        <div class="sides">
+          <div>
+            {#each axes as axis (axis)}
+              {@const value = current[name][axis]}
+              <div class="row">
+                <label for="{id}-{name}-{axis}">{axis}</label>
+                <button
+                  type="button"
+                  aria-label="Decrease {axis}"
+                  aria-disabled={!withComponent(current, name, axis, value - 1)}
+                  onclick={() => setComponent(name, axis, value - 1)}>−</button
+                >
+                <input
+                  id="{id}-{name}-{axis}"
+                  value={numeral(value)}
+                  onchange={(event) => readComponent(name, axis, event.currentTarget)}
+                  aria-describedby="{id}-arrow-hint {id}-{name}-problem"
+                  autocomplete="off"
+                  size="3"
+                />
+                <button
+                  type="button"
+                  aria-label="Increase {axis}"
+                  aria-disabled={!withComponent(current, name, axis, value + 1)}
+                  onclick={() => setComponent(name, axis, value + 1)}>+</button
+                >
+              </div>
+            {/each}
           </div>
-        {/each}
-        {@render problemAt(name)}
+          <p class="message" id="{id}-{name}-problem"><b>{problems[name]?.text}</b></p>
+        </div>
       </fieldset>
     {/each}
 
     <p data-view="numbers">
       Sum <b>a + b</b>: {#if sum}x = {numeral(sum.x)}, y = {numeral(sum.y)}{:else}x = ?, y = ?{/if}
     </p>
-    <div data-view="formula">{@render formulaOf(current)}</div>
+    <div data-view="formula">{@html drawFormulaOnOwnLine(formula(current))}</div>
     <fieldset class="plain" disabled={!live}>
       <button type="button" onclick={reset}>Reset</button>
     </fieldset>
+    {#if !live}
+      <p class="late">The controls are not working. <a href="#{id}-still">See a still figure</a> instead.</p>
+    {/if}
   </div>
 
   <p class="announcement" role="status">{#key announcement}<span>{announcement.text}</span>{/key}</p>
@@ -253,9 +269,9 @@
     <Drawing arrows={still} sum={visibleSum(still)} prediction={undefined} describedby="{id}-still-words" />
     {@render key()}
     <p id="{id}-still-words">
-      Arrow <b>a</b> goes {moves(still.a)}. Arrow <b>b</b> goes {moves(still.b)}. The sum, <b>a + b</b>, goes {moves({ x, y })}.
+      Arrow <b>a</b> goes {moves(still.a)}. Arrow <b>b</b> goes {moves(still.b)}. The sum, <b>a + b</b>, goes {moves(startSum)}.
     </p>
-    {@render formulaOf(still)}
+    {@html drawFormulaOnOwnLine(formula(still))}
     {@render reason()}
   </div>
 {/if}
@@ -353,17 +369,38 @@
     min-height: 6lh;
   }
 
-  .echo {
-    min-height: 1lh;
-  }
-
-  .problem,
-  .echo {
+  .message {
+    min-height: 3lh;
     margin: 0;
   }
 
-  .problem {
-    font-weight: bold;
+  @media (min-width: 64rem) {
+    .sides {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* Beside two rows of controls, which are higher than the longest message. */
+    .sides > .message {
+      min-height: 0;
+    }
+
+    form .message {
+      min-height: 2lh;
+    }
+  }
+
+  /* Seen only if the scripts have not started by then. */
+  .late {
+    animation: appear 5s step-end both;
+  }
+
+  @keyframes appear {
+    from {
+      visibility: hidden;
+    }
   }
 
   .announcement {

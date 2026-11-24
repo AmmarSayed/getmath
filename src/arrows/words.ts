@@ -18,27 +18,28 @@ export function moves({ x, y }: Vector): string {
   return parts.join(" and ") || "nowhere";
 }
 
-/** A number as it is added: negative ones in brackets. */
-const addend = (value: number) => (value < 0 ? `(${numeral(value)})` : numeral(value));
+/** Such as "3 + (−1)". */
+const added = (a: Vector, b: Vector, axis: Axis) =>
+  `${numeral(a[axis])} + ${b[axis] < 0 ? `(${numeral(b[axis])})` : numeral(b[axis])}`;
 
 export function explain({ a, b, sum, prediction, right }: Feedback, axis: Axis): string {
   const result = right[axis] ? "You had this right." : `You predicted ${numeral(prediction[axis])}.`;
-  return `${numeral(a[axis])} + ${addend(b[axis])} = ${numeral(sum[axis])}. ${result}`;
+  return `${added(a, b, axis)} = ${numeral(sum[axis])}. ${result}`;
 }
 
 export const mistakes: Record<Mistake, string> = {
-  "tip of a": "You predicted the tip of a by itself. The sum goes on from there, along b.",
-  "tip of b": "You predicted the tip of b by itself. The sum goes along a first, and then along b.",
-  difference: "You predicted what subtracting gives. Adding follows both arrows the way they point.",
-  signs: "You predicted what you get without the minus signs. A minus sign means going left or down.",
+  "tip of a": "This is the tip of a by itself. The sum goes on from there, along b.",
+  "tip of b": "This is the tip of b by itself. The sum goes along a as well.",
+  difference: "Subtracting one arrow from the other gives this point. Adding follows both arrows the way they point.",
+  signs: "Leaving out the minus signs gives this point. A minus sign means going left or down.",
 };
 
 /** The formula in LaTeX. Like every other view, it has no sum to show before the prediction. */
 export function formula(state: State): string {
   const { a, b } = state;
   const sum = visibleSum(state);
-  const column = (x: string | number, y: string | number) => `\\begin{bmatrix} ${x} \\\\ ${y} \\end{bmatrix}`;
-  const added = (axis: Axis) => `${a[axis]} + ${b[axis] < 0 ? `(${b[axis]})` : b[axis]}`;
-  const result = sum ? `${column(added("x"), added("y"))} = ${column(sum.x, sum.y)}` : column("?", "?");
-  return `\\mathbf{a} + \\mathbf{b} = ${column(a.x, a.y)} + ${column(b.x, b.y)} = ${result}`;
+  const column = (x: string, y: string) => `\\begin{bmatrix} ${x} \\\\ ${y} \\end{bmatrix}`;
+  const vector = ({ x, y }: Vector) => column(numeral(x), numeral(y));
+  const result = sum ? `${column(added(a, b, "x"), added(a, b, "y"))} = ${vector(sum)}` : column("?", "?");
+  return `\\mathbf{a} + \\mathbf{b} = ${vector(a)} + ${vector(b)} = ${result}`;
 }

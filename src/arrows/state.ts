@@ -80,8 +80,8 @@ export interface Feedback extends Arrows {
   readonly sum: Vector;
   /** Which components of the prediction are right. */
   readonly right: { readonly [axis in Axis]: boolean };
-  /** A common mistake that gives exactly this prediction. */
-  readonly mistake: Mistake | undefined;
+  /** The common mistakes that give exactly this prediction. Several can, so none is known to be the cause. */
+  readonly mistakes: readonly Mistake[];
 }
 
 /** What to say about the submitted prediction, for the arrows that it was for. */
@@ -90,13 +90,13 @@ export function feedback(state: State): Feedback | undefined {
   if (!state.submittedFor || !prediction) return undefined;
   const { a, b } = state.submittedFor;
   const sum = add(a, b);
-  const results: [Mistake, Vector][] = [
-    ["tip of a", a],
-    ["tip of b", b],
-    ["difference", { x: a.x - b.x, y: a.y - b.y }],
-    ["difference", { x: b.x - a.x, y: b.y - a.y }],
-    ["signs", { x: Math.abs(a.x) + Math.abs(b.x), y: Math.abs(a.y) + Math.abs(b.y) }],
+  const isPredicted = (...points: Vector[]) => points.some((point) => same(prediction, point));
+  const results: [Mistake, boolean][] = [
+    ["tip of a", isPredicted(a)],
+    ["tip of b", isPredicted(b)],
+    ["difference", isPredicted({ x: a.x - b.x, y: a.y - b.y }, { x: b.x - a.x, y: b.y - a.y })],
+    ["signs", isPredicted({ x: Math.abs(a.x) + Math.abs(b.x), y: Math.abs(a.y) + Math.abs(b.y) })],
   ];
-  const mistake = same(prediction, sum) ? undefined : results.find(([, result]) => same(prediction, result))?.[0];
-  return { a, b, prediction, sum, right: { x: prediction.x === sum.x, y: prediction.y === sum.y }, mistake };
+  const mistakes = same(prediction, sum) ? [] : results.filter(([, given]) => given).map(([mistake]) => mistake);
+  return { a, b, prediction, sum, right: { x: prediction.x === sum.x, y: prediction.y === sum.y }, mistakes };
 }

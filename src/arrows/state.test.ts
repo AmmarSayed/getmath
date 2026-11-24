@@ -114,11 +114,11 @@ describe("feedback", () => {
   });
 
   test("a right prediction", () => {
-    expect(feedback(predict(start, 2, 4))).toMatchObject({ sum: { x: 2, y: 4 }, right: { x: true, y: true }, mistake: undefined });
+    expect(feedback(predict(start, 2, 4))).toMatchObject({ sum: { x: 2, y: 4 }, right: { x: true, y: true }, mistakes: [] });
   });
 
   test("a prediction with one right component", () => {
-    expect(feedback(predict(start, 2, 5))).toMatchObject({ right: { x: true, y: false }, mistake: undefined });
+    expect(feedback(predict(start, 2, 5))).toMatchObject({ right: { x: true, y: false }, mistakes: [] });
   });
 
   test.each([
@@ -128,13 +128,21 @@ describe("feedback", () => {
     ["b minus a", { x: -4, y: 0 }, "difference"],
     ["the components without their minus signs", { x: 4, y: 4 }, "signs"],
   ])("%s is recognised", (_, prediction, mistake) => {
-    expect(feedback(predict(start, prediction.x, prediction.y))?.mistake).toBe(mistake);
+    expect(feedback(predict(start, prediction.x, prediction.y))?.mistakes).toEqual([mistake]);
   });
 
   test("a right prediction is never called a mistake", () => {
     // Here the sum is also the tip of a and a minus b.
     const state = withArrows({ a: { x: 1, y: 2 }, b: { x: 0, y: 0 } });
-    expect(feedback(predict(state, 1, 2))?.mistake).toBeUndefined();
+    expect(feedback(predict(state, 1, 2))?.mistakes).toEqual([]);
+  });
+
+  test.each([
+    [{ a: { x: 3, y: 2 }, b: { x: -1, y: -2 } }, { x: 4, y: 4 }, ["difference", "signs"]],
+    [{ a: { x: 4, y: 2 }, b: { x: 2, y: 1 } }, { x: 2, y: 1 }, ["tip of b", "difference"]],
+    [{ a: { x: 1, y: 2 }, b: { x: 1, y: 2 } }, { x: 0, y: 0 }, ["difference"]],
+  ])("%j and the prediction %j: every mistake that gives it is named once", (arrows, { x, y }, mistakes) => {
+    expect(feedback(predict(withArrows(arrows), x, y))?.mistakes).toEqual(mistakes);
   });
 
   test("stays about the arrows that the prediction was for", () => {

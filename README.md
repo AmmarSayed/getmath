@@ -37,7 +37,7 @@ The status sets the label that readers see. The allowed statuses are in `src/sta
 
 A formula is LaTeX between dollar signs: `$3 + 4 = 7$` inside a sentence, or between `$$` lines on its own line. KaTeX draws it during the build, and a formula that it cannot draw, or that has a link, an image or HTML, fails the build. A dollar sign that is not a formula is written `\$`.
 
-An interaction is a Svelte component, such as `src/arrows/AddArrows.svelte`. One plain module holds its state and arithmetic, and everything shown is calculated from that. It is marked `interaction`, and beside it the element marked `still` holds the still figure that replaces it without JavaScript.
+An interaction is a Svelte component, such as `src/arrows/AddArrows.svelte`. One plain module holds the mathematical state and its arithmetic, and the drawing, numbers, words and formula are calculated from that. In the component, the element with the class `interaction` is replaced, without JavaScript, by the still figure with the class `still`.
 
 ## Publishing
 
@@ -45,7 +45,7 @@ The site is meant for <https://ammarsayed.github.io/getmath/>. While GitHub Page
 
 - **Turn it on:** `gh api -X POST repos/AmmarSayed/getmath/pages -f build_type=workflow`. Check that `gh api repos/AmmarSayed/getmath/environments/github-pages/deployment-branch-policies --jq '.branch_policies[].name'` prints only `main`, so that no other branch can publish. Then run `gh workflow run checks.yml --ref main`.
 - **Publish again:** use that last command, not "Re-run all jobs", which would publish the older commit or fail.
-- **Check the published site:** build the same commit with `pnpm build`, set the environment variable `SITE_URL` to `https://ammarsayed.github.io/getmath/`, and run `pnpm exec playwright test site.spec.ts arrows.spec.ts`. Copies can be up to ten minutes old just after publishing.
+- **Check the published site:** build the same commit with `pnpm build`, set the environment variable `SITE_URL` to `https://ammarsayed.github.io/getmath/`, and run `pnpm exec playwright test --project=chromium --project=firefox --project=webkit`. Copies can be up to ten minutes old just after publishing.
 - **Take it down:** `gh api -X DELETE repos/AmmarSayed/getmath/pages`. Later pushes are checked but not published. Without `gh`, open Settings → Pages on GitHub, set the source to "Deploy from a branch", choose the branch "None" and save. Do not use "Unpublish site" for this, because the next push to `main` would publish again. Then open the address to see that it is gone; copies can last ten minutes.
 
 ## Licences

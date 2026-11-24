@@ -20,6 +20,20 @@ async function enter(field: Locator, text: string) {
   await field.press("Tab");
 }
 
+/** Notes every text that is put into a live region of the page from now on. */
+async function listen(page: Page) {
+  await page.evaluate(() => {
+    const spoken: string[] = [];
+    Object.assign(window, { spoken });
+    for (const region of document.querySelectorAll("[role=status], [role=alert], [role=log], output, [aria-live]")) {
+      new MutationObserver(() => {
+        if (region.textContent) spoken.push(region.textContent);
+      }).observe(region, { childList: true, subtree: true, characterData: true });
+    }
+  });
+  return () => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken);
+}
+
 const minus = (value: number) => String(value).replace("-", "−");
 
 /** Where an arrow's tip is drawn, or undefined if the arrow is not drawn. */
@@ -64,13 +78,12 @@ async function expectViews(page: Page, a: Pair, b: Pair, sum?: Pair) {
 test.beforeEach(({ page, javaScriptEnabled }) => openPage(page, "", javaScriptEnabled));
 
 test("the sum is hidden everywhere until a prediction is submitted", async ({ page }) => {
-  const reachable = page.locator("body");
   await expectViews(page, [3, 2], [-1, 2]);
   // The answer is nowhere in the page, not even where only a screen reader would find it.
-  const attributes = () => page.locator(".interaction").evaluate((element) => element.outerHTML);
+  const markup = () => page.locator(".interaction").evaluate((element) => element.outerHTML);
   for (const answer of ["(2, 4)", "2 right and 4 up", "x = 2, y = 4"]) {
-    expect(await attributes()).not.toContain(answer);
-    await expect(reachable).not.toContainText(answer);
+    expect(await markup()).not.toContain(answer);
+    await expect(page.locator("body")).not.toContainText(answer);
   }
   await expect(page.locator('[data-arrow="copy"]')).toHaveCount(0);
   await expect(page.locator(".still")).toHaveCount(0);
@@ -104,35 +117,47 @@ test("picture, numbers, words and formula agree after every change", async ({ pa
   await expectViews(page, [4, -4], [-4, 4], [0, 0]);
 });
 
+/** The parts of the drawing that reach outside it. */
+function drawnOutside(page: Page) {
+  return page.locator(".interaction svg").evaluate((svg) => {
+    const box = svg.getBoundingClientRect();
+    return [...svg.querySelectorAll("text, line, polygon, path, circle")]
+      .filter((part) => {
+        const { left, right, top, bottom } = part.getBoundingClientRect();
+        return left < box.left || right > box.right || top < box.top || bottom > box.bottom;
+      })
+      .map((part) => part.outerHTML);
+  });
+}
+
+for (const [x, y] of [["-8", "8"], ["8", "-8"]]) {
+  test(`a prediction of (${x}, ${y}) is marked inside the drawing`, async ({ page }) => {
+    await predict(page, x, y);
+    await expect(page.locator(".interaction .prediction")).toBeVisible();
+    expect(await drawnOutside(page)).toEqual([]);
+  });
+}
+
 test("every drawn part stays inside the drawing at the bounds", async ({ page }) => {
   await predict(page, "-8", "8");
-  for (const [x, y] of [[4, 4], [4, -4], [-4, 4], [-4, -4], [4, 0], [0, -4]]) {
+  for (const [x, y] of [[4, 4], [4, -4], [-4, 4], [-4, -4], [4, 0], [0, -4], [0, 0]]) {
     for (const name of ["a", "b"] as const) {
       await enter(arrow(page, name).getByLabel("x", { exact: true }), String(x));
       await enter(arrow(page, name).getByLabel("y", { exact: true }), String(y));
     }
     await expectViews(page, [x, y], [x, y], [2 * x, 2 * y]);
-    const outside = await page.locator(".interaction svg").evaluate((svg) => {
-      const box = svg.getBoundingClientRect();
-      return [...svg.querySelectorAll("text, line, polygon, path")]
-        .filter((part) => {
-          const { left, right, top, bottom } = part.getBoundingClientRect();
-          return left < box.left || right > box.right || top < box.top || bottom > box.bottom;
-        })
-        .map((part) => part.outerHTML);
-    });
-    expect(outside).toEqual([]);
+    expect(await drawnOutside(page)).toEqual([]);
   }
 });
 
 test.describe("feedback", () => {
   for (const [name, x, y, texts] of [
-    ["a right prediction", "2", "4", ["Yes: the sum ends at (2, 4)", "x: 3 + (−1) = 2. You had this right.", "y: 2 + 2 = 4. You had this right."]],
-    ["a wrong number", "2", "-5", ["Not quite: the sum ends at (2, 4)", "x: 3 + (−1) = 2. You had this right.", "y: 2 + 2 = 4. You predicted −5."]],
-    ["the tip of a", "3", "2", ["Not quite", "You predicted the tip of a by itself."]],
-    ["the tip of b", "-1", "2", ["Not quite", "You predicted the tip of b by itself."]],
-    ["subtracting", "4", "0", ["Not quite", "You predicted what subtracting gives."]],
-    ["leaving out a minus sign", "4", "4", ["Not quite", "You predicted what you get without the minus signs."]],
+    ["a right prediction", "2", "4", ["Yes: (3, 2) + (−1, 2) = (2, 4)", "x: 3 + (−1) = 2. You had this right.", "y: 2 + 2 = 4. You had this right."]],
+    ["a wrong number", "2", "-5", ["Not quite: (3, 2) + (−1, 2) = (2, 4)", "x: 3 + (−1) = 2. You had this right.", "y: 2 + 2 = 4. You predicted −5."]],
+    ["the tip of a", "3", "2", ["Not quite", "This is the tip of a by itself."]],
+    ["the tip of b", "-1", "2", ["Not quite", "This is the tip of b by itself."]],
+    ["subtracting", "4", "0", ["Not quite", "Subtracting one arrow from the other gives this point."]],
+    ["leaving out a minus sign", "4", "4", ["Not quite", "Leaving out the minus signs gives this point."]],
   ] as const) {
     test(`explains ${name} through the components`, async ({ page }) => {
       await predict(page, x, y);
@@ -152,7 +177,7 @@ test.describe("feedback", () => {
     await expect(view(page, "words")).toContainText("Your prediction, marked ×, ends at (4, −3).");
     await arrow(page, "b").getByRole("button", { name: "Increase x" }).click();
     await expect(view(page, "feedback")).toContainText("You predicted (4, −3) for a = (3, 2) and b = (−1, 2).");
-    await expect(view(page, "feedback")).toContainText("the sum ends at (2, 4)");
+    await expect(view(page, "feedback")).toContainText("(3, 2) + (−1, 2) = (2, 4)");
     await expect(mark).toHaveCount(0);
     await expect(view(page, "words")).not.toContainText("Your prediction");
   });
@@ -161,7 +186,7 @@ test.describe("feedback", () => {
 test.describe("invalid input", () => {
   for (const text of ["5", "-5", "1.5", "two", ""]) {
     test(`${JSON.stringify(text)} in an arrow shows a message and keeps the last valid value`, async ({ page }) => {
-      const message = "x of arrow a must be a whole number from −4 to 4. It is still 3.";
+      const message = "x must be a whole number from −4 to 4. It is still 3.";
       const field = arrow(page, "a").getByLabel("x", { exact: true });
       await enter(field, text);
       await expect(arrow(page, "a").getByText(message)).toBeVisible();
@@ -194,27 +219,72 @@ test.describe("invalid input", () => {
     await expectViews(page, [3, 2], [-1, 2]);
   });
 
-  for (const way of ["Enter", "button"]) {
-    test(`a refused prediction is not submitted as the one before it, with ${way}`, async ({ page }) => {
-      const message = "y of your prediction must be a whole number from −8 to 8. It is still 1.";
-      const field = prediction(page).getByLabel("y", { exact: true });
-      await enter(prediction(page).getByLabel("x", { exact: true }), "2");
-      await enter(field, "1");
-      await field.fill("9");
-      if (way === "Enter") await field.press("Enter");
-      else await page.getByRole("button", { name: "Submit prediction" }).click();
-      await expect(prediction(page).getByText(message)).toBeVisible();
-      await expect(field).toHaveValue("1");
-      await expect(field).toBeFocused();
+  for (const text of ["9", "-9", "0.5", "two"]) {
+    for (const way of ["Enter", "button"]) {
+      test(`${text} as a prediction is not submitted as the one before it, with ${way}`, async ({ page }) => {
+        const message = "y must be a whole number from −8 to 8. It is still 1.";
+        const field = prediction(page).getByLabel("y", { exact: true });
+        await enter(prediction(page).getByLabel("x", { exact: true }), "2");
+        await enter(field, "1");
+        const spoken = await listen(page);
+        await field.fill(text);
+        if (way === "Enter") await field.press("Enter");
+        else await page.getByRole("button", { name: "Submit prediction" }).click();
+        await expect(prediction(page).getByText(message)).toBeVisible();
+        await expect(field).toHaveValue("1");
+        await expectViews(page, [3, 2], [-1, 2]);
+        expect(await spoken()).toEqual([message]);
+        // Leaving the field, or changing something else, does not take the message away.
+        await field.press("Tab");
+        await enter(prediction(page).getByLabel("x", { exact: true }), "4");
+        await arrow(page, "a").getByRole("button", { name: "Decrease x" }).click();
+        await expect(prediction(page).getByText(message)).toBeVisible();
+        // The learner has been told of the value that is kept, and can submit it.
+        await page.getByRole("button", { name: "Submit prediction" }).click();
+        await expect(view(page, "feedback")).toContainText("You predicted (4, 1)");
+      });
+    }
+  }
+
+  test("a refused first number is explained again when the prediction is incomplete", async ({ page }) => {
+    const x = prediction(page).getByLabel("x", { exact: true });
+    await enter(x, "9");
+    await expect(prediction(page).getByText("x must be a whole number from −8 to 8. It is still empty.")).toBeVisible();
+    await prediction(page).getByLabel("y", { exact: true }).fill("4");
+    await prediction(page).getByLabel("y", { exact: true }).press("Enter");
+    await expect(prediction(page).getByText("Enter both numbers of your prediction.")).toBeVisible();
+    await expect(x).toBeFocused();
+    await x.fill("2");
+    await x.press("Enter");
+    await expect(view(page, "feedback")).toContainText("You predicted (2, 4)");
+  });
+
+  test("an old announcement does not stay when the prediction is put right", async ({ page }) => {
+    const x = prediction(page).getByLabel("x", { exact: true });
+    await enter(x, "9");
+    await enter(x, "2");
+    await expect(page.getByRole("status")).toHaveText("");
+    await expect(prediction(page).getByText("must be")).toHaveCount(0);
+  });
+});
+
+// A field changes when it loses the focus, which a press on a button causes. If
+// anything moved the button then, the click would miss it.
+for (const width of [320, 1280]) {
+  for (const text of ["9", "0"]) {
+    test(`a click just after typing ${text} is not lost at ${width} px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await arrow(page, "a").getByLabel("x", { exact: true }).fill(text);
+      await arrow(page, "b").getByRole("button", { name: "Increase y" }).click();
+      await expectViews(page, [text === "9" ? 3 : 0, 2], [-1, 3]);
+      await predict(page, "8", "8");
+      await expect(view(page, "feedback")).toBeVisible();
+      await arrow(page, "b").getByLabel("y", { exact: true }).fill(text);
+      await page.getByRole("button", { name: "Reset" }).click();
       await expectViews(page, [3, 2], [-1, 2]);
-      // Leaving the field does not take the message away.
-      await field.press("Tab");
-      await expect(prediction(page).getByText(message)).toBeVisible();
-      await page.getByRole("button", { name: "Submit prediction" }).click();
-      await expectViews(page, [3, 2], [-1, 2], [2, 4]);
     });
   }
-});
+}
 
 test("Reset restores the start and keeps the focus", async ({ page }) => {
   await predict(page, "2", "4");
@@ -231,17 +301,7 @@ test("Reset restores the start and keeps the focus", async ({ page }) => {
 
 test("a change is announced once and briefly", async ({ page }) => {
   await predict(page, "2", "4");
-  // Every text that is put into any live region of the page.
-  await page.evaluate(() => {
-    const spoken: string[] = [];
-    Object.assign(window, { spoken });
-    for (const region of document.querySelectorAll("[role=status], [role=alert], [role=log], output, [aria-live]")) {
-      new MutationObserver(() => {
-        if (region.textContent) spoken.push(region.textContent);
-      }).observe(region, { childList: true, subtree: true, characterData: true });
-    }
-  });
-  const spoken = () => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken);
+  const spoken = await listen(page);
   await arrow(page, "a").getByRole("button", { name: "Decrease y" }).click();
   await expect.poll(spoken).toEqual(["Arrow a is (3, 1). The sum is (2, 3)."]);
   await enter(arrow(page, "b").getByLabel("x", { exact: true }), "-3");
@@ -252,7 +312,7 @@ test("a change is announced once and briefly", async ({ page }) => {
   await expect.poll(spoken).toHaveLength(4);
   expect((await spoken()).slice(1)).toEqual([
     "Arrow b is (−3, 2). The sum is (0, 3).",
-    ...Array(2).fill("x of arrow b must be a whole number from −4 to 4. It is still −3."),
+    ...Array(2).fill("x must be a whole number from −4 to 4. It is still −3."),
   ]);
 });
 
@@ -391,6 +451,12 @@ async function expectStillFigure(page: Page) {
   await expect(still.getByRole("math")).toHaveCount(1);
 }
 
+test("the link to the still figure does not flash while the page loads", async ({ page }) => {
+  await page.route("**/*.js", (route) => route.abort());
+  await page.goto("./");
+  await expect(page.getByText("The controls are not working.")).toBeHidden();
+});
+
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
@@ -405,6 +471,6 @@ test("if the scripts fail to load, a link leads to the still figure", async ({ p
   await page.goto("./");
   await expect(page.locator(".still")).toBeHidden();
   await expect(page.getByRole("button", { name: "Reset" })).toBeDisabled();
-  await page.getByRole("link", { name: "see a still figure" }).click();
+  await page.getByRole("link", { name: "See a still figure" }).click({ timeout: 10_000 });
   await expectStillFigure(page);
 });
