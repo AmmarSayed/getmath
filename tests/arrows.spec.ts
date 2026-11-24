@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { listen } from "./listen";
+import { expectFocusAfterClick } from "./mac";
 import { openPage } from "./open-page";
 
 type Pair = [number, number];
@@ -704,7 +705,7 @@ for (const width of [320, 1280]) {
   });
 }
 
-test("Reset restores the start and keeps the focus", async ({ page }) => {
+test("Reset restores the start and keeps the focus", async ({ page, browserName }) => {
   await predict(page, "2", "4");
   await enter(arrow(page, "a").getByLabel("x", { exact: true }), "-2");
   await enter(arrow(page, "b").getByLabel("y", { exact: true }), "x");
@@ -713,7 +714,7 @@ test("Reset restores the start and keeps the focus", async ({ page }) => {
   await expect(view(page, "feedback")).toHaveCount(0);
   await expect(prediction(page).getByLabel("x", { exact: true })).toHaveValue("");
   await expect(page.getByText("must be")).toHaveCount(0);
-  await expect(reset(page)).toBeFocused();
+  await expectFocusAfterClick(reset(page), browserName);
   await expect(status(page)).toHaveText("Back at the start. The sum is hidden until you submit a prediction.");
 });
 

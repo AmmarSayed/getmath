@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { listen } from "./listen";
+import { expectArrowKeyScrolls, expectFocusAfterClick } from "./mac";
 import { openPage } from "./open-page";
 
 // The only source of the program and of its output.
@@ -56,14 +57,14 @@ async function expectRevealed(page: Page) {
   expect((await output.boundingBox())!.y).toBeGreaterThanOrEqual(buttons.y + buttons.height);
 }
 
-test("Run by mouse shows the expected output, and keeps the focus", async ({ page }) => {
+test("Run by mouse shows the expected output, and keeps the focus", async ({ page, browserName }) => {
   await run(page).click();
   await expectRevealed(page);
-  await expect(run(page)).toBeFocused();
+  await expectFocusAfterClick(run(page), browserName);
   await expect(status(page)).toHaveText(ran);
   await reset(page).click();
   await expect(shownOutput(page)).toHaveCount(0);
-  await expect(reset(page)).toBeFocused();
+  await expectFocusAfterClick(reset(page), browserName);
   await expect(status(page)).toHaveText(cleared);
   await expect(page.getByText("Expected output", { exact: true })).toHaveCount(0);
 });
@@ -216,7 +217,7 @@ for (const width of [320, 1280]) {
   });
 }
 
-test("a long line scrolls inside the block, which the keyboard can reach", async ({ page }) => {
+test("a long line scrolls inside the block, which the keyboard can reach", async ({ page, browserName }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await run(page).click();
   await shownOutput(page).evaluate((element) => {
@@ -225,8 +226,7 @@ test("a long line scrolls inside the block, which the keyboard can reach", async
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   expect(await shownOutput(page).evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
   await shownOutput(page).focus();
-  await page.keyboard.press("ArrowRight");
-  await expect.poll(() => shownOutput(page).evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expectArrowKeyScrolls(shownOutput(page), browserName);
 });
 
 test("if the scripts fail to load, the buttons are off and a link leads to the output", async ({ page }) => {

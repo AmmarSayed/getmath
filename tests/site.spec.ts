@@ -2,6 +2,7 @@ import { globSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { expectArrowKeyScrolls } from "./mac";
 import { openPage } from "./open-page";
 
 /** Turns files such as `a/index.html` and `a.mdx` into page paths such as `a/`. */
@@ -269,14 +270,12 @@ for (const width of [320, 390, 1280]) {
   }
 }
 
-test("a wide formula can be scrolled with the keyboard", async ({ page }) => {
+test("a wide formula can be scrolled with the keyboard", async ({ page, browserName }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("./");
   const formula = page.locator("main > .formula").last();
   for (let i = 0; i < 10 && !(await formula.evaluate((element) => element === document.activeElement)); i++) {
     await page.keyboard.press("Tab");
   }
-  await expect(formula).toBeFocused();
-  await page.keyboard.press("ArrowRight");
-  await expect.poll(() => formula.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expectArrowKeyScrolls(formula, browserName);
 });
