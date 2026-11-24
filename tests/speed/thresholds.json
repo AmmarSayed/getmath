@@ -181,8 +181,8 @@
       "label": "Drag move, worst",
       "unit": "ms",
       "deterministic": false,
-      "ceiling": 100,
-      "why": "About 3 times the runner's median of 35.55 ms and below the public INP 'good' guidance of 200 ms. The developer machine's worst of 25 runs was 85.5 ms.",
+      "ceiling": 120,
+      "why": "About 3.4 times the runner's median of 35.55 ms and below the public INP 'good' guidance of 200 ms. The same ceiling as the keyboard: the developer machine's worst of 25 runs was 85.5 ms, and a busy one gave 98.7 ms.",
       "measured": {
         "developer": {
           "runs": 25,
