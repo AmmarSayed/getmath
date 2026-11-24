@@ -2,6 +2,7 @@
   import { onMount, tick } from "svelte";
   import { drawFormulaOnOwnLine } from "../draw-formula";
   import Drawing from "./Drawing.svelte";
+  import Tips from "./Tips.svelte";
   import {
     add,
     feedback,
@@ -12,8 +13,10 @@
     visibleSum,
     withComponent,
     withPrediction,
+    withTip,
     type ArrowName,
     type Axis,
+    type Vector,
   } from "./state";
   import { arrowRange, explain, formula, mistakes, moves, numeral, pair, predictionRange } from "./words";
 
@@ -64,21 +67,44 @@
     if (problem?.axis ? problem.axis === axis : prediction) problems = { ...problems, [place]: undefined };
   }
 
-  function setComponent(arrow: ArrowName, axis: Axis, value: number) {
+  /** Whether the component has changed. */
+  function setComponent(arrow: ArrowName, axis: Axis, value: number): boolean {
     const before = current[arrow][axis];
     const next = withComponent(current, arrow, axis, value);
     if (!next) {
       refuse(arrow, axis, arrowRange, before);
-      return;
+      return false;
     }
     accept(arrow, axis);
-    if (value === before) return;
+    if (value === before) return false;
     current = next;
-    announce(`Arrow ${arrow} is ${pair(current[arrow])}.${sum ? ` The sum is ${pair(sum)}.` : ""}`);
+    return true;
+  }
+
+  const sumInWords = () => (sum ? `The sum is ${pair(sum)}.` : "");
+
+  function changeComponent(arrow: ArrowName, axis: Axis, value: number) {
+    if (setComponent(arrow, axis, value)) announce(`Arrow ${arrow} is ${pair(current[arrow])}. ${sumInWords()}`.trim());
+  }
+
+  function dragTip(arrow: ArrowName, point: Vector) {
+    const next = withTip(current, arrow, point);
+    if (next === current) return;
+    current = next;
+    problems = { ...problems, [arrow]: undefined };
+  }
+
+  /** A tip that is moved has the focus, so its new value is read. The rest is announced here. */
+  function announceSum() {
+    announce(sumInWords());
+  }
+
+  function stepTip(arrow: ArrowName, axis: Axis, step: number) {
+    if (setComponent(arrow, axis, current[arrow][axis] + step)) announceSum();
   }
 
   function readComponent(arrow: ArrowName, axis: Axis, field: HTMLInputElement) {
-    setComponent(arrow, axis, readNumber(field.value));
+    changeComponent(arrow, axis, readNumber(field.value));
     field.value = numeral(current[arrow][axis]);
   }
 
@@ -156,7 +182,11 @@
 
 <div class="interaction">
   <div class="views">
-    <Drawing arrows={current} {sum} {prediction} describedby="{id}-words" />
+    <Drawing arrows={current} {sum} {prediction} describedby="{id}-words">
+      {#if live}
+        <Tips arrows={current} describedby="{id}-tip-hint" ondrag={dragTip} ondrop={announceSum} onstep={stepTip} />
+      {/if}
+    </Drawing>
     {@render key()}
     <p id="{id}-words" data-view="words">
       Arrow <b>a</b> goes {moves(current.a)}. Arrow <b>b</b> goes {moves(current.b)}.
@@ -212,7 +242,11 @@
     {/if}
 
     <h3>{answer ? "Change the arrows, and watch what else changes" : "2. Change the arrows"}</h3>
-    <p id="{id}-arrow-hint">Each component is {arrowRange}.</p>
+    <p id="{id}-tip-hint">
+      Drag the ring at the tip of an arrow in the drawing. Or move the focus to the ring with Tab, and press the arrow keys of
+      your keyboard.
+    </p>
+    <p id="{id}-arrow-hint">You can also use the fields and buttons here. Each component is {arrowRange}.</p>
     {#each names as name (name)}
       <fieldset disabled={!live}>
         <legend>Arrow <b>{name}</b></legend>
@@ -226,7 +260,7 @@
                   type="button"
                   aria-label="Decrease {axis}"
                   aria-disabled={!withComponent(current, name, axis, value - 1)}
-                  onclick={() => setComponent(name, axis, value - 1)}>−</button
+                  onclick={() => changeComponent(name, axis, value - 1)}>−</button
                 >
                 <input
                   id="{id}-{name}-{axis}"
@@ -240,7 +274,7 @@
                   type="button"
                   aria-label="Increase {axis}"
                   aria-disabled={!withComponent(current, name, axis, value + 1)}
-                  onclick={() => setComponent(name, axis, value + 1)}>+</button
+                  onclick={() => changeComponent(name, axis, value + 1)}>+</button
                 >
               </div>
             {/each}

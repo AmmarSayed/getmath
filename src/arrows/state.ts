@@ -25,6 +25,8 @@ export function add(a: Vector, b: Vector): Vector {
   return { x: a.x + b.x, y: a.y + b.y };
 }
 
+const same = (a: Vector, b: Vector) => a.x === b.x && a.y === b.y;
+
 const isWholeUpTo = (limit: number, value: number) => Number.isInteger(value) && Math.abs(value) <= limit;
 
 /** The whole number that the learner typed, or NaN. Both kinds of minus sign count. */
@@ -37,6 +39,14 @@ export function readNumber(text: string): number {
 export function withComponent(state: State, arrow: ArrowName, axis: Axis, value: number): State | undefined {
   if (!isWholeUpTo(arrowLimit, value)) return undefined;
   return { ...state, [arrow]: { ...state[arrow], [axis]: value } };
+}
+
+/** The state with the tip of one arrow at the place nearest to this point, on the grid and within the bounds. */
+export function withTip(state: State, arrow: ArrowName, point: Vector): State {
+  // Adding 0 turns −0 into 0.
+  const nearest = (value: number) => Math.max(-arrowLimit, Math.min(arrowLimit, Math.round(value))) + 0;
+  const tip = { x: nearest(point.x), y: nearest(point.y) };
+  return same(tip, state[arrow]) ? state : { ...state, [arrow]: tip };
 }
 
 /** The sum of the arrows, or undefined until a prediction is submitted. Every view gets it from here. */
@@ -63,8 +73,6 @@ export function submit(state: State): State | undefined {
   if (state.submittedFor || !wholePrediction(state)) return undefined;
   return { ...state, submittedFor: { a: state.a, b: state.b } };
 }
-
-const same = (a: Vector, b: Vector) => a.x === b.x && a.y === b.y;
 
 /** The prediction for the arrows as they are now, or undefined. */
 export function shownPrediction(state: State): Vector | undefined {
