@@ -4,7 +4,7 @@ Tickets for this repo live as GitHub issues on `AmmarSayed/getmath`. Use the `gh
 
 ## Chapter specifications
 
-The repository is the project record (`CHARTER.md` sections 7.2 and 13), so approved chapter specifications are committed to it. Draft and discuss a specification in an issue; once Ammar approves it, commit it and link the file from the issue. Tickets link to the committed file.
+The repository is the project record (`CHARTER.md` section 8), so approved chapter specifications are committed to it. Draft and discuss a specification in an issue; once Ammar approves it, commit it and link the file from the issue. Tickets link to the committed file.
 
 ## Conventions
 

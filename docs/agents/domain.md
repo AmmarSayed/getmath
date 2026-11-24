@@ -5,7 +5,7 @@ How the engineering skills should consume this repo's domain documentation when 
 ## Before exploring, read these
 
 - **`GLOSSARY.md`** at the repo root.
-- **`DECISIONS.md`** at the repo root, with the decisions in `CHARTER.md` section 10: read the entries that touch the area you're about to work in.
+- **`CHARTER.md`** at the repo root: read the sections that touch the area you're about to work in.
 
 If `GLOSSARY.md` doesn't exist, **proceed silently**. Don't flag its absence; don't suggest creating it upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates it lazily when terms actually get resolved.
 
@@ -16,14 +16,13 @@ Single-context repo:
 ```
 /
 ├── CHARTER.md
-├── DECISIONS.md
 ├── GLOSSARY.md
 └── src/
 ```
 
-## Record decisions in `DECISIONS.md`
+## Record decisions in `CHARTER.md`
 
-`DECISIONS.md` takes the place of `docs/adr/`. When a skill says to write or read an ADR, use an entry there, with date, decision, rationale, authority, and consequences (`CHARTER.md` section 7.4). Substantial changes require Ammar's approval.
+`CHARTER.md` takes the place of `docs/adr/`. When a skill says to write an ADR, update the relevant charter section and give the reason in the commit message. Substantial changes require Ammar's approval.
 
 ## Use the glossary's vocabulary
 
@@ -35,4 +34,4 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 
 If your output contradicts an existing decision, surface it explicitly rather than silently overriding:
 
-> _Contradicts D3-D (KaTeX first), but worth reopening because…_
+> _Contradicts charter section 6 (KaTeX first), but worth reopening because…_
