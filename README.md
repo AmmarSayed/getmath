@@ -16,7 +16,8 @@ You need Git, [uv](https://docs.astral.sh/uv/) and [Node.js](https://nodejs.org)
 | `pnpm check` | Checks types, page metadata and components |
 | `pnpm build` | Builds the site into `dist/` |
 | `pnpm preview` | Serves that build under the real base path |
-| `pnpm test` | Tests the state of interactions, builds the site, then tests that build in Chromium, Firefox and WebKit. Stop `pnpm dev` and `pnpm preview` first |
+| `pnpm test` | Tests the state of interactions, builds the site, then tests that build in Chromium, Firefox and WebKit, then times it alone (loading, layout shift, weight and arrow response) against the ceilings in `tests/speed/thresholds.json`. Stop `pnpm dev` and `pnpm preview` first |
+| `pnpm measure [runs]` | Builds the site and times it in a throttled Chromium, 20 runs by default, and prints the minimum, median and maximum of each measure beside its ceiling. The ceilings are provisional until Ammar accepts them |
 | `pnpm verify` | Builds the site, then checks the table of contents against the gap assessment, reproduces its table of data from `data/`, runs every Python program in `src/snippets/` with the locked Python and compares its output, checks that each notebook in `notebooks/` is the one made from its program and output, runs it with the locked Python and compares its output, and checks that the code blocks and outputs in the built pages come from those files |
 
 The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`.

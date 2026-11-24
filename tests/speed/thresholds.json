@@ -1,0 +1,227 @@
+{
+  "status": "provisional until Ammar accepts",
+  "environment": {
+    "description": "Chromium from Playwright on the production build under /getmath/, cold cache (a new browser context for every run), viewport 1280 by 800. Network: 150 ms round trip, 1600 kbit/s down, 750 kbit/s up (the slow 4G profile of Lighthouse), set through the Chrome DevTools Protocol. Processor: 4 times slower. Each run loads the page, then waits until no request is in flight and none has started for 500 ms (a failed or pending request fails the run). It submits a prediction, so that the sum, its copy, the formula and the feedback are all shown. It presses 20 arrow keys on a handle, then drags the handle through 30 pointer moves from the middle of one grid cell to the middle of another. Every step must change the arrow, or the run fails. Arrow response is the time from the input to the first frame and the task after it, for every step; the worst of the keyboard also counts the Event Timing figure (it only reports events over 16 ms, in steps of 8 ms), which does not cover pointer moves. The page weight counts bytes as the preview server sends them, without compression, so GitHub Pages sends less.",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "latencyMs": 150,
+    "downloadKbps": 1600,
+    "uploadKbps": 750,
+    "cpuSlowdown": 4,
+    "keySteps": 20,
+    "dragSteps": 30,
+    "runsInTest": 3,
+    "quietMs": 500
+  },
+  "measures": {
+    "lcp": {
+      "label": "Largest contentful paint",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 1000,
+      "why": "About 2 times the runner's median of 476 ms and below the public 'good' guidance of 2500 ms. The developer machine's slowest run was 572 ms.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 496,
+          "median": 524,
+          "max": 572,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 464,
+          "median": 476,
+          "max": 520,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "cls": {
+      "label": "Cumulative layout shift",
+      "unit": "",
+      "deterministic": false,
+      "ceiling": 0.02,
+      "why": "The page does not shift at all (0 in every run, in both places). 0.02 is well below the public 'good' guidance of 0.1 and still lets a real shift of the page fail.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 0,
+          "median": 0,
+          "max": 0,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 0,
+          "median": 0,
+          "max": 0,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "bytes": {
+      "label": "Total transferred",
+      "unit": "bytes",
+      "deterministic": true,
+      "ceiling": 215000,
+      "why": "The same in every run (4 bytes apart in the two places). About 10% above it, so 20 kB of new font, picture or library fails. Not a time, so there is no public guidance.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 195570,
+          "median": 195570,
+          "max": 195570,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 195566,
+          "median": 195566,
+          "max": 195566,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "scriptBytes": {
+      "label": "Script transferred",
+      "unit": "bytes",
+      "deterministic": true,
+      "ceiling": 118000,
+      "why": "The same in every run and in both places. About 10% above it, so 11 kB of new script fails.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 107320,
+          "median": 107320,
+          "max": 107320,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 107320,
+          "median": 107320,
+          "max": 107320,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "requests": {
+      "label": "Requests",
+      "unit": "requests",
+      "deterministic": true,
+      "ceiling": 14,
+      "why": "12 in every run, in both places. Two more, so two new files pass and a third fails.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 12,
+          "median": 12,
+          "max": 12,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 12,
+          "median": 12,
+          "max": 12,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "keyWorst": {
+      "label": "Keyboard step, worst",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 120,
+      "why": "About 3 times the runner's median of 42.85 ms and below the public INP 'good' guidance of 200 ms. The gate compares the median of 3 runs, so one slow step in one run does not fail a pull request; the developer machine's worst of 25 runs was 110.3 ms, with a median of 51.5 ms.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 38.8,
+          "median": 51.5,
+          "max": 110.3,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 36.8,
+          "median": 42.85,
+          "max": 46.6,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "keyMedian": {
+      "label": "Keyboard step, median",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 80,
+      "why": "About 2.4 times the runner's median of 33.15 ms and below the 100 ms in which an answer feels immediate. The developer machine's slowest run was 42.95 ms.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 32.75,
+          "median": 40.05,
+          "max": 42.95,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 31.75,
+          "median": 33.15,
+          "max": 35.1,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "dragWorst": {
+      "label": "Drag move, worst",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 120,
+      "why": "About 3.4 times the runner's median of 35.55 ms and below the public INP 'good' guidance of 200 ms. The same ceiling as the keyboard: the developer machine's worst of 25 runs was 85.5 ms.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 35.4,
+          "median": 42.3,
+          "max": 85.5,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 32.9,
+          "median": 35.55,
+          "max": 39.4,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    },
+    "dragMedian": {
+      "label": "Drag move, median",
+      "unit": "ms",
+      "deterministic": false,
+      "ceiling": 60,
+      "why": "2 times the runner's median of 29.8 ms and below the 100 ms in which an answer feels immediate. The developer machine's slowest run was 35.95 ms.",
+      "measured": {
+        "developer": {
+          "runs": 25,
+          "min": 26,
+          "median": 29.8,
+          "max": 35.95,
+          "where": "developer machine under WSL2, Node 26.13.1, Playwright 1.65.1, 2026-11-25, nothing else running on port 4321"
+        },
+        "runner": {
+          "runs": 20,
+          "min": 28.2,
+          "median": 29.8,
+          "max": 30.4,
+          "where": "GitHub ubuntu-24.04 runner, 2026-11-24"
+        }
+      }
+    }
+  }
+}
