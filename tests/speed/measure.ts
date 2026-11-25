@@ -76,7 +76,7 @@ function cumulativeShift(shifts: [number, number][]) {
   return worst;
 }
 
-export const middle = (values: number[]) => {
+export const median = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
   const half = sorted.length >> 1;
   return sorted.length % 2 ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2;
@@ -124,9 +124,9 @@ export async function measureOnce(browser: Browser, url: string, tamper?: Tamper
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.waitForFunction(() => !document.querySelector("astro-island[ssr]"));
   // Until no request is in flight and none has started for a while: late files, late shifts and the last paint.
-  const give = Date.now() + 60_000;
+  const deadline = Date.now() + 60_000;
   while (pending.size || Date.now() - lastActivity < env.quietMs) {
-    if (Date.now() > give) throw new Error(`${pending.size} requests did not finish in a minute`);
+    if (Date.now() > deadline) throw new Error(`${pending.size} requests did not finish in a minute`);
     await page.waitForTimeout(50);
   }
   if (failed.length) throw new Error(`Requests failed: ${failed.join(", ")}`);
@@ -187,14 +187,14 @@ export async function measureOnce(browser: Browser, url: string, tamper?: Tamper
     scriptBytes,
     requests: sizes.size,
     keyWorst: Math.max(...seen.keys, ...seen.timed),
-    keyMedian: middle(seen.keys),
+    keyMedian: median(seen.keys),
     dragWorst: Math.max(...seen.drags),
-    dragMedian: middle(seen.drags),
+    dragMedian: median(seen.drags),
   };
 }
 /** The median of repeated runs, so that one noisy run cannot fail a pull request. */
 export function medians(runs: Result[]): Result {
-  return Object.fromEntries(measures.map((m) => [m, middle(runs.map((r) => r[m]))])) as Result;
+  return Object.fromEntries(measures.map((m) => [m, median(runs.map((r) => r[m]))])) as Result;
 }
 
 /** The measures that are over their ceiling. */
