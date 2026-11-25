@@ -97,11 +97,11 @@ Chapter order follows dependencies, not any reference text.
 | Area | Decision |
 | --- | --- |
 | Site | Static, computer-first site on GitHub Pages at its default address. No account, server or behavioural tracking. The host changes only if the proof of concept shows a concrete unmet need. |
-| Stack | Astro, MDX, TypeScript, Zod, Svelte islands, SVG and D3, with Three.js only where 3D helps learning. KaTeX, with MathJax only if accessibility testing shows a need. IndexedDB. Vitest, Playwright and axe-core in GitHub Actions. pnpm on a supported Node LTS. The proof of concept validates the stack. |
+| Stack | Astro, MDX, TypeScript, Zod, Svelte islands, SVG and D3, with Three.js only where 3D helps learning. KaTeX. IndexedDB. Vitest, Playwright and axe-core in GitHub Actions. pnpm on a supported Node LTS. The proof of concept validates the stack. |
 | Python | Read-only; never executed on the site. **Run** reveals a verified output or a JavaScript-computed equivalent, visibly labelled **expected/simulated**. **Reset** restores the start. Every snippet and output is verified against real Python in development or CI. |
 | Colab | Optional matching notebooks for running real Python. Lessons and assessments never depend on them. The site explains that Colab is external, online and may need a Google account. |
 | Offline | Not supported. The book is a website only. |
-| Accessibility | WCAG 2.2 AA, checked automatically and manually with keyboard and assistive technology. Every graphical interaction has an accessible alternative meeting the same objective. Colour is never the only cue. |
+| Accessibility | Built to WCAG 2.2 AA, checked automatically and by hand with the keyboard, zoom and high contrast. The site states that it is not tested with a screen reader. Every graphical interaction has an accessible alternative meeting the same objective. Colour is never the only cue. |
 | Screens | Computer first: designed for 1280 px and wider, and fully supported from 1024 px. On phones, text and mathematics stay readable and reflow, but interactions are not promised to work well. |
 | Browsers | Latest two versions of Chrome, Edge, Firefox and Safari on computers. Automated tests run on the Chromium, Firefox and WebKit engines. Hand checks are on Windows; the site states that Safari is not tested by hand. |
 | Progress data | Stored locally, with export, import and reset. No personal data is needed. |
