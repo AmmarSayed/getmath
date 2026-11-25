@@ -41,7 +41,6 @@ async function setUp(folder: string, dist = "dist") {
 test("the site as built passes", async ({}, testInfo) => {
   const result = await (await setUp(testInfo.outputPath("copy"))).verify(["--no-build"]);
   expect(result.output).toMatch(/^OK: /m);
-  expect(result.output).toMatch(/^known difference: /m);
   expect(result.passed).toBe(true);
 });
 
@@ -54,7 +53,7 @@ test("an output file that differs from what Python prints fails, and both are sh
   );
   const result = await copy.verify(["--no-build"]);
   // The notebook is made from the wrong output, so it differs too, and is listed after.
-  expect(result.output.trim().split(/\r?\n/).filter((line) => !line.startsWith("known difference: ")).slice(0, 3)).toEqual([
+  expect(result.output.trim().split(/\r?\n/).slice(0, 3)).toEqual([
     "add-vectors: the output differs from add-vectors.txt",
     String.raw`  expected: '[4, 4]\n'`,
     String.raw`  actual:   '[4, 3]\n'`,
