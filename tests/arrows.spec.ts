@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { listen } from "./listen";
+import { expectFocusAfterClick } from "./webkit";
 import { openPage } from "./open-page";
 
 type Pair = [number, number];
@@ -275,13 +276,17 @@ test.describe("dragging", () => {
     await expect(arrow(page, "a").getByText("must be")).toHaveCount(0);
   });
 
-  test("needs the main button, and is not disturbed by the keyboard", async ({ page }) => {
+  test("needs the main button", async ({ page }) => {
     await interaction(page).locator("svg").scrollIntoViewIfNeeded();
     await page.mouse.move(...(await onScreen(page, [3, 2])));
     await page.mouse.down({ button: "middle" });
     await page.mouse.move(...(await onScreen(page, [0, 0])));
     await page.mouse.up({ button: "middle" });
     await expectViews(page, [3, 2], [-1, 2]);
+  });
+
+  // Not after the test of the middle button: with it, some browsers start to scroll, and the next press only ends that.
+  test("is not disturbed by the keyboard", async ({ page }) => {
     const spoken = await listen(page);
     await drag(page, [3, 2], [1, 1]);
     await page.keyboard.press("ArrowLeft");
@@ -704,7 +709,7 @@ for (const width of [320, 1280]) {
   });
 }
 
-test("Reset restores the start and keeps the focus", async ({ page }) => {
+test("Reset restores the start and keeps the focus", async ({ page, browserName }) => {
   await predict(page, "2", "4");
   await enter(arrow(page, "a").getByLabel("x", { exact: true }), "-2");
   await enter(arrow(page, "b").getByLabel("y", { exact: true }), "x");
@@ -713,7 +718,7 @@ test("Reset restores the start and keeps the focus", async ({ page }) => {
   await expect(view(page, "feedback")).toHaveCount(0);
   await expect(prediction(page).getByLabel("x", { exact: true })).toHaveValue("");
   await expect(page.getByText("must be")).toHaveCount(0);
-  await expect(reset(page)).toBeFocused();
+  await expectFocusAfterClick(reset(page), browserName);
   await expect(status(page)).toHaveText("Back at the start. The sum is hidden until you submit a prediction.");
 });
 

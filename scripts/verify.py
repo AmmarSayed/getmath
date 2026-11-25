@@ -128,8 +128,8 @@ def execute(name, text):
         manager = KernelManager(kernel_name="python3", kernel_spec_manager=specs, connection_file=str(Path(folder) / "kernel.json"))
         client = NotebookClient(notebook, km=manager, timeout=60, resources={"metadata": {"path": folder}})
         try:
-            # The kernel's own warnings are not the notebook's output.
-            client.execute(stderr=subprocess.DEVNULL)
+            # The kernel's own warnings are not the notebook's output. It must stop before its folder is deleted.
+            client.execute(stderr=subprocess.DEVNULL, cleanup_kc=True)
         except Exception as problem:
             errors.append(f"{name}: the notebook did not run\n{type(problem).__name__}: {problem}")
             return
