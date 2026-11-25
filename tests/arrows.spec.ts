@@ -276,13 +276,17 @@ test.describe("dragging", () => {
     await expect(arrow(page, "a").getByText("must be")).toHaveCount(0);
   });
 
-  test("needs the main button, and is not disturbed by the keyboard", async ({ page }) => {
+  test("needs the main button", async ({ page }) => {
     await interaction(page).locator("svg").scrollIntoViewIfNeeded();
     await page.mouse.move(...(await onScreen(page, [3, 2])));
     await page.mouse.down({ button: "middle" });
     await page.mouse.move(...(await onScreen(page, [0, 0])));
     await page.mouse.up({ button: "middle" });
     await expectViews(page, [3, 2], [-1, 2]);
+  });
+
+  // Not after the test of the middle button: with it, some browsers start to scroll, and the next press only ends that.
+  test("is not disturbed by the keyboard", async ({ page }) => {
     const spoken = await listen(page);
     await drag(page, [3, 2], [1, 1]);
     await page.keyboard.press("ArrowLeft");
