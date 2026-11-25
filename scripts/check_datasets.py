@@ -62,28 +62,8 @@ SEPARATION_TOLERANCE = 1e-6  # the sum of slacks above which a direction separat
 
 ROOT = Path(__file__).resolve().parent.parent
 errors = []
-notes = []
+WORDS = {word: str(n) for n, word in enumerate(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"])}
 values = []  # every reproduced value, unrounded, for --values
-
-# Differences from the table that are known and reported to Ammar. Each is (row, label) ->
-# (table value, reproduced value, reason). The script fails if a reproduced value changes,
-# or if an entry is no longer needed. The table is corrected in a separate pull request.
-LOWER = "The run behind the table did not record its seeds or how its starts were drawn. The seed here was fixed in advance."
-KNOWN = {
-    ("Mixture of three Gaussians, standardised, full covariances", label): (table, got, LOWER)
-    for label, table, got in [
-        ("starts at the best", "17", "14"),
-        ("stopped lower", "3", "6"),
-        ("lower 1", "-1159.6", "-1188.5"),
-        ("lower 2", "-1188.5", "-1191.6"),
-        ("lower 3", "-1195.6", "-1191.8"),
-        ("ARI lower 1", "0.91", "0.52"),
-        ("ARI lower 2", "0.52", "0.53"),
-        ("ARI lower 3", "0.60", "0.58"),
-        ("lower groups", "3", "4"),
-        ("further lower groups", "none", "-1298.9 (ARI 0.65)"),
-    ]
-}
 
 
 class Unusable(Exception):
@@ -216,6 +196,12 @@ def runs():
     return result
 
 
+def listed(items):
+    """The items as the table writes a list: "a, b and c"."""
+    *most, last = list(items) or ["none"]
+    return f"{', '.join(most)} and {last}" if most else last
+
+
 def mixture():
     groups = {}
     for total, ari in runs():
@@ -223,15 +209,10 @@ def mixture():
     best, *lower = sorted(groups, reverse=True)
     values.extend((f"mixture: groups of log-likelihoods, {key}", [(round(t, 4), round(a, 4)) for t, a in groups[key]]) for key in sorted(groups, reverse=True))
     for key, members in groups.items():
-        check(len({f"{ari:.2f}" for _, ari in members}) == 1, f"mixture: the starts at {key} do not agree on the ARI at two decimals")
-    further = "; ".join(f"{key} (ARI {groups[key][0][1]:.2f})" for key in lower[3:])
-    lower = (lower + [None] * 3)[:3]
+        check(len({shown(ari, "0.00") for _, ari in members}) == 1, f"mixture: the starts at {key} do not agree on the ARI at two decimals")
     return [
-        groups[best][0][1], STARTS, len(groups[best]), best, sum(len(groups[key]) for key in groups if key != best),
-        *(key if key is not None else "none" for key in lower),
-        *(groups[key][0][1] if key is not None else "none" for key in lower),
-        len(groups) - 1,
-        further or "none",
+        groups[best][0][1], STARTS, len(groups[best]), best, sum(len(groups[key]) for key in lower), len(lower),
+        listed(shown(key, "0.0") for key in lower), listed(shown(groups[key][0][1], "0.00") for key in lower),
     ]
 
 
@@ -282,7 +263,7 @@ ROWS = [
     ("Adelie and Gentoo", r"(completely) separable", ["separation"], lambda: [{"complete": "completely"}.get(pair_separation("Adelie", "Gentoo"), "not completely")]),
     ("Adelie and Chinstrap", r"(neither) completely nor quasi-completely separable", ["separation"], lambda: [{"none": "neither"}.get(pair_separation("Adelie", "Chinstrap"), "separable")]),
     ("Three-class softmax", rf"{NUMBER}% accuracy, 5-fold cross-validation", ["accuracy %"], softmax),
-    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (three) stop lower: {NUMBER}, {NUMBER} and {NUMBER} \(ARI {NUMBER}, {NUMBER} and {NUMBER}\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower 1", "lower 2", "lower 3", "ARI lower 1", "ARI lower 2", "ARI lower 3", "lower groups", "further lower groups"], mixture),
+    ("Mixture of three Gaussians", rf"\(ARI\) {NUMBER} with species\. Of {NUMBER} random starts run to convergence, {NUMBER} reach log-likelihood {NUMBER} and (\w+) stop lower, in (\w+) groups: ([^()]+) \(ARI ([^()]+)\)", ["ARI", "starts", "starts at the best", "best log-likelihood", "stopped lower", "lower groups", "log-likelihoods of the lower groups", "ARI of the lower groups"], mixture),
     ("Adelie (151) and Chinstrap (68)", rf"Adelie \({NUMBER}\) and Chinstrap \({NUMBER}\) body mass.*\|\| difference {NUMBER} g, 95% interval {NUMBER} to {NUMBER} g, p = {NUMBER}", ["Adelie rows", "Chinstrap rows", "difference", "interval low", "interval high", "p"], welch),
     ("Price per unit area", rf"{NUMBER} rows \|\| in-sample R² {NUMBER}; {NUMBER} on log distance", ["rows", "R²", "R² on log distance"], price_curves),
     ("Coordinates", rf"{NUMBER} rows repeat an earlier row's exact coordinates", ["repeated rows"], coordinates),
@@ -328,29 +309,12 @@ def edge(value, token):
 
 def compare(row, labels, tokens, results):
     for label, token, value in zip(labels, tokens, results, strict=True):
-        token = {"three": "3"}.get(token.replace("−", "-"), token.replace("−", "-"))
+        token = WORDS.get(token, token.replace("−", "-"))
         got = shown(value, token)
         values.append((f"{row}: {label}", value if isinstance(value, str) else float(value)))
         if re.fullmatch(r"-?\d+(\.\d+)?", token) and edge(value, token) < 0.05:
             values.append((f"{row}: {label}: close to a rounding edge, by this many units of the last place", edge(value, token)))
-        if got == token:
-            continue
-        known = KNOWN.get((row, label))
-        if known and known[:2] == (token, got):
-            if (row, known[2]) not in reasons:
-                reasons.add((row, known[2]))
-                notes.append(f"known difference: {row}: {known[2]}")
-            notes.append(f"known difference: {row}: {label}: table {token}, reproduced {got}")
-            used.add((row, label))
-        elif known:
-            errors.append(f"{row}: {label}: known difference changed: table {token}, now reproduced {got}, was {known[1]}")
-            used.add((row, label))
-        else:
-            errors.append(f"{row}: {label}: table {token}, reproduced {got}")
-
-
-used = set()
-reasons = set()
+        check(got == token, f"{row}: {label}: table {token}, reproduced {got}")
 
 
 def run():
@@ -368,11 +332,7 @@ def run():
         if not found:
             errors.append(f"{cells[0]}: the table's wording no longer matches the check")
             continue
-        tokens = found.groups()
-        if key == "Mixture of three Gaussians":
-            # The table lists three lower groups and no fourth.
-            tokens += (tokens[4], "none")
-        compare(cells[0], labels, tokens, function())
+        compare(cells[0], labels, found.groups(), function())
     for key, *_ in ROWS:
         check(key in keys, f"check without a table row: {key}")
     for name, pattern, labels, function in LIMITS:
@@ -381,8 +341,6 @@ def run():
             errors.append(f"limit {name}: the table's wording no longer matches the check")
             continue
         compare(f"limit: {name}", labels, found.groups(), function())
-    for row, label in KNOWN.keys() - used:
-        errors.append(f"{row}: {label}: listed as a known difference, but the table now agrees")
     return len(rows), len(LIMITS)
 
 
@@ -398,6 +356,5 @@ errors.extend(f"warning: {w.category.__name__}: {w.message}" for w in caught)
 if "--values" in sys.argv:
     for name, value in values:
         print(f"{name}: {value!r}")
-print("\n".join(notes))
-print("\n".join(errors) or f"OK: {done[0]} rows and {done[1]} limits reproduced, {len(KNOWN)} known differences")
+print("\n".join(errors) or f"OK: {done[0]} rows and {done[1]} limits reproduced")
 sys.exit(bool(errors))

@@ -19,8 +19,8 @@ Parts 0 to IV (chapters 1 to 46, 229 lessons) are Ready to Start ML. Part V (cha
 
 ## 2. Data
 
-- **Returning dataset:** Palmer Penguins (CC0). **Second dataset**, in Part IV: UCI Real Estate Valuation (CC BY 4.0), prices per unit area in New Taipei City. Neither is in the repository yet; `THIRD_PARTY_NOTICES.md` is written in the same change that adds one.
-- Claude ran these checks on 2026-11-24 with scikit-learn 1.9.1 and SciPy 1.18.1. They are provisional until the proof of concept adds a script that reproduces them from pinned data.
+- **Returning dataset:** Palmer Penguins (CC0). **Second dataset**, in Part IV: UCI Real Estate Valuation (CC BY 4.0), prices per unit area in New Taipei City. Copies are in `data/`, with their sources and licences in `THIRD_PARTY_NOTICES.md`.
+- `scripts/check_datasets.py` reproduces these checks and the limits below them from those copies, with scikit-learn 1.9.1 and SciPy 1.18.1. Its seed and settings were fixed before any result was seen.
 
 | Check | Result | Use |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ Parts 0 to IV (chapters 1 to 46, 229 lessons) are Ready to Start ML. Part V (cha
 | Adelie and Gentoo, bill length and depth | completely separable (linear program) | No finite unpenalised logistic fit |
 | Adelie and Chinstrap, bill length and depth | neither completely nor quasi-completely separable (linear program) | Logistic fit, soft margin |
 | Three-class softmax, standardised, scikit-learn's default penalty | 99% accuracy, 5-fold cross-validation, scaled inside each fold | Softmax |
-| Mixture of three Gaussians, standardised, full covariances | adjusted Rand index (ARI) 0.96 with species. Of 20 random starts run to convergence, 17 reach log-likelihood −1148.4 and three stop lower: −1159.6, −1188.5 and −1195.6 (ARI 0.91, 0.52 and 0.60) | EM and sensitivity to initialisation |
+| Mixture of three Gaussians, standardised, full covariances | adjusted Rand index (ARI) 0.96 with species. Of 20 random starts run to convergence, 14 reach log-likelihood −1148.4 and six stop lower, in four groups: −1188.5, −1191.6, −1191.8 and −1298.9 (ARI 0.52, 0.53, 0.58 and 0.65) | EM and sensitivity to initialisation |
 | Adelie (151) and Chinstrap (68) body mass, Welch's t-test | difference −32 g, 95% interval −150 to 86 g, p = 0.59 | Weak evidence is not "no difference" |
 | Price per unit area on distance to metro, 414 rows | in-sample R² 0.45; 0.54 on log distance | Curves |
 | Coordinates | 155 rows repeat an earlier row's exact coordinates | Possible leakage: random and grouped splits compared |
