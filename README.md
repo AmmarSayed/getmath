@@ -20,7 +20,7 @@ You need Git, [uv](https://docs.astral.sh/uv/) and [Node.js](https://nodejs.org)
 | `pnpm measure [runs]` | Builds the site and times it in a throttled Chromium, 20 runs by default, and prints the minimum, median and maximum of each measure beside its ceiling. The ceilings are provisional until Ammar accepts them |
 | `pnpm verify` | Builds the site, then checks the table of contents against the gap assessment, reproduces its table of data from `data/`, runs every Python program in `src/snippets/` with the locked Python and compares its output, checks that each notebook in `notebooks/` is the one made from its program and output, runs it with the locked Python and compares its output, and checks that the code blocks and outputs in the built pages come from those files |
 
-The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`.
+The same checks run on every pull request and every push to `main`, in `.github/workflows/checks.yml`. Started by hand, with `gh workflow run checks.yml`, they run on Windows and macOS machines too, which takes about half an hour.
 
 ## Pages
 

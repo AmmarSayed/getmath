@@ -38,6 +38,7 @@ The site serves KaTeX's styles and fonts, formulas that KaTeX has drawn, and the
 | pnpm | pnpm contributors | MIT | <https://github.com/pnpm/pnpm> |
 | nbformat | Jupyter Development Team | BSD-3-Clause | <https://github.com/jupyter/nbformat> |
 | nbclient | Jupyter Development Team | BSD-3-Clause | <https://github.com/jupyter/nbclient> |
+| jupyter-client | Jupyter Development Team | BSD-3-Clause | <https://github.com/jupyter/jupyter_client> |
 | ipykernel | IPython Development Team | BSD-3-Clause | <https://github.com/ipython/ipykernel> |
 | uv | Astral | MIT or Apache-2.0 | <https://github.com/astral-sh/uv> |
 | CPython builds that uv downloads (python-build-standalone) | The Python Software Foundation and Astral | PSF-2.0, with the notices in each download; the scripts that make the builds are under MPL-2.0 | <https://github.com/astral-sh/python-build-standalone> |

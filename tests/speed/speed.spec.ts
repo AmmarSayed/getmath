@@ -4,14 +4,12 @@ import { describe, measureOnce, measures, medians, over, thresholds, type Measur
 // One browser, and one test at a time: another test running beside these would slow them.
 test.describe.configure({ mode: "serial" });
 
-const page = (baseURL: string | undefined) => baseURL!;
-
 test("the page loads fast, stays still and answers the arrows within the ceilings", async ({ baseURL }) => {
   test.setTimeout(90_000);
   const browser = await chromium.launch();
   try {
     const runs = [];
-    for (let i = 0; i < thresholds.environment.runsInTest; i++) runs.push(await measureOnce(browser, page(baseURL)));
+    for (let i = 0; i < thresholds.environment.runsInTest; i++) runs.push(await measureOnce(browser, baseURL!));
     const result = medians(runs);
     console.log(`speed, ${runs.length} runs:`);
     for (const m of measures) console.log(`  ${thresholds.measures[m].label}: ${runs.map((r) => +r[m].toFixed(3)).join(", ")}; median ${+result[m].toFixed(3)}; ceiling ${thresholds.measures[m].ceiling}`);
@@ -113,7 +111,7 @@ for (const [name, { tamper, fails, fine = [] }] of Object.entries(slowdowns)) {
     test.setTimeout(90_000);
     const browser = await chromium.launch();
     try {
-      const result = await measureOnce(browser, page(baseURL), tamper);
+      const result = await measureOnce(browser, baseURL!, tamper);
       const caught = over(result);
       expect(caught, describe(result, over(result)).join("; ")).toEqual(expect.arrayContaining(fails));
       for (const measure of fine) expect(caught).not.toContain(measure);

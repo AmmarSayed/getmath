@@ -3,7 +3,7 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { chromium } from "@playwright/test";
-import { measures, measureOnce, middle, thresholds, type Result } from "../tests/speed/measure.ts";
+import { measures, measureOnce, median, thresholds, type Result } from "../tests/speed/measure.ts";
 
 const runs = Number(process.argv[2] ?? 20);
 if (!Number.isInteger(runs) || runs < 1) throw new Error("The number of runs must be a positive whole number");
@@ -41,10 +41,9 @@ try {
   for (const m of measures) {
     const values = all.map((r) => r[m]);
     const { label, unit, ceiling } = thresholds.measures[m];
-    const cells = [Math.min(...values), middle(values), Math.max(...values), ceiling].map((v) => String(+v.toFixed(3)).padStart(12));
+    const cells = [Math.min(...values), median(values), Math.max(...values), ceiling].map((v) => String(+v.toFixed(3)).padStart(12));
     console.log(`${label} (${unit})`.padEnd(34), cells.join(""));
   }
-  if (process.env.MEASURE_JSON) console.log(JSON.stringify(all));
 } finally {
   await stop();
 }
